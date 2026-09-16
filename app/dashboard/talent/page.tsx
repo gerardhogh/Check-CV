@@ -1,0 +1,1011 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
+import {
+  Menu,
+  Bell,
+  ChevronDown,
+  Upload,
+  Video,
+  Briefcase,
+  Settings,
+  LogOut,
+  Home,
+  Share2,
+  FileText,
+  X,
+  MessageCircle,
+  CheckCircle,
+  Copy,
+  Search,
+  Camera,
+  Check,
+  Download,
+  Edit,
+  Star,
+  Globe,
+  History,
+  CreditCard,
+  QrCode,
+  AlertTriangle,
+  ChevronRight,
+} from "lucide-react";
+
+import OffresEmplois from "./components/OffresEmplois";
+import TalentPremium from "./components/TalentPremium";
+import ProfilTalent from "./components/ProfilTalent";
+import TransactionsTab from "./components/TransactionsTab";
+import ParametresTab from "./components/ParametresTab";
+
+type TalentTab =
+  | "dashboard"
+  | "profil"
+  | "transactions"
+  | "video"
+  | "emplois"
+  | "premium"
+  | "affiliation"
+  | "parametres";
+
+export default function TalentDashboard() {
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<TalentTab>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [notifMenuOpen, setNotifMenuOpen] = useState(false);
+  const [lang, setLang] = useState<"fr" | "en">("fr");
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+
+  // Dynamic Dashboard States
+  const [profilePct, setProfilePct] = useState(60);
+  const [stars, setStars] = useState(3);
+  const [hasValidVideo, setHasValidVideo] = useState(false);
+  const [cvFileName, setCvFileName] = useState("CV_Jules_Kofi_2025.pdf");
+  const [cvUploadedAt, setCvUploadedAt] = useState("Mis à jour il y a 2 jours");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Affiliation
+  const [affiliationCount, setAffiliationCount] = useState(4);
+  const [affiliationBalance, setAffiliationBalance] = useState(6000);
+  const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
+  const [withdrawPhone, setWithdrawPhone] = useState("");
+  const [withdrawMethod, setWithdrawMethod] = useState("MTN MoMo");
+
+  // Modals state
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [videoStep, setVideoStep] = useState<"intro" | "recording" | "done">("intro");
+  const [affiliationModalOpen, setAffiliationModalOpen] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [profileGuideOpen, setProfileGuideOpen] = useState(false);
+
+  // Profile editable state
+  const [userName, setUserName] = useState(user?.name || "Jules Kofi");
+  const [userTitle, setUserTitle] = useState("Développeur Full-Stack & UI");
+  const [userPhone, setUserPhone] = useState(user?.phone || "+229 97 00 00 00");
+  const [userBio, setUserBio] = useState(
+    "Passionné par le développement web moderne, l'architecture logicielle et les interfaces fluides."
+  );
+
+  // Jobs state
+  const [jobSearch, setJobSearch] = useState("");
+  const [appliedJobs, setAppliedJobs] = useState<string[]>([]);
+  const [allJobs] = useState([
+    {
+      id: "1",
+      title: "Développeur Front-end Next.js",
+      company: "TechAfrique",
+      location: "Cotonou, Bénin",
+      type: "Temps plein",
+      salary: "450 000 - 650 000 FCFA",
+    },
+    {
+      id: "2",
+      title: "Designer UI/UX & Figma",
+      company: "CreativX",
+      location: "Abidjan, Côte d'Ivoire",
+      type: "Hybride",
+      salary: "400 000 - 550 000 FCFA",
+    },
+    {
+      id: "3",
+      title: "Chef de Projet Digital",
+      company: "DigitGroup",
+      location: "Dakar, Sénégal",
+      type: "Temps plein",
+      salary: "600 000 - 800 000 FCFA",
+    },
+    {
+      id: "4",
+      title: "Data Analyst & Business Intelligence",
+      company: "DataCorp",
+      location: "Lomé, Togo",
+      type: "Télétravail",
+      salary: "500 000 - 700 000 FCFA",
+    },
+    {
+      id: "5",
+      title: "Développeur Mobile Flutter",
+      company: "InnovMobile",
+      location: "Douala, Cameroun",
+      type: "Temps plein",
+      salary: "500 000 - 650 000 FCFA",
+    },
+  ]);
+
+  // Notifications
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      text: "Votre CV a été consulté par 3 recruteurs aujourd'hui",
+      time: "Il y a 10 min",
+      read: false,
+    },
+    {
+      id: 2,
+      text: "Nouveau filleul inscrit avec votre code de parrainage (+1 500 FCFA)",
+      time: "Il y a 2h",
+      read: false,
+    },
+    {
+      id: 3,
+      text: "TechAfrique a publié une offre correspondant à votre profil",
+      time: "Hier",
+      read: true,
+    },
+  ]);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setCvFileName(file.name);
+      setCvUploadedAt("Mis à jour à l'instant");
+      setProfilePct(Math.min(100, profilePct + 15));
+      showToast(`CV "${file.name}" importé et analysé avec succès !`);
+    }
+  };
+
+  const handleApplyJob = (jobId: string, title: string) => {
+    if (appliedJobs.includes(jobId)) return;
+    setAppliedJobs([...appliedJobs, jobId]);
+    showToast(`Candidature envoyée pour le poste "${title}" !`);
+  };
+
+  const handleCompleteVideoInterview = () => {
+    setVideoStep("done");
+    setHasValidVideo(true);
+    setStars(5);
+    setProfilePct(100);
+    showToast("Félicitations ! Entretien vidéo validé avec succès (Score 5 étoiles)");
+    setTimeout(() => {
+      setVideoModalOpen(false);
+      setVideoStep("intro");
+    }, 1500);
+  };
+
+  const handleCopyAffiliation = () => {
+    const link = `https://checkcv.com/inscription?ref=${(user?.name || "JULES").toUpperCase().replace(/\s+/g, "")}-750`;
+    navigator.clipboard.writeText(link);
+    setCopiedLink(true);
+    showToast("Lien de parrainage copié dans le presse-papier !");
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  const sidebarItems = [
+    { key: "dashboard" as TalentTab, icon: Home, label: "Tableau de bord" },
+    { key: "profil" as TalentTab, icon: FileText, label: "Mon profil" },
+    { key: "transactions" as TalentTab, icon: History, label: "Mes transactions" },
+    { key: "video" as TalentTab, icon: Video, label: "Entretien vidéo" },
+    { key: "emplois" as TalentTab, icon: Briefcase, label: "Offres d'emploi" },
+    { key: "premium" as TalentTab, icon: Star, label: "Talents Premium" },
+    { key: "affiliation" as TalentTab, icon: Share2, label: "Affiliation" },
+    { key: "parametres" as TalentTab, icon: Settings, label: "Paramètres" },
+  ];
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  return (
+    <div className="flex min-h-screen bg-[#f1f5f9] text-slate-800">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-sm animate-fade-in border border-slate-700">
+          <CheckCircle size={18} className="text-green-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Hidden CV File Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        accept=".pdf,.doc,.docx"
+        className="hidden"
+      />
+
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-xs"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* ── SIDEBAR ── */}
+      <aside
+        className={`
+          fixed md:static inset-y-0 left-0 z-40
+          w-64 min-h-screen bg-white border-r border-slate-200
+          flex flex-col transition-transform duration-300
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `}
+      >
+        {/* Brand Header */}
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          <Link href="/" className="block">
+            <div className="relative h-9 w-36">
+              <Image
+                src="/assets/CC blue png horiz 1.png"
+                alt="Check CV Logo"
+                fill
+                priority
+                className="object-contain object-left"
+              />
+            </div>
+          </Link>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden text-slate-400 hover:text-slate-600 p-1"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Sidebar Nav Items */}
+        <nav className="flex-1 p-4 space-y-1.5">
+          {sidebarItems.map(({ key, icon: Icon, label }) => {
+            const isActive = activeTab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => {
+                  if (key === "video") {
+                    setActiveTab("video");
+                  } else {
+                    setActiveTab(key);
+                  }
+                  setSidebarOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${isActive
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 translate-x-1"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  }`}
+              >
+                <Icon size={18} />
+                <span className="whitespace-nowrap text-sm font-medium">{label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* User Card at bottom */}
+        <div className="p-4 border-t border-slate-100">
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="w-10 h-10 rounded-full overflow-hidden relative border border-slate-200 flex-shrink-0">
+              <Image
+                src={user?.avatar || "/assets/Avatar ByeWind.png"}
+                alt="Avatar"
+                width={40}
+                height={40}
+                className="object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-800 truncate">
+                {userName}
+              </p>
+              <p className="text-[11px] text-slate-400 truncate">
+                {user?.email || "jules.kofi@gmail.com"}
+              </p>
+            </div>
+            <button
+              onClick={logout}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+              title="Se déconnecter"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* ── MAIN CONTENT AREA ── */}
+      <div className="flex-1 flex flex-col min-h-screen min-w-0">
+        {/* Top Header */}
+        <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="text-slate-600 hover:text-slate-900 p-1 md:hidden"
+              aria-label="Menu"
+            >
+              <Menu size={22} />
+            </button>
+            <div>
+              <h1 className="text-xl font-normal text-slate-700 leading-tight">
+                Bienvenue,{" "}
+                <span className="font-extrabold text-slate-900">
+                  {userName.split(" ")[0]}
+                </span>
+              </h1>
+              <p className="text-[11px] text-slate-400 font-medium">
+                Espace Candidat Certifié Check CV
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Language Switcher */}
+            <div className="relative">
+              <button
+                onClick={() => { setLangMenuOpen(!langMenuOpen); setNotifMenuOpen(false); setProfileMenuOpen(false); }}
+                className="flex items-center gap-1.5 p-2.5 rounded-full hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-800"
+                aria-label="Langue"
+              >
+                <Globe size={18} />
+                <span className="text-xs font-bold uppercase">{lang}</span>
+              </button>
+              {langMenuOpen && (
+                <div className="absolute right-0 mt-2 w-36 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-30 animate-fade-in">
+                  {(["fr", "en"] as const).map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => { setLang(l); setLangMenuOpen(false); }}
+                      className={`w-full text-left px-4 py-2 text-xs font-semibold transition-colors ${lang === l ? "text-blue-600 bg-blue-50" : "text-slate-600 hover:bg-slate-50"
+                        }`}
+                    >
+                      {l === "fr" ? "🇫🇷 Français" : "🇬🇧 English"}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Notification Bell with interactive dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setNotifMenuOpen(!notifMenuOpen);
+                  setProfileMenuOpen(false);
+                  setLangMenuOpen(false);
+                }}
+                className="relative text-slate-500 hover:text-slate-800 p-2.5 rounded-full hover:bg-slate-100 transition-colors"
+                aria-label="Notifications"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {notifMenuOpen && (
+                <div className="absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-slate-100 py-3 z-30 animate-fade-in">
+                  <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                    <p className="text-xs font-bold text-slate-800">
+                      Notifications ({unreadCount})
+                    </p>
+                    <button
+                      onClick={() =>
+                        setNotifications(notifications.map((n) => ({ ...n, read: true })))
+                      }
+                      className="text-[10px] text-blue-600 hover:underline font-semibold"
+                    >
+                      Tout marquer comme lu
+                    </button>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto divide-y divide-slate-50">
+                    {notifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        className={`p-3 text-xs hover:bg-slate-50 transition-colors ${!notif.read ? "bg-blue-50/40" : ""
+                          }`}
+                      >
+                        <p className="text-slate-800 font-medium leading-snug">
+                          {notif.text}
+                        </p>
+                        <span className="text-[10px] text-slate-400 mt-1 block">
+                          {notif.time}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Profile Menu Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setProfileMenuOpen(!profileMenuOpen)
+                }
+                }
+                className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 transition-colors"
+              >
+                <div className="w-9 h-9 rounded-full overflow-hidden relative border border-slate-200">
+                  <Image
+                    src={user?.avatar || "/assets/Avatar ByeWind.png"}
+                    alt="Avatar"
+                    width={36}
+                    height={36}
+                    className="object-cover"
+                  />
+                </div>
+                <ChevronDown size={14} className="text-slate-400" />
+              </button>
+
+              {profileMenuOpen && (
+                <div className="absolute right-0 mt-3 w-52 bg-white rounded-3xl shadow-2xl border border-slate-100 py-2 z-30 animate-fade-in">
+                  <div className="px-4 py-2.5 border-b border-slate-100">
+                    <p className="text-xs font-bold text-slate-800 truncate">
+                      {userName}
+                    </p>
+                    <p className="text-[11px] text-slate-400 truncate">
+                      {user?.email || "jules.kofi@gmail.com"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setActiveTab("profil");
+                      setProfileMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 font-medium flex items-center gap-2"
+                  >
+                    <FileText size={14} /> Mon Profil
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab("parametres");
+                      setProfileMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 font-medium flex items-center gap-2"
+                  >
+                    <Settings size={14} /> Paramètres
+                  </button>
+                  <button
+                    onClick={logout}
+                    className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100 mt-1 flex items-center gap-2"
+                  >
+                    <LogOut size={14} /> Déconnexion
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* ── DYNAMIC CONTENT BY TAB ── */}
+        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+          {/* TAB: DASHBOARD (HOME) */}
+          {activeTab === "dashboard" && (
+            <>
+              {/* Row 1 – Profile & certification */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Profile completion */}
+                <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-slate-800 text-sm">
+                      Complétion du profil
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+                        {profilePct}% complété
+                      </span>
+                      <button
+                        onClick={() => setProfileGuideOpen(!profileGuideOpen)}
+                        className="text-xs text-slate-400 hover:text-blue-600 underline transition-colors"
+                      >
+                        Guide
+                      </button>
+                    </div>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden mb-3">
+                    <div
+                      className="bg-blue-600 h-full rounded-full transition-all duration-700"
+                      style={{ width: `${profilePct}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    {profilePct < 100
+                      ? "Complétez les étapes ci-dessous pour atteindre 100% et décrocher la certification 5 étoiles !"
+                      : "Profil complété à 100% ! Vous avez le score de visibilité optimal."}
+                  </p>
+                  {/* Profile completion guide */}
+                  {profileGuideOpen && (
+                    <div className="mt-4 pt-4 border-t border-slate-100 space-y-2 animate-fade-in">
+                      {[
+                        { label: "Informations personnelles", done: true, pct: 20 },
+                        { label: "Photo de profil", done: true, pct: 10 },
+                        { label: "CV uploadé", done: true, pct: 20 },
+                        { label: "Réseaux sociaux", done: false, pct: 10 },
+                        { label: "Entretien vidéo validé", done: hasValidVideo, pct: 40 },
+                      ].map((item) => (
+                        <div key={item.label} className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px] font-bold ${item.done ? "bg-green-500" : "bg-slate-200"}`}>
+                              {item.done ? "✓" : ""}
+                            </span>
+                            <span className={`text-xs ${item.done ? "text-slate-700 line-through" : "text-slate-600"}`}>{item.label}</span>
+                          </div>
+                          <span className="text-xs font-bold text-blue-600">+{item.pct}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Certification level */}
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between">
+                  <h3 className="font-bold text-slate-800 text-sm mb-2">
+                    Niveau de certification
+                  </h3>
+                  <div className="flex gap-1.5 my-2">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <span
+                        key={s}
+                        className={`text-2xl transition-all ${s <= stars ? "text-amber-400 scale-105" : "text-slate-200"
+                          }`}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-xs font-semibold text-slate-500">
+                    {stars} étoiles obtenues {hasValidVideo ? "• Badge Vidéo IA" : ""}
+                  </p>
+                </div>
+              </div>
+
+              {/* Row 2 – CV, Vidéo, Affiliation */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* CV Card */}
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-sm mb-2">
+                      CV (Curriculum Vitae)
+                    </h3>
+                    <div className="w-full px-4 py-3 border border-slate-200 rounded-2xl text-xs text-slate-600 bg-slate-50 mb-2 truncate flex items-center justify-between">
+                      <span className="truncate font-medium">{cvFileName}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mb-5">{cvUploadedAt}</p>
+                  </div>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full py-3 rounded-2xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2"
+                    id="btn-upload-cv"
+                  >
+                    <Upload size={15} /> Mettre à jour mon CV
+                  </button>
+                </div>
+
+                {/* Entretien Vidéo Card */}
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold text-slate-800 text-sm">
+                        Entretien vidéo
+                      </h3>
+                      <span
+                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full text-white ${hasValidVideo ? "bg-green-500" : "bg-red-500"
+                          }`}
+                      >
+                        {hasValidVideo ? "Validé" : "Non validé"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mb-5 leading-relaxed">
+                      {hasValidVideo
+                        ? "Votre test vidéo a été évalué avec succès par l'IA."
+                        : "Tu n'as pas encore passé l'entretien vidéo"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab("video")}
+                    className="w-full py-3 rounded-2xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2"
+                    id="btn-launch-video"
+                  >
+                    <Video size={15} />{" "}
+                    {hasValidVideo ? "Refaire le test (2 restants)" : "Lancer l'entretien vidéo"}
+                  </button>
+                </div>
+
+                {/* Affiliation Card */}
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-sm mb-2">
+                      Affiliation
+                    </h3>
+                    <p className="text-xs text-slate-500 mb-1 leading-relaxed">
+                      Tu as parrainé{" "}
+                      <strong className="text-slate-900 font-bold">{affiliationCount} personnes</strong> au
+                      total
+                    </p>
+                    <p className="text-[11px] font-bold text-green-600 mb-5">
+                      Gains disponibles : {affiliationBalance.toLocaleString("fr-FR")} FCFA
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setAffiliationModalOpen(true)}
+                    className="w-full py-3 rounded-2xl font-bold text-xs text-white bg-[#0071a2] hover:bg-[#005f88] shadow-lg shadow-blue-900/15 transition-all flex items-center justify-center gap-2"
+                    id="btn-affiliation"
+                  >
+                    <Share2 size={15} /> Voir les détails
+                  </button>
+                </div>
+              </div>
+
+              {/* Row 3 – Emplois Disponibles */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-slate-800 text-sm">
+                    Emplois disponibles recommandés
+                  </h3>
+                  <span className="text-xs font-bold text-slate-400">
+                    {allJobs.length} offres actives
+                  </span>
+                </div>
+                <div className="space-y-3 mb-5">
+                  {allJobs.slice(0, 3).map((job) => {
+                    const isApplied = appliedJobs.includes(job.id);
+                    return (
+                      <div
+                        key={job.id}
+                        className="p-4 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      >
+                        <div>
+                          <p className="font-bold text-slate-800 text-sm">{job.title}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            {job.company} — {job.location} •{" "}
+                            <span className="text-blue-600 font-semibold">
+                              {job.salary}
+                            </span>
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleApplyJob(job.id, job.title)}
+                          disabled={isApplied}
+                          className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${isApplied
+                            ? "bg-green-100 text-green-700 cursor-default"
+                            : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+                            }`}
+                        >
+                          {isApplied ? "✓ Postulé" : "Postuler"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={() => setActiveTab("emplois")}
+                  className="w-full py-3.5 rounded-2xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
+                  id="btn-voir-emplois"
+                >
+                  <Briefcase size={16} /> Voir toutes les offres d'emplois
+                </button>
+              </div>
+
+              {/* Row 4 – Quick actions matching Figma */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-sm mb-1">
+                      Créer un CV
+                    </h3>
+                    <p className="text-xs text-slate-400 mb-5 leading-relaxed">
+                      Utilise un outil de création de CV professionnel
+                    </p>
+                  </div>
+                  <a
+                    href="https://www.moncvparfait.fr/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-3 rounded-2xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-all flex items-center justify-center gap-2 text-center"
+                    id="btn-creer-cv"
+                  >
+                    <FileText size={15} /> Commencer
+                  </a>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-sm mb-1">
+                      Paramètres
+                    </h3>
+                    <p className="text-xs text-slate-400 mb-5 leading-relaxed">
+                      Gère tes préférences et ton compte personnel
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab("parametres")}
+                    className="w-full py-3 rounded-2xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-all flex items-center justify-center gap-2"
+                    id="btn-parametres-talent"
+                  >
+                    <Settings size={15} /> Accéder
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-sm mb-1">
+                      Rejoindre la communauté
+                    </h3>
+                    <p className="text-xs text-slate-400 mb-5 leading-relaxed">
+                      Échange avec d'autres talents sur notre groupe WhatsApp exclusif
+                    </p>
+                  </div>
+                  <a
+                    href="https://chat.whatsapp.com/HxYOiCDSjOI7L1Wj6Fedd9"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-3 rounded-2xl font-bold text-xs text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition-all flex items-center justify-center gap-2 text-center"
+                    id="btn-rejoindre-whatsapp"
+                  >
+                    <MessageCircle size={15} /> Rejoindre sur WhatsApp
+                  </a>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* TAB: MON PROFIL */}
+          {activeTab === "profil" && <ProfilTalent />}
+
+          {/* TAB: ENTRETIEN VIDÉO – redirects to ProfilTalent video tab */}
+          {activeTab === "video" && <ProfilTalent />}
+
+          {/* TAB: MES TRANSACTIONS */}
+          {activeTab === "transactions" && <TransactionsTab />}
+
+          {/* TAB: OFFRES D'EMPLOI */}
+          {activeTab === "emplois" && <OffresEmplois />}
+
+          {/* TAB: PREMIUM */}
+          {activeTab === "premium" && <TalentPremium />}
+
+          {/* TAB: AFFILIATION */}
+          {activeTab === "affiliation" && (
+            <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-xl space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Programme d'Affiliation
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    Parrainez d'autres talents et gagnez des récompenses en espèces
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200">
+                    Solde : {affiliationBalance.toLocaleString("fr-FR")} FCFA
+                  </span>
+                  <button
+                    onClick={() => { setAffiliationCount(0); setAffiliationBalance(0); showToast("Compteur remis à zéro."); }}
+                    className="text-xs text-slate-400 hover:text-red-500 border border-slate-200 hover:border-red-200 px-3 py-1 rounded-full transition-colors"
+                  >
+                    Réinitialiser
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+                <div>
+                  <h3 className="font-extrabold text-lg mb-1">
+                    Votre lien de parrainage unique
+                  </h3>
+                  <p className="text-xs text-blue-100">
+                    Chaque inscription réussie vous rapporte 1 500 FCFA directement.
+                  </p>
+                </div>
+                <button
+                  onClick={handleCopyAffiliation}
+                  className="px-6 py-3 rounded-full font-bold text-xs bg-white text-blue-700 hover:bg-blue-50 transition-all shadow-lg flex items-center gap-2"
+                >
+                  {copiedLink ? <Check size={16} /> : <Copy size={16} />}
+                  {copiedLink ? "Lien copié !" : "Copier mon lien"}
+                </button>
+              </div>
+
+              {/* Referral list */}
+              <div>
+                <h4 className="text-sm font-bold text-slate-800 mb-3">Mes filleuls ({affiliationCount})</h4>
+                <div className="space-y-2">
+                  {[
+                    { name: "Marc A.", date: "12 sept. 2026", gain: 1500 },
+                    { name: "Sophie D.", date: "11 sept. 2026", gain: 1500 },
+                    { name: "Alain K.", date: "08 sept. 2026", gain: 1500 },
+                    { name: "Fatou M.", date: "05 sept. 2026", gain: 1500 },
+                  ].slice(0, affiliationCount).map((f) => (
+                    <div key={f.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">{f.name}</p>
+                        <p className="text-xs text-slate-400">{f.date}</p>
+                      </div>
+                      <span className="text-xs font-bold text-green-600">+{f.gain.toLocaleString("fr-FR")} FCFA</span>
+                    </div>
+                  ))}
+                  {affiliationCount === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-4">Aucun filleul pour le moment.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                  <p className="text-xs text-slate-400">Filleuls inscrits</p>
+                  <p className="text-2xl font-black text-slate-900 mt-1">{affiliationCount}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                  <p className="text-xs text-slate-400">Gains totaux générés</p>
+                  <p className="text-2xl font-black text-green-600 mt-1">{affiliationBalance.toLocaleString("fr-FR")} FCFA</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-slate-400">Retrait disponible</p>
+                    <p className="text-sm font-bold text-slate-800 mt-1">Mobile Money</p>
+                  </div>
+                  <button
+                    onClick={() => setWithdrawalModalOpen(true)}
+                    disabled={affiliationBalance < 1000}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors"
+                  >
+                    Retirer
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: PARAMETRES */}
+          {activeTab === "parametres" && <ParametresTab />}
+        </main>
+      </div>
+
+      {/* ── MODAL: SIMULATION TEST VIDEO IA ── */}
+      {videoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 text-center relative">
+            <button
+              onClick={() => setVideoModalOpen(false)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-600"
+            >
+              <X size={18} />
+            </button>
+
+            {videoStep === "intro" && (
+              <div className="py-4 space-y-4">
+                <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto">
+                  <Video size={28} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900">
+                  Entretien Vidéo Automatisé par IA
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed max-w-md mx-auto">
+                  Question 1/3 :{" "}
+                  <strong>
+                    « Présentez brièvement vos compétences clés et votre valeur ajoutée pour un employeur. »
+                  </strong>
+                </p>
+                <div className="p-4 bg-slate-50 rounded-2xl text-xs text-slate-500 text-left space-y-1">
+                  <p>• Durée d'enregistrement : 60 secondes max</p>
+                  <p>• Essais disponibles : 3</p>
+                  <p>• Scoring automatique sur la clarté et l'élocution</p>
+                </div>
+                <button
+                  onClick={() => setVideoStep("recording")}
+                  className="btn-primary w-full justify-center py-3 text-xs"
+                >
+                  Démarrer l'enregistrement
+                </button>
+              </div>
+            )}
+
+            {videoStep === "recording" && (
+              <div className="py-6 space-y-4">
+                <div className="w-24 h-24 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto animate-pulse">
+                  <Camera size={36} />
+                </div>
+                <div className="flex items-center justify-center gap-2 text-red-600 text-xs font-bold">
+                  <span className="w-2.5 h-2.5 bg-red-600 rounded-full animate-ping"></span>
+                  Enregistrement en cours (00:42 / 01:00)
+                </div>
+                <p className="text-xs text-slate-500">
+                  Parlez clairement face à votre caméra.
+                </p>
+                <button
+                  onClick={handleCompleteVideoInterview}
+                  className="btn-primary w-full justify-center py-3 text-xs bg-green-600 hover:bg-green-700"
+                >
+                  Valider et terminer l'enregistrement
+                </button>
+              </div>
+            )}
+
+            {videoStep === "done" && (
+              <div className="py-8 space-y-3">
+                <div className="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center mx-auto">
+                  <CheckCircle size={32} />
+                </div>
+                <h4 className="text-lg font-bold text-slate-900">
+                  Analyse IA terminée avec succès !
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Votre badge et vos 5 étoiles ont été attribués.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: AFFILIATION DETAILS ── */}
+      {affiliationModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 text-center relative">
+            <button
+              onClick={() => setAffiliationModalOpen(false)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-600"
+            >
+              <X size={18} />
+            </button>
+            <div className="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-3">
+              <Share2 size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-1">
+              Détails de vos parrainages
+            </h3>
+            <p className="text-xs text-slate-500 mb-4">
+              4 personnes se sont inscrites via votre recommandation.
+            </p>
+
+            <div className="space-y-2 text-left mb-6 text-xs divide-y divide-slate-100">
+              <div className="pt-2 flex justify-between">
+                <span>Marc A. (Talent)</span>
+                <span className="font-bold text-green-600">+1 500 FCFA</span>
+              </div>
+              <div className="pt-2 flex justify-between">
+                <span>Sophie D. (Talent)</span>
+                <span className="font-bold text-green-600">+1 500 FCFA</span>
+              </div>
+              <div className="pt-2 flex justify-between">
+                <span>Alain K. (Talent)</span>
+                <span className="font-bold text-green-600">+1 500 FCFA</span>
+              </div>
+              <div className="pt-2 flex justify-between">
+                <span>Fatou M. (Talent)</span>
+                <span className="font-bold text-green-600">+1 500 FCFA</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleCopyAffiliation}
+              className="btn-primary w-full justify-center py-3 text-xs mb-2"
+            >
+              Copier mon lien de parrainage
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

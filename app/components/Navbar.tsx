@@ -1,0 +1,211 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import {
+  Menu,
+  X,
+  Users,
+  Briefcase,
+  HelpCircle,
+  Home,
+  Star,
+  LogOut,
+  LayoutDashboard,
+} from "lucide-react";
+
+export default function Navbar({
+  variant = "default",
+}: {
+  variant?: "default" | "transparent";
+}) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, logout } = useAuth();
+
+  const getDashboardHref = () => {
+    if (!user) return "/dashboard/talent";
+    if (user.role === "admin") return "/dashboard/admin";
+    if (user.role === "recruteur") return "/dashboard/recruteur";
+    return "/dashboard/talent";
+  };
+
+  return (
+    <header
+      className="sticky top-0 z-50"
+      style={{
+        background: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(16px)",
+        borderBottom: "1px solid rgba(226,232,240,0.8)",
+      }}
+    >
+      <nav className="max-w-7xl mx-auto px-6 flex items-center justify-between h-20">
+        {/* Logo with official Figma asset */}
+        <Link href="/" className="flex items-center gap-2 group transition-opacity hover:opacity-90">
+          <div className="relative h-11 w-36 sm:w-44 flex items-center">
+            <Image
+              src="/assets/CC blue png horiz 1.png"
+              alt="Check CV Logo"
+              fill
+              priority
+              className="object-contain object-left"
+            />
+          </div>
+        </Link>
+
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-1.5">
+          {[
+            { href: "/", label: "Accueil", icon: Home },
+            { href: "/#pourquoi", label: "Pourquoi ?", icon: Star },
+            { href: "/#comment", label: "Comment ça marche ?", icon: HelpCircle },
+            { href: "/talents", label: "Talents", icon: Users },
+            { href: "/recruteurs", label: "Recruteurs", icon: Briefcase },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-50/60 transition-all"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
+        {/* CTA / Auth Actions */}
+        <div className="hidden md:flex items-center gap-3">
+          {user ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href={getDashboardHref()}
+                className="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:border-blue-500 hover:bg-blue-50/30 transition-all shadow-sm group"
+              >
+                <div className="w-8 h-8 rounded-full overflow-hidden relative border border-slate-200">
+                  <Image
+                    src={user.avatar || "/assets/Avatar ByeWind.png"}
+                    alt={user.name}
+                    width={32}
+                    height={32}
+                    className="object-cover"
+                  />
+                </div>
+                <div className="text-left pr-1">
+                  <p className="text-xs font-bold text-slate-800 group-hover:text-blue-600 leading-tight">
+                    {user.name.split(" ")[0]}
+                  </p>
+                  <p className="text-[10px] text-slate-400 capitalize leading-tight">
+                    {user.role}
+                  </p>
+                </div>
+              </Link>
+
+              <Link
+                href={getDashboardHref()}
+                className="btn-primary text-xs py-2 px-3 flex items-center gap-1.5"
+              >
+                <LayoutDashboard size={14} />
+                Dashboard
+              </Link>
+
+              <button
+                onClick={logout}
+                title="Se déconnecter"
+                className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/connexion"
+                className="px-5 py-2 rounded-full text-sm font-semibold border text-blue-600 border-blue-500 hover:bg-blue-50/50 transition-all"
+              >
+                Connexion
+              </Link>
+              <Link
+                href="/inscription"
+                className="btn-primary text-sm py-2 px-5 !rounded-full"
+              >
+                S'inscrire
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Mobile menu button */}
+        <button
+          className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Menu"
+        >
+          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </nav>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden bg-white border-t border-slate-100 px-4 py-4 flex flex-col gap-1 animate-fade-in shadow-lg">
+          {[
+            { href: "/", label: "Accueil" },
+            { href: "/#pourquoi", label: "Pourquoi ?" },
+            { href: "/#comment", label: "Comment ça marche ?" },
+            { href: "/talents", label: "Talents" },
+            { href: "/recruteurs", label: "Recruteurs" },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="nav-link"
+              onClick={() => setMobileOpen(false)}
+            >
+              {label}
+            </Link>
+          ))}
+
+          <div className="flex gap-3 mt-3 pt-3 border-t border-slate-100">
+            {user ? (
+              <div className="w-full flex items-center justify-between gap-2">
+                <Link
+                  href={getDashboardHref()}
+                  onClick={() => setMobileOpen(false)}
+                  className="btn-primary flex-1 justify-center text-sm"
+                >
+                  Mon Espace ({user.role})
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileOpen(false);
+                  }}
+                  className="p-2.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50"
+                  title="Déconnexion"
+                >
+                  <LogOut size={18} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/connexion"
+                  onClick={() => setMobileOpen(false)}
+                  className="btn-outline flex-1 justify-center text-sm !rounded-full"
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/inscription"
+                  onClick={() => setMobileOpen(false)}
+                  className="btn-primary flex-1 justify-center text-sm !rounded-full"
+                >
+                  S'inscrire
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
