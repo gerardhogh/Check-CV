@@ -244,88 +244,60 @@ export default function TalentDashboard() {
       {/* ── SIDEBAR ── */}
       <aside
         className={`
-          fixed md:static inset-y-0 left-0 z-40
-          w-64 min-h-screen bg-white border-r border-slate-200
-          flex flex-col transition-transform duration-300
+          fixed md:sticky top-0 left-0 z-40
+          w-64 h-screen overflow-hidden bg-white border-r border-slate-200
+          flex flex-col justify-between transition-transform duration-300
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
       >
-        {/* Brand Header */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-          <Link href="/" className="block">
-            <div className="relative h-9 w-36">
-              <Image
-                src="/assets/CC blue png horiz 1.png"
-                alt="Check CV Logo"
-                fill
-                priority
-                className="object-contain object-left"
-              />
-            </div>
-          </Link>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="md:hidden text-slate-400 hover:text-slate-600 p-1"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Sidebar Nav Items */}
-        <nav className="flex-1 p-4 space-y-1.5">
-          {sidebarItems.map(({ key, icon: Icon, label }) => {
-            const isActive = activeTab === key;
-            return (
-              <button
-                key={key}
-                onClick={() => {
-                  if (key === "video") {
-                    setActiveTab("video");
-                  } else {
-                    setActiveTab(key);
-                  }
-                  setSidebarOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${isActive
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 translate-x-1"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                  }`}
-              >
-                <Icon size={18} />
-                <span className="whitespace-nowrap text-sm font-medium">{label}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* User Card at bottom */}
-        <div className="p-4 border-t border-slate-100">
-          <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
-            <div className="w-10 h-10 rounded-full overflow-hidden relative border border-slate-200 flex-shrink-0">
-              <Image
-                src={user?.avatar || "/assets/Avatar ByeWind.png"}
-                alt="Avatar"
-                width={40}
-                height={40}
-                className="object-cover"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-800 truncate">
-                {userName}
-              </p>
-              <p className="text-[11px] text-slate-400 truncate">
-                {user?.email || "jules.kofi@gmail.com"}
-              </p>
-            </div>
+        <div className="flex flex-col h-full overflow-hidden">
+          {/* Brand Header */}
+          <div className="p-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+            <Link href="/" className="block">
+              <div className="relative h-9 w-36">
+                <Image
+                  src="/assets/CC blue png horiz 1.png"
+                  alt="Check CV Logo"
+                  fill
+                  priority
+                  className="object-contain object-left"
+                />
+              </div>
+            </Link>
             <button
-              onClick={logout}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-              title="Se déconnecter"
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden text-slate-400 hover:text-slate-600 p-1"
             >
-              <LogOut size={16} />
+              <X size={18} />
             </button>
           </div>
+
+          {/* Sidebar Nav Items */}
+          <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+            {sidebarItems.map(({ key, icon: Icon, label }) => {
+              const isActive = activeTab === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => {
+                    if (key === "video") {
+                      setActiveTab("video");
+                    } else {
+                      setActiveTab(key);
+                    }
+                    setSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${isActive
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 translate-x-1"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    }`}
+                >
+                  <Icon size={18} />
+                  <span className="whitespace-nowrap text-sm font-medium">{label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
       </aside>
 
