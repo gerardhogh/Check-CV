@@ -146,40 +146,40 @@ export default function OffresEmplois() {
             <div className="space-y-4">
               {filteredJobs.length > 0 ? (
                 filteredJobs.map((job) => (
-                  <div key={job.id} onClick={() => handleViewDetail(job)} className="group cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl border border-slate-100 bg-white hover:shadow-md transition-all gap-4">
-                    <div className="flex items-start sm:items-center gap-5">
-                      <div className="w-14 h-14 rounded-2xl border border-slate-100 bg-white flex items-center justify-center flex-shrink-0 shadow-sm text-[#32A8D7] font-bold text-xl">
+                  <div key={job.id} onClick={() => handleViewDetail(job)} className="group cursor-pointer flex flex-col md:flex-row md:items-center justify-between p-6 rounded-3xl border border-slate-100 bg-white hover:border-slate-200 hover:shadow-lg transition-all gap-6">
+                    <div className="flex items-start md:items-center gap-6">
+                      <div className="w-16 h-16 rounded-2xl border border-slate-100 bg-white flex items-center justify-center flex-shrink-0 shadow-sm text-[#32A8D7] font-bold text-xl">
                         {job.company.substring(0, 2).toUpperCase()}
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <h4 className="font-bold text-slate-900 text-base">{job.title}</h4>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 font-medium">
-                          <span className="flex items-center gap-1.5 text-slate-600 font-semibold"><Building size={14} className="text-slate-400" /> {job.company}</span>
-                          <span className="hidden sm:inline text-slate-300">•</span>
-                          <span className="flex items-center gap-1.5"><MapPin size={14} className="text-slate-400" /> {job.location}</span>
-                          <span className="hidden sm:inline text-slate-300">•</span>
-                          <span className="flex items-center gap-1.5"><Clock size={14} className="text-slate-400" /> {job.postedAt}</span>
+                      <div className="flex flex-col gap-2">
+                        <h4 className="font-bold text-[#1a2332] text-[17px]">{job.title}</h4>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] text-slate-500">
+                          <span className="flex items-center gap-1.5"><Building size={15} className="text-slate-300 stroke-[1.5]" /> {job.company}</span>
+                          <span className="hidden md:inline text-slate-200">•</span>
+                          <span className="flex items-center gap-1.5"><MapPin size={15} className="text-slate-300 stroke-[1.5]" /> {job.location}</span>
+                          <span className="hidden md:inline text-slate-200">•</span>
+                          <span className="flex items-center gap-1.5"><Clock size={15} className="text-slate-300 stroke-[1.5]" /> {job.postedAt}</span>
                         </div>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-semibold">{job.contract}</span>
-                          {job.salary && <span className="px-3 py-1 bg-green-50 text-green-600 rounded-md text-xs font-semibold">{job.salary}</span>}
+                        <div className="flex flex-wrap gap-3 mt-1">
+                          <span className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium">{job.contract}</span>
+                          {job.salary && <span className="px-3 py-1.5 bg-[#eaf6ec] text-[#16a34a] rounded-lg text-xs font-medium">{job.salary}</span>}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 mt-3 sm:mt-0">
+                    <div className="flex items-center gap-4 mt-4 md:mt-0">
                       <button 
-                        className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"
+                        className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-semibold rounded-2xl transition-colors whitespace-nowrap"
                       >
                         Détails
                       </button>
                       {job.status === "open" ? (
-                         <button className="px-5 py-2.5 bg-[#32A8D7] hover:bg-blue-600 text-white text-sm font-semibold rounded-xl transition-colors whitespace-nowrap">
+                         <button className="px-6 py-2.5 bg-[#32A8D7] hover:bg-[#258eb8] text-white text-sm font-semibold rounded-2xl transition-colors whitespace-nowrap">
                            Postuler
                          </button>
                       ) : (
-                         <button className="px-5 py-2.5 bg-slate-50 border border-slate-100 text-slate-500 text-sm font-semibold rounded-xl whitespace-nowrap cursor-not-allowed">
+                         <div className="px-6 py-2.5 bg-slate-50 text-slate-500 text-sm font-semibold rounded-2xl whitespace-nowrap">
                            Fermée
-                         </button>
+                         </div>
                       )}
                     </div>
                   </div>
