@@ -15,7 +15,8 @@ import {
   Mail,
   Phone,
   Globe,
-  Link2
+  Link2,
+  MoreHorizontal
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -123,69 +124,59 @@ export default function OffresEmplois() {
       {/* --- VUE LISTE --- */}
       {view === "list" && (
         <>
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-              <div>
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">Offres d'emplois</h2>
-                <p className="text-sm text-slate-500 mt-1">
-                  Découvrez les meilleures opportunités et postulez directement
-                </p>
-              </div>
-              <div className="relative w-full sm:w-80">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Rechercher (ex: Développeur...)"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                />
-              </div>
+          <div className="space-y-5">
+            <div>
+              <h2 className="text-xl font-bold text-[#0B3A5A]">Offres d'emploi disponibles</h2>
+              <p className="text-[14px] text-slate-600 mt-1.5">
+                Des entreprises recrutent : Postes à pourvoir dès maintenant dans divers secteurs.
+              </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {filteredJobs.length > 0 ? (
                 filteredJobs.map((job) => (
-                  <div key={job.id} onClick={() => handleViewDetail(job)} className="group cursor-pointer flex flex-col md:flex-row md:items-center justify-between p-6 rounded-3xl border border-slate-100 bg-white hover:border-slate-200 hover:shadow-lg transition-all gap-6">
-                    <div className="flex items-start md:items-center gap-6">
-                      <div className="w-16 h-16 rounded-2xl border border-slate-100 bg-white flex items-center justify-center flex-shrink-0 shadow-sm text-[#32A8D7] font-bold text-xl">
-                        {job.company.substring(0, 2).toUpperCase()}
+                  <div key={job.id} onClick={() => handleViewDetail(job)} className="bg-white rounded-xl p-5 border border-slate-200 hover:shadow-md transition-shadow cursor-pointer flex flex-col justify-between min-h-[220px]">
+                    <div>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="w-10 h-10 border border-slate-100 rounded-lg flex items-center justify-center bg-white shadow-sm overflow-hidden flex-shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={`https://logo.clearbit.com/${job.domain}`} alt={job.company} className="w-6 h-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company)}&background=fff&color=f97316&font-size=0.6&bold=true`; }} />
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-2">
-                        <h4 className="font-bold text-[#1a2332] text-[17px]">{job.title}</h4>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] text-slate-500">
-                          <span className="flex items-center gap-1.5"><Building size={15} className="text-slate-300 stroke-[1.5]" /> {job.company}</span>
-                          <span className="hidden md:inline text-slate-200">•</span>
-                          <span className="flex items-center gap-1.5"><MapPin size={15} className="text-slate-300 stroke-[1.5]" /> {job.location}</span>
-                          <span className="hidden md:inline text-slate-200">•</span>
-                          <span className="flex items-center gap-1.5"><Clock size={15} className="text-slate-300 stroke-[1.5]" /> {job.postedAt}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-3 mt-1">
-                          <span className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium">{job.contract}</span>
-                          {job.salary && <span className="px-3 py-1.5 bg-[#eaf6ec] text-[#16a34a] rounded-lg text-xs font-medium">{job.salary}</span>}
-                        </div>
+                      <div className="flex items-center justify-between text-[11px] text-slate-400 mb-2">
+                        <span>Publié le: 15/01/2025</span>
+                        {job.status === "open" ? (
+                          <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
+                            <span className="text-slate-600 font-medium">Active</span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
+                            <span className="text-slate-600 font-medium">Inactive</span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
+                          </div>
+                        )}
+                      </div>
+                      <h4 className="font-bold text-[#4B5563] text-[15px] leading-snug mb-1">{job.title}</h4>
+                      <div className="text-[12px] text-slate-500 mb-1">
+                        Entreprise : <span className="font-semibold text-[#32A8D7]">{job.company}</span>
+                      </div>
+                      <div className="text-[12px] text-slate-400">
+                        {job.location}
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 mt-4 md:mt-0">
-                      <button 
-                        className="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-semibold rounded-2xl transition-colors whitespace-nowrap"
-                      >
-                        Détails
+                    <div className="mt-5 flex items-center gap-2">
+                      <button className="flex-1 py-2 text-[13px] font-semibold text-[#32A8D7] border border-[#32A8D7] rounded-lg hover:bg-blue-50 transition-colors bg-white">
+                        Voir détail
                       </button>
-                      {job.status === "open" ? (
-                         <button className="px-6 py-2.5 bg-[#32A8D7] hover:bg-[#258eb8] text-white text-sm font-semibold rounded-2xl transition-colors whitespace-nowrap">
-                           Postuler
-                         </button>
-                      ) : (
-                         <div className="px-6 py-2.5 bg-slate-50 text-slate-500 text-sm font-semibold rounded-2xl whitespace-nowrap">
-                           Fermée
-                         </div>
-                      )}
+                      <button className="w-9 h-9 flex items-center justify-center bg-slate-50 border border-slate-100 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors flex-shrink-0" onClick={(e) => { e.stopPropagation(); }}>
+                        <MoreHorizontal size={16} />
+                      </button>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <div className="col-span-full text-center py-12 text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                   <Briefcase size={32} className="mx-auto text-slate-300 mb-3" />
                   <p className="text-sm font-medium">Aucune offre ne correspond à votre recherche.</p>
                 </div>
