@@ -33,14 +33,25 @@ export default function Navbar({
 
   return (
     <header
-      className="sticky top-0 z-50"
-      style={{
-        background: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(16px)",
-        borderBottom: "1px solid rgba(226,232,240,0.8)",
-      }}
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        variant === "transparent"
+          ? "max-w-5xl mx-auto mt-6 rounded-full border border-white/40 shadow-sm"
+          : ""
+      }`}
+      style={
+        variant === "transparent"
+          ? {
+              background: "rgba(255,255,255,0.6)",
+              backdropFilter: "blur(16px)",
+            }
+          : {
+              background: "rgba(255,255,255,0.92)",
+              backdropFilter: "blur(16px)",
+              borderBottom: "1px solid rgba(226,232,240,0.8)",
+            }
+      }
     >
-      <nav className="max-w-7xl mx-auto px-6 flex items-center justify-between h-20">
+      <nav className={`mx-auto px-6 flex items-center justify-between ${variant === "transparent" ? "h-16" : "max-w-7xl h-20"}`}>
         {/* Logo with official Figma asset */}
         <Link href="/" className="flex items-center gap-2 group transition-opacity hover:opacity-90">
           <div className="relative h-11 w-36 sm:w-44 flex items-center">

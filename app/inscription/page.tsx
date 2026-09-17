@@ -18,11 +18,12 @@ import {
 } from "lucide-react";
 import { useAuth, UserRole } from "../context/AuthContext";
 import GoogleAuthModal from "../components/GoogleAuthModal";
+import Navbar from "../components/Navbar";
 
 function InscriptionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
 
   const defaultRole: UserRole =
     searchParams.get("type") === "recruteur" ? "recruteur" : "talent";
@@ -38,7 +39,6 @@ function InscriptionForm() {
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,57 +88,53 @@ function InscriptionForm() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const success = await loginWithGoogle(role);
+      if (success) {
+        if (role === "admin") router.push("/dashboard/admin");
+        else if (role === "recruteur") router.push("/dashboard/recruteur");
+        else router.push("/dashboard/talent");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div
       className="min-h-screen flex flex-col relative"
       style={{
-        background:
-          "linear-gradient(135deg, #bfe1f7 0%, #d8edf9 35%, #eae4f5 70%, #c9e4f7 100%)",
+        backgroundImage: "url('/assets/Fond.png')",
+        backgroundSize: "cover",
+        backgroundAttachment: "fixed",
+        backgroundPosition: "center",
       }}
     >
-      {/* Top nav */}
-      <header className="max-w-6xl w-full mx-auto px-6 py-6 flex items-center justify-between">
-        <Link
-          href="/"
-          className="flex items-center gap-2 transition-opacity hover:opacity-90"
-        >
-          <div className="relative h-10 w-44">
-            <Image
-              src="/assets/CC blue png horiz 1.png"
-              alt="Check CV Logo"
-              fill
-              priority
-              className="object-contain object-left"
-            />
-          </div>
-        </Link>
-        <Link
-          href="/connexion"
-          className="px-6 py-2 rounded-full text-sm font-semibold border border-blue-500 text-blue-600 bg-white/80 hover:bg-white shadow-sm transition-all"
-        >
-          Connexion
-        </Link>
-      </header>
-
+      {/* Navbar with pill transparent variant */}
+      <Navbar variant="transparent" />
       {/* Main card */}
-      <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8 md:p-10 border border-white/60 animate-fade-in-up">
-          <h1 className="text-3xl font-extrabold text-center text-blue-600 mb-2">
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8 md:p-10 border border-slate-100 animate-fade-in-up">
+          <h1 className="text-3xl font-extrabold text-center mb-2" style={{ color: "#32A8D7" }}>
             Créer un compte
           </h1>
-          <p className="text-center text-slate-400 text-sm mb-6">
+          <p className="text-center text-sm mb-6 text-slate-500">
             Rejoignez la plateforme Check CV dès aujourd'hui
           </p>
 
           {/* Role selector */}
-          <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl mb-6">
+          <div className="flex gap-3 mb-8 justify-center">
             <button
               type="button"
               onClick={() => setRole("talent")}
-              className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+              className={`px-4 py-2 text-sm font-semibold rounded-lg capitalize transition-all border ${
                 role === "talent"
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-[#32A8D7] text-white border-transparent shadow-md"
+                  : "bg-transparent text-[#32A8D7] border-[#32A8D7] hover:bg-blue-50"
               }`}
               id="tab-talent"
             >
@@ -147,10 +143,10 @@ function InscriptionForm() {
             <button
               type="button"
               onClick={() => setRole("recruteur")}
-              className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+              className={`px-4 py-2 text-sm font-semibold rounded-lg capitalize transition-all border ${
                 role === "recruteur"
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-[#32A8D7] text-white border-transparent shadow-md"
+                  : "bg-transparent text-[#32A8D7] border-[#32A8D7] hover:bg-blue-50"
               }`}
               id="tab-recruteur"
             >
@@ -168,7 +164,7 @@ function InscriptionForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Nom complet ou Entreprise */}
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 {role === "recruteur" ? "Nom de l'entreprise" : "Nom complet"}
               </label>
               <div className="relative">
@@ -190,7 +186,7 @@ function InscriptionForm() {
                   placeholder={
                     role === "recruteur" ? "Ex: Grand-G Corp" : "Ex: Jules Kofi"
                   }
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-[#F9FAFB] border-0 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#32A8D7] transition-all"
                   id="nom-complet"
                 />
               </div>
@@ -198,7 +194,7 @@ function InscriptionForm() {
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Email professionnel ou personnel
               </label>
               <div className="relative">
@@ -211,7 +207,7 @@ function InscriptionForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Entrer l'e-mail"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-[#F9FAFB] border-0 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#32A8D7] transition-all"
                   id="email-inscription"
                 />
               </div>
@@ -219,7 +215,7 @@ function InscriptionForm() {
 
             {/* Téléphone */}
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Téléphone (WhatsApp de préférence)
               </label>
               <div className="relative">
@@ -232,7 +228,7 @@ function InscriptionForm() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+229 XX XX XX XX"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-[#F9FAFB] border-0 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#32A8D7] transition-all"
                   id="telephone"
                 />
               </div>
@@ -240,7 +236,7 @@ function InscriptionForm() {
 
             {/* Mot de passe */}
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Mot de passe
               </label>
               <div className="relative">
@@ -253,7 +249,7 @@ function InscriptionForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="•••••••••••• (au moins 6 caractères)"
-                  className="w-full pl-10 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                  className="w-full pl-10 pr-11 py-3 bg-[#F9FAFB] border-0 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#32A8D7] transition-all"
                   id="password-inscription"
                 />
                 <button
@@ -269,14 +265,14 @@ function InscriptionForm() {
             {/* CV upload for Talents */}
             {role === "talent" && (
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                  Votre CV <span className="text-slate-400">(optionnel)</span>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                  Votre CV <span className="text-slate-400 font-normal">(optionnel)</span>
                 </label>
                 <label
                   htmlFor="cv-upload-input"
-                  className="flex items-center gap-3 p-3.5 rounded-2xl border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 cursor-pointer transition-all"
+                  className="flex items-center gap-3 p-3.5 rounded-2xl border-2 border-dashed border-slate-200 hover:border-[#32A8D7] hover:bg-blue-50/30 cursor-pointer transition-all"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-[#32A8D7] flex-shrink-0">
                     {cvFile ? <FileCheck size={18} /> : <Upload size={18} />}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -304,7 +300,7 @@ function InscriptionForm() {
 
             {/* Referral code */}
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Code de parrainage{" "}
                 <span className="text-slate-400 font-normal">(optionnel)</span>
               </label>
@@ -313,7 +309,7 @@ function InscriptionForm() {
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value)}
                 placeholder="Ex: CC-XXXX"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 bg-[#F9FAFB] border-0 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#32A8D7] transition-all"
                 id="code-parrainage"
               />
             </div>
@@ -325,7 +321,7 @@ function InscriptionForm() {
                 id="terms"
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 accent-blue-600 cursor-pointer"
+                className="mt-0.5 w-5 h-5 rounded-md border-slate-300 text-[#32A8D7] focus:ring-[#32A8D7] accent-[#32A8D7] cursor-pointer"
               />
               <label
                 htmlFor="terms"
@@ -334,14 +330,16 @@ function InscriptionForm() {
                 J'accepte les{" "}
                 <Link
                   href="/conditions"
-                  className="text-blue-600 font-medium hover:underline"
+                  className="font-medium hover:underline"
+                  style={{ color: "#32A8D7" }}
                 >
                   conditions d'utilisation
                 </Link>{" "}
                 et la{" "}
                 <Link
                   href="/confidentialite"
-                  className="text-blue-600 font-medium hover:underline"
+                  className="font-medium hover:underline"
+                  style={{ color: "#32A8D7" }}
                 >
                   politique de confidentialité
                 </Link>
@@ -354,7 +352,7 @@ function InscriptionForm() {
               type="submit"
               disabled={isLoading}
               id="btn-creer-compte"
-              className="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.99] transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 text-sm mt-3"
+              className="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-[#32A8D7] hover:bg-[#2a95c2] active:scale-[0.99] transition-all shadow-md flex items-center justify-center gap-2 text-sm mt-3"
             >
               {isLoading ? (
                 <>
@@ -374,42 +372,38 @@ function InscriptionForm() {
             <div className="flex-1 h-px bg-slate-200"></div>
           </div>
 
-          {/* Google Sign up button */}
-          <button
-            type="button"
-            onClick={() => setIsGoogleModalOpen(true)}
-            id="btn-google-inscription"
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 active:scale-[0.99] transition-all text-sm font-medium text-slate-700 shadow-sm"
-          >
-            <Image
-              src="/assets/google 1.png"
-              alt="Google Logo"
-              width={18}
-              height={18}
-              className="object-contain"
-            />
-            S'inscrire avec Google
-          </button>
+          {/* Social login buttons */}
+          <div className="flex w-full">
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+              id="btn-google-inscription"
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 active:scale-[0.99] transition-all text-sm font-bold text-slate-700 shadow-sm disabled:opacity-50"
+            >
+              <Image
+                src="/assets/google 1.png"
+                alt="Google Logo"
+                width={20}
+                height={20}
+                className="object-contain"
+              />
+              S'inscrire avec Google
+            </button>
+          </div>
 
           <p className="text-center text-xs text-slate-500 mt-6">
             Déjà inscrit ?{" "}
             <Link
               href="/connexion"
-              className="font-bold text-blue-600 hover:underline"
+              className="font-bold hover:underline"
+              style={{ color: "#32A8D7" }}
             >
               Se connecter
             </Link>
           </p>
         </div>
       </div>
-
-      {/* Google Modal */}
-      <GoogleAuthModal
-        isOpen={isGoogleModalOpen}
-        onClose={() => setIsGoogleModalOpen(false)}
-        defaultRole={role}
-        isSignUp={true}
-      />
     </div>
   );
 }

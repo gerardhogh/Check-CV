@@ -64,7 +64,15 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 selection:bg-blue-500 selection:text-white">
+    <div 
+      className="min-h-screen bg-slate-50 selection:bg-blue-500 selection:text-white"
+      style={{
+        backgroundImage: "url('/assets/Fond.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed"
+      }}
+    >
       <Navbar />
 
       {/* ── HERO SECTION ── */}
