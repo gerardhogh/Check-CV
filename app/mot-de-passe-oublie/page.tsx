@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Mail, ArrowLeft } from "lucide-react";
-import Navbar from "../../components/Navbar";
+import Navbar from "../components/Navbar";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
