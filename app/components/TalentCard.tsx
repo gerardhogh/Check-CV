@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Bookmark, CheckCircle2 } from "lucide-react";
+import { Bookmark, BadgeCheck } from "lucide-react";
 
 interface TalentCardProps {
   name: string;
@@ -29,7 +29,7 @@ export default function TalentCard({
         {/* Verification badge */}
         {isVerified && (
           <div className="absolute top-2 right-2 bg-white rounded-full p-0.5 shadow-sm">
-            <CheckCircle2 className="w-5 h-5 text-green-500" />
+            <BadgeCheck className="w-5 h-5 text-green-500" />
           </div>
         )}
       </div>
