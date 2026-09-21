@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import Navbar from "../../../components/Navbar";
+import Navbar from "../../components/Navbar";
 
 function OtpForm() {
   const router = useRouter();

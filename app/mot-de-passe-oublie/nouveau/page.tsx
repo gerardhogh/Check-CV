@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Eye, EyeOff } from "lucide-react";
-import Navbar from "../../../components/Navbar";
+import Navbar from "../../components/Navbar";
 
 export default function NewPasswordPage() {
   const router = useRouter();

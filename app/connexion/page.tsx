@@ -11,7 +11,7 @@ import Navbar from "../components/Navbar";
 
 export default function ConnexionPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
