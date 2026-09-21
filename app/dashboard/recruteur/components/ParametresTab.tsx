@@ -100,8 +100,8 @@ export default function ParametresTab() {
               aria-label="Toggle email notifications"
             >
               <span
-                className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${emailNotif ? "translate-x-5.5" : "translate-x-0.5"}`}
-                style={{ transform: emailNotif ? "translateX(22px)" : "translateX(2px)" }}
+                className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300"
+                style={{ left: emailNotif ? "22px" : "2px" }}
               />
             </button>
           </div>
@@ -122,8 +122,8 @@ export default function ParametresTab() {
               aria-label="Toggle SMS notifications"
             >
               <span
-                className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300"
-                style={{ transform: smsNotif ? "translateX(22px)" : "translateX(2px)" }}
+                className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300"
+                style={{ left: smsNotif ? "22px" : "2px" }}
               />
             </button>
           </div>
