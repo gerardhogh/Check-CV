@@ -25,7 +25,9 @@ import {
   FileText,
   Gift,
   User,
+  Globe,
 } from "lucide-react";
+import { useLang, LOCALES } from "../../context/LangContext";
 import TalentCard from "@/app/components/TalentCard";
 import CandidaturesTab from "./components/CandidaturesTab";
 import EmploisTab from "./components/EmploisTab";
@@ -59,11 +61,13 @@ const MOCK_TALENTS = Array.from({ length: 16 }).map((_, i) => ({
 // ─── Component ─────────────────────────────────────────────────────────────────
 export default function RecruteurDashboard() {
   const { user, logout } = useAuth();
+  const { locale, setLocale, t } = useLang();
 
   const [activeTab, setActiveTab] = useState<RecruiterTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
@@ -122,13 +126,13 @@ export default function RecruteurDashboard() {
 
   // ─── Sidebar items ───────────────────────────────────────────────────────────
   const sidebarItems = [
-    { key: "dashboard" as RecruiterTab, icon: LayoutDashboard, label: "Accueil" },
-    { key: "recherche" as RecruiterTab, icon: Search, label: "Recherche talents" },
-    { key: "candidatures" as RecruiterTab, icon: Users, label: "Candidatures" },
-    { key: "emplois" as RecruiterTab, icon: Briefcase, label: "Mes emplois" },
-    { key: "favoris" as RecruiterTab, icon: Bookmark, label: "Favoris" },
-    { key: "affiliation" as RecruiterTab, icon: Share2, label: "Affiliation" },
-    { key: "parametres" as RecruiterTab, icon: Settings, label: "Paramètres" },
+    { key: "dashboard" as RecruiterTab, icon: LayoutDashboard, label: t("nav", "home") },
+    { key: "recherche" as RecruiterTab, icon: Search, label: t("nav", "searchTalents") },
+    { key: "candidatures" as RecruiterTab, icon: Users, label: t("nav", "applications") },
+    { key: "emplois" as RecruiterTab, icon: Briefcase, label: t("nav", "myJobs") },
+    { key: "favoris" as RecruiterTab, icon: Bookmark, label: t("nav", "favorites") },
+    { key: "affiliation" as RecruiterTab, icon: Share2, label: t("nav", "affiliation") },
+    { key: "parametres" as RecruiterTab, icon: Settings, label: t("nav", "settings") },
   ];
 
   return (
@@ -209,7 +213,7 @@ export default function RecruteurDashboard() {
             className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
           >
             <LogOut size={18} />
-            <span>Déconnexion</span>
+            <span>{t("nav", "logout")}</span>
           </button>
         </div>
       </aside>
@@ -266,12 +270,40 @@ export default function RecruteurDashboard() {
             )}
           </div>
 
-          {/* Right: notifications + avatar */}
+          {/* Right: lang + notifications + avatar */}
           <div className="flex items-center gap-3">
+            {/* Lang */}
+            <div className="relative">
+              <button
+                onClick={() => { setLangMenuOpen(!langMenuOpen); setNotifMenuOpen(false); setProfileMenuOpen(false); }}
+                className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors relative"
+                aria-label="Language"
+              >
+                <Globe size={20} />
+              </button>
+
+              {langMenuOpen && (
+                <div className="absolute right-0 mt-3 w-40 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-30 animate-fade-in">
+                  {LOCALES.map(({ code, label, flag }) => (
+                    <button
+                      key={code}
+                      onClick={() => { setLocale(code); setLangMenuOpen(false); }}
+                      className={`w-full text-left px-4 py-2 text-xs font-medium flex items-center gap-2 transition-colors ${
+                        locale === code ? "text-[#32A8D7] bg-sky-50/50" : "text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      <span className="text-base">{flag}</span>
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Bell */}
             <div className="relative">
               <button
-                onClick={() => { setNotifMenuOpen(!notifMenuOpen); setProfileMenuOpen(false); }}
+                onClick={() => { setNotifMenuOpen(!notifMenuOpen); setLangMenuOpen(false); setProfileMenuOpen(false); }}
                 className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors relative"
                 aria-label="Notifications"
               >
@@ -312,7 +344,7 @@ export default function RecruteurDashboard() {
             {/* Avatar */}
             <div className="relative">
               <button
-                onClick={() => { setProfileMenuOpen(!profileMenuOpen); setNotifMenuOpen(false); }}
+                onClick={() => { setProfileMenuOpen(!profileMenuOpen); setNotifMenuOpen(false); setLangMenuOpen(false); }}
                 className="flex items-center gap-2 p-1 pr-2 rounded-full hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 relative">
@@ -337,19 +369,19 @@ export default function RecruteurDashboard() {
                     onClick={() => { setActiveTab("profil"); setProfileMenuOpen(false); }}
                     className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 font-medium flex items-center gap-2"
                   >
-                    <User size={14} /> Mon profil
+                    <User size={14} /> {t("nav", "myProfile")}
                   </button>
                   <button
                     onClick={() => { setActiveTab("parametres"); setProfileMenuOpen(false); }}
                     className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 font-medium flex items-center gap-2"
                   >
-                    <Settings size={14} /> Paramètres
+                    <Settings size={14} /> {t("nav", "settings")}
                   </button>
                   <button
                     onClick={() => { setProfileMenuOpen(false); setIsLogoutModalOpen(true); }}
                     className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100 mt-1 flex items-center gap-2"
                   >
-                    <LogOut size={14} /> Déconnexion
+                    <LogOut size={14} /> {t("nav", "logout")}
                   </button>
                 </div>
               )}
