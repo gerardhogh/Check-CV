@@ -5,13 +5,10 @@ import Image from "next/image";
 import {
   Search,
   Bookmark,
-  Share2,
-  Mail,
-  Eye,
   CheckCircle,
-  MapPin,
   X,
 } from "lucide-react";
+import TalentCard from "@/app/components/TalentCard";
 
 interface CandidatFavori {
   id: string;
@@ -23,15 +20,7 @@ interface CandidatFavori {
   isVerified: boolean;
 }
 
-const MOCK_FAVORIS: CandidatFavori[] = Array.from({ length: 12 }, (_, i) => ({
-  id: `fav_${i}`,
-  name: "Alicia PARKER",
-  profession: "Designer web",
-  location: "Cotonou, Bénin",
-  savedAgo: i === 0 ? "Enregistré il y a 2 min" : i === 1 ? "Enregistré il y a 15 min" : i < 4 ? "Enregistré il y a 1h" : "Enregistré il y a 2 jours",
-  imageUrl: "/assets/candidate-alicia-parker.jpg",
-  isVerified: true,
-}));
+const MOCK_FAVORIS: CandidatFavori[] = [];
 
 interface FavorisTabProps {
   onViewProfile?: (id: string) => void;
@@ -112,73 +101,21 @@ export default function FavorisTab({ onViewProfile, onSendEmail }: FavorisTabPro
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filtered.map((candidat) => (
-            <div
-              key={candidat.id}
-              className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all flex flex-col overflow-hidden"
-            >
-              {/* Top action bar */}
-              <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                <span className="text-[10px] text-slate-400 font-medium">{candidat.savedAgo}</span>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handleShare(candidat.name)}
-                    className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
-                    title="Partager"
-                  >
-                    <Share2 size={14} />
-                  </button>
-                  <button
-                    onClick={() => removeFavori(candidat.id)}
-                    className="p-1.5 rounded-lg bg-[#32A8D7] text-white hover:bg-[#2896c2] transition-colors"
-                    title="Retirer des favoris"
-                  >
-                    <Bookmark size={14} fill="white" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Avatar + info */}
-              <div className="flex flex-col items-center px-4 pb-4">
-                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-slate-100 shadow-sm mb-3">
-                  <Image
-                    src={candidat.imageUrl}
-                    alt={candidat.name}
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(candidat.name)}&background=32A8D7&color=fff&size=128`;
-                    }}
-                  />
-                  {candidat.isVerified && (
-                    <div className="absolute bottom-0 right-0 w-5 h-5 bg-[#32A8D7] rounded-full flex items-center justify-center border-2 border-white">
-                      <CheckCircle size={10} className="text-white" />
-                    </div>
-                  )}
-                </div>
-
-                <h3 className="font-bold text-slate-900 text-sm text-center">{candidat.name}</h3>
-                <p className="text-xs text-[#32A8D7] font-medium text-center mt-0.5">{candidat.profession}</p>
-                <div className="flex items-center gap-1 mt-1 text-[11px] text-slate-400">
-                  <MapPin size={10} />
-                  <span>{candidat.location}</span>
-                </div>
-              </div>
-
-              {/* Action buttons */}
-              <div className="px-4 pb-4 flex gap-2 mt-auto">
-                <button
-                  onClick={() => { onSendEmail?.(candidat.name); showToast(`Email envoyé à ${candidat.name}`); }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-colors"
-                >
-                  <Mail size={12} /> Email
-                </button>
-                <button
-                  onClick={() => onViewProfile?.(candidat.id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#32A8D7] hover:bg-[#2896c2] text-white text-xs font-semibold transition-colors"
-                >
-                  <Eye size={12} /> Voir profil
-                </button>
-              </div>
+            <div key={candidat.id} className="flex flex-col gap-1.5">
+              <span className="text-[10px] text-slate-400 font-medium px-1">
+                {candidat.savedAgo}
+              </span>
+              <TalentCard
+                id={candidat.id}
+                name={candidat.name}
+                location={candidat.location}
+                profession={candidat.profession}
+                imageUrl={candidat.imageUrl}
+                isVerified={candidat.isVerified}
+                isFavorite={true}
+                onFavorite={() => removeFavori(candidat.id)}
+                onViewProfile={() => onViewProfile?.(candidat.id)}
+              />
             </div>
           ))}
         </div>

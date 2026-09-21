@@ -1,0 +1,230 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// AUTHENTICATION & UTILISATEURS (NextAuth)
+// ==========================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Rôle de l'utilisateur (Talent, Recruteur, Admin...)
+  roleId        String?
+  role          Role?     @relation(fields: [roleId], references: [id])
+
+  // Relations NextAuth standards
+  accounts      Account[]
+  sessions      Session[]
+
+  // Profils spécifiques
+  talentProfile TalentProfile?
+  recruiterProfile RecruiterProfile?
+
+  // Transactions liées à l'utilisateur
+  transactions  Transaction[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ==========================================
+// RÔLES ET PERMISSIONS
+// ==========================================
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  permissions String   // Format JSON
+  active      Boolean  @default(true)
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  by        String
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+// ==========================================
+// PROFILS : TALENTS & RECRUTEURS
+// ==========================================
+
+model TalentProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  bio         String?
+  phone       String?
+  videoUrl    String?  // Vidéo de présentation (le même rendu pour Admin/Recruteur)
+  skills      String?  // JSON ou string
+  experience  String?  // JSON
+  education   String?  // JSON
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  applications Application[]
+  interviewSessions InterviewSession[]
+}
+
+model RecruiterProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyName String?
+  companyLogo String?
+  industry    String?
+  website     String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  jobOffers   JobOffer[]
+}
+
+// ==========================================
+// OFFRES D'EMPLOI & CANDIDATURES
+// ==========================================
+
+model JobOffer {
+  id              String   @id @default(cuid())
+  title           String
+  description     String   @db.Text
+  location        String?
+  salary          String?
+  contractType    String?
+  status          String   @default("DRAFT") // DRAFT, PUBLISHED, CLOSED
+  
+  recruiterId     String
+  recruiter       RecruiterProfile @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  applications    Application[]
+  aiInterviews    AIInterview[]
+}
+
+model Application {
+  id              String   @id @default(cuid())
+  status          String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  
+  talentId        String
+  talent          TalentProfile @relation(fields: [talentId], references: [id], onDelete: Cascade)
+  
+  jobOfferId      String
+  jobOffer        JobOffer @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([talentId, jobOfferId])
+}
+
+// ==========================================
+// ENTRETIENS VIDÉO IA
+// ==========================================
+
+model AIInterview {
+  id              String   @id @default(cuid())
+  title           String
+  questions       String   // JSON avec la liste des questions
+  durationMinutes Int      @default(30)
+  
+  jobOfferId      String
+  jobOffer        JobOffer @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sessions        InterviewSession[]
+}
+
+model InterviewSession {
+  id              String   @id @default(cuid())
+  status          String   @default("TODO") // TODO, COMPLETED, EVALUATED
+  videoRecordings String?  // JSON (URLs des vidéos pour chaque question)
+  aiScore         Int?     // Score calculé par l'IA (sur 100)
+  aiFeedback      String?  @db.Text
+  
+  talentId        String
+  talent          TalentProfile @relation(fields: [talentId], references: [id], onDelete: Cascade)
+  
+  interviewId     String
+  interview       AIInterview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([talentId, interviewId])
+}
+
+// ==========================================
+// TRANSACTIONS & ABONNEMENTS
+// ==========================================
+
+model Transaction {
+  id          String   @id @default(cuid())
+  amount      Float
+  currency    String   @default("EUR")
+  status      String   @default("PENDING") // SUCCESS, FAILED, PENDING
+  type        String   // SUBSCRIPTION, ONE_TIME
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+}

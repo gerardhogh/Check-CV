@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Bookmark, BadgeCheck } from "lucide-react";
+import Link from "next/link";
+import { Bookmark, BadgeCheck, CheckCircle } from "lucide-react";
 
 export interface TalentCardProps {
   id?: string | number;
@@ -47,10 +48,10 @@ export default function TalentCard({
         {/* Verification badge */}
         {isVerified && (
           <div
-            className="absolute top-2.5 right-2.5 bg-white/95 rounded-full p-0.5 shadow-sm flex items-center justify-center"
+            className="absolute top-2.5 right-2.5 flex items-center justify-center rounded-full bg-white p-0.5 shadow-sm"
             title="Profil certifié et vérifié"
           >
-            <BadgeCheck className="w-5 h-5 text-emerald-500 fill-emerald-500 text-white" />
+            <CheckCircle className="w-5 h-5 text-white fill-emerald-500" />
           </div>
         )}
       </div>
@@ -90,20 +91,32 @@ export default function TalentCard({
         <div className="mt-auto flex items-center gap-2 w-full pt-1">
           <button
             type="button"
-            onClick={() => onSendEmail?.(id, name)}
+            onClick={() => {
+              if (onSendEmail) {
+                onSendEmail(id, name);
+              } else {
+                // Gmail web client fallback if no handler is passed
+                const mail = "candidat@example.com"; // Fallback email since we don't have it in mock
+                const subject = encodeURIComponent(`Contact Candidat ${name || ""}`);
+                const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${mail}&su=${subject}`;
+                window.open(gmailUrl, "_blank", "noopener,noreferrer");
+              }
+            }}
             className="flex-1 py-2 px-2 text-xs font-semibold border border-slate-300 rounded-md text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition-colors text-center truncate"
           >
             Envoyer un mail
           </button>
 
           {destination ? (
-            <a
+            <Link
               href={destination}
-              onClick={() => onViewProfile?.(id)}
+              onClick={(e) => {
+                if (onViewProfile) onViewProfile(id);
+              }}
               className="flex-1 py-2 px-2 text-xs font-semibold bg-[#32A8D7] hover:bg-[#2896c2] active:bg-[#2283aa] text-white rounded-md transition-colors shadow-xs hover:shadow text-center truncate"
             >
               Voir profil
-            </a>
+            </Link>
           ) : (
             <button
               type="button"

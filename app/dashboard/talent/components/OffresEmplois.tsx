@@ -21,57 +21,9 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 
-// Mock Data
-const MOCK_JOBS = [
-  {
-    id: 1,
-    title: "Développeur Front-end Senior (React / Next.js)",
-    company: "Paystack",
-    domain: "paystack.com",
-    location: "Cotonou, Bénin (Hybride)",
-    type: "Temps plein",
-    contract: "CDI",
-    employees: "500+ employés",
-    category: "Ingénierie & Tech",
-    status: "open",
-    salary: "800 000 - 1 200 000 FCFA",
-    postedAt: "Il y a 2 jours",
-    skills: ["React", "Next.js", "Tailwind CSS", "TypeScript", "GraphQL"],
-    description: "Nous recherchons un Développeur Front-end talentueux et passionné pour rejoindre notre équipe dynamique. Vous jouerez un rôle clé dans la conception, le développement et l'optimisation de nos interfaces de paiement web.\n\n✨ Ce que vous ferez :\n• Développer de nouvelles fonctionnalités orientées utilisateur.\n• Créer du code réutilisable et des bibliothèques pour une utilisation future.\n• Optimiser les applications pour une vitesse et une scalabilité maximales.\n\n🎯 Profil recherché :\n• Au moins 3 ans d'expérience en développement Front-end.\n• Maîtrise parfaite de React et de son écosystème.\n• Sensibilité accrue pour le design et l'UX."
-  },
-  {
-    id: 2,
-    title: "Product Marketing Manager",
-    company: "MTN",
-    domain: "mtn.bj",
-    location: "Cotonou, Bénin",
-    type: "Temps plein",
-    contract: "CDI",
-    employees: "1000+ employés",
-    category: "Marketing",
-    status: "open",
-    salary: "600 000 - 900 000 FCFA",
-    postedAt: "Il y a 5 heures",
-    skills: ["Stratégie Go-to-Market", "Analyse de données", "Copywriting", "Gestion de projet"],
-    description: "Rejoignez MTN pour diriger la stratégie marketing de nos nouveaux produits digitaux. Vous serez au centre de l'innovation, travaillant avec les équipes produit, vente et communication."
-  },
-  {
-    id: 3,
-    title: "Designer UX/UI",
-    company: "Sèmè City",
-    domain: "semecity.bj",
-    location: "Sèmè-Podji, Bénin",
-    type: "Hybride",
-    contract: "Freelance",
-    employees: "50 - 200 employés",
-    category: "Design",
-    status: "closed",
-    salary: "Taux journalier à négocier",
-    postedAt: "Il y a 2 semaines",
-    skills: ["Figma", "Prototypage", "Recherche utilisateur", "Design System"],
-    description: "Sèmè City recherche un designer UX/UI créatif pour repenser l'expérience digitale de ses plateformes éducatives et entrepreneuriales."
-  }
-];
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 const JOB_BOARDS = [
   { name: "LinkedIn Jobs", domain: "linkedin.com", url: "https://www.linkedin.com/jobs" },
@@ -98,11 +50,13 @@ type ViewState = "list" | "detail" | "company";
 
 export default function OffresEmplois() {
   const [view, setView] = useState<ViewState>("list");
-  const [selectedJob, setSelectedJob] = useState<typeof MOCK_JOBS[0] | null>(null);
+  const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const [companyTab, setCompanyTab] = useState<"info" | "reseaux">("info");
   const [search, setSearch] = useState("");
 
-  const handleViewDetail = (job: typeof MOCK_JOBS[0]) => {
+  const { data: jobs = [], error, isLoading } = useSWR("/api/jobs", fetcher);
+
+  const handleViewDetail = (job: any) => {
     setSelectedJob(job);
     setView("detail");
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -113,9 +67,9 @@ export default function OffresEmplois() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const filteredJobs = MOCK_JOBS.filter(j => 
-    j.title.toLowerCase().includes(search.toLowerCase()) || 
-    j.company.toLowerCase().includes(search.toLowerCase())
+  const filteredJobs = jobs.filter((j: any) => 
+    j.title?.toLowerCase().includes(search.toLowerCase()) || 
+    j.recruiter?.companyName?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -133,19 +87,29 @@ export default function OffresEmplois() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {filteredJobs.length > 0 ? (
-                filteredJobs.map((job) => (
+              {isLoading ? (
+                <div className="col-span-1 sm:col-span-2 lg:col-span-4 p-10 text-center text-slate-400">
+                  <div className="w-8 h-8 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+                  Chargement des offres...
+                </div>
+              ) : error ? (
+                <div className="col-span-1 sm:col-span-2 lg:col-span-4 p-10 text-center text-red-500 bg-red-50 rounded-2xl border border-red-100">
+                  <AlertTriangle className="mx-auto mb-2 opacity-50" size={32} />
+                  Erreur lors du chargement des offres.
+                </div>
+              ) : filteredJobs.length > 0 ? (
+                filteredJobs.map((job: any) => (
                   <div key={job.id} onClick={() => handleViewDetail(job)} className="bg-white rounded-xl p-5 border border-slate-200 hover:shadow-md transition-shadow cursor-pointer flex flex-col justify-between min-h-[220px]">
                     <div>
                       <div className="flex items-start justify-between mb-3">
                         <div className="w-10 h-10 border border-slate-100 rounded-lg flex items-center justify-center bg-white shadow-sm overflow-hidden flex-shrink-0">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={`https://logo.clearbit.com/${job.domain}`} alt={job.company} className="w-6 h-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company)}&background=fff&color=f97316&font-size=0.6&bold=true`; }} />
+                          <img src={`https://logo.clearbit.com/${job.recruiter?.companyName || "unknown"}.com`} alt={job.recruiter?.companyName || "Entreprise"} className="w-6 h-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(job.recruiter?.companyName || "Company")}&background=fff&color=f97316&font-size=0.6&bold=true`; }} />
                         </div>
                       </div>
                       <div className="flex items-center justify-between text-[11px] text-slate-400 mb-2">
-                        <span>Publié le: 15/01/2025</span>
-                        {job.status === "open" ? (
+                        <span>Publié le: {new Date(job.createdAt).toLocaleDateString("fr-FR")}</span>
+                        {job.status === "PUBLISHED" ? (
                           <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
                             <span className="text-slate-600 font-medium">Active</span>
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
@@ -261,10 +225,10 @@ export default function OffresEmplois() {
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-12 mb-6">
                 <div className="w-24 h-24 bg-white rounded-2xl border-4 border-white shadow-md flex items-center justify-center overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`https://logo.clearbit.com/${selectedJob.domain}`} alt={selectedJob.company} className="w-16 h-16 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.company)}&background=f8fafc&color=32A8D7&font-size=0.4`; }} />
+                  <img src={`https://logo.clearbit.com/${selectedJob.recruiter?.companyName || "unknown"}.com`} alt={selectedJob.recruiter?.companyName || "Entreprise"} className="w-16 h-16 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.recruiter?.companyName || "Company")}&background=f8fafc&color=32A8D7&font-size=0.4`; }} />
                 </div>
                 
-                {selectedJob.status === "closed" ? (
+                {selectedJob.status === "CLOSED" ? (
                   <span className="px-4 py-1.5 bg-red-50 text-red-600 text-xs font-bold rounded-full border border-red-100 inline-flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span> Offre clôturée
                   </span>
@@ -280,27 +244,27 @@ export default function OffresEmplois() {
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-500 mb-8 font-medium">
                   <span className="flex items-center gap-1.5">
                     <Building size={16} className="text-slate-400" />
-                    <button onClick={handleViewCompany} className="text-blue-600 hover:text-blue-700 hover:underline transition-colors">{selectedJob.company}</button>
+                    <button onClick={handleViewCompany} className="text-blue-600 hover:text-blue-700 hover:underline transition-colors">{selectedJob.recruiter?.companyName || "Entreprise"}</button>
                   </span>
-                  <span className="flex items-center gap-1.5"><MapPin size={16} className="text-slate-400" /> {selectedJob.location}</span>
-                  <span className="flex items-center gap-1.5"><Clock size={16} className="text-slate-400" /> {selectedJob.postedAt}</span>
+                  <span className="flex items-center gap-1.5"><MapPin size={16} className="text-slate-400" /> {selectedJob.location || "Non précisé"}</span>
+                  <span className="flex items-center gap-1.5"><Clock size={16} className="text-slate-400" /> {new Date(selectedJob.createdAt).toLocaleDateString("fr-FR")}</span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col gap-1 text-center">
                     <Briefcase size={18} className="mx-auto text-slate-400 mb-1" />
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Type</span>
-                    <span className="text-sm font-bold text-slate-800">{selectedJob.type}</span>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Secteur</span>
+                    <span className="text-sm font-bold text-slate-800">Non précisé</span>
                   </div>
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col gap-1 text-center">
                     <CheckCircle size={18} className="mx-auto text-slate-400 mb-1" />
                     <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Contrat</span>
-                    <span className="text-sm font-bold text-slate-800">{selectedJob.contract}</span>
+                    <span className="text-sm font-bold text-slate-800">{selectedJob.contractType || "Non précisé"}</span>
                   </div>
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col gap-1 text-center">
                     <Users size={18} className="mx-auto text-slate-400 mb-1" />
                     <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Taille Ent.</span>
-                    <span className="text-sm font-bold text-slate-800">{selectedJob.employees}</span>
+                    <span className="text-sm font-bold text-slate-800">Non précisé</span>
                   </div>
                   <div className="p-4 bg-green-50/50 rounded-2xl border border-green-100 flex flex-col gap-1 text-center">
                     <span className="text-lg mb-1">💰</span>
@@ -324,7 +288,7 @@ export default function OffresEmplois() {
                       <span className="w-1 h-5 bg-blue-600 rounded-full"></span> Compétences requises
                     </h3>
                     <div className="flex flex-wrap gap-2.5">
-                      {selectedJob.skills.map((skill, i) => (
+                      {["Dynamisme", "Autonomie", "Rigueur"].map((skill, i) => (
                         <span key={i} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm hover:border-blue-300 hover:text-blue-600 transition-colors cursor-default">
                           {skill}
                         </span>
@@ -349,14 +313,14 @@ export default function OffresEmplois() {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
               </button>
               <button 
-                disabled={selectedJob.status === "closed"}
+                disabled={selectedJob.status === "CLOSED"}
                 className={`px-8 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-lg flex items-center gap-2 ${
-                  selectedJob.status === "closed" 
+                  selectedJob.status === "CLOSED" 
                   ? "bg-slate-300 cursor-not-allowed shadow-none" 
                   : "bg-blue-600 hover:bg-blue-700 shadow-blue-500/25 hover:scale-105"
                 }`}
               >
-                {selectedJob.status === "closed" ? "Offre non disponible" : "Postuler maintenant"} <ArrowRight size={16} />
+                {selectedJob.status === "CLOSED" ? "Offre non disponible" : "Postuler maintenant"} <ArrowRight size={16} />
               </button>
             </div>
           </div>
@@ -386,14 +350,14 @@ export default function OffresEmplois() {
             <div className="px-8 pb-0 flex flex-col sm:flex-row sm:items-end gap-6 border-b border-slate-100 relative">
               <div className="w-28 h-28 bg-white rounded-2xl border-4 border-white shadow-lg flex items-center justify-center -mt-16 z-10 relative overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`https://logo.clearbit.com/${selectedJob.domain}`} alt={selectedJob.company} className="w-20 h-20 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.company)}&background=f8fafc&color=32A8D7&font-size=0.4`; }} />
+                <img src={`https://logo.clearbit.com/${selectedJob.recruiter?.companyName || "unknown"}.com`} alt={selectedJob.recruiter?.companyName || "Entreprise"} className="w-20 h-20 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.recruiter?.companyName || "Company")}&background=f8fafc&color=32A8D7&font-size=0.4`; }} />
               </div>
               <div className="pb-4 flex-1">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">{selectedJob.company}</h2>
+                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">{selectedJob.recruiter?.companyName || "Entreprise"}</h2>
                     <p className="text-sm font-medium text-slate-500 mt-1 flex items-center gap-1.5">
-                      <Globe size={14} /> {selectedJob.domain}
+                      <Globe size={14} /> {selectedJob.recruiter?.companyName || "unknown"}.com
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -435,7 +399,7 @@ export default function OffresEmplois() {
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nom de l'entreprise</label>
                     <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 font-medium">
-                      {selectedJob.company}
+                      {selectedJob.recruiter?.companyName || "Entreprise"}
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -447,19 +411,19 @@ export default function OffresEmplois() {
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Taille de l'entreprise</label>
                     <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 font-medium flex items-center gap-2">
-                      <Users size={16} className="text-slate-400" /> {selectedJob.employees}
+                      <Users size={16} className="text-slate-400" /> Non précisé
                     </div>
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Siège Social</label>
                     <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 font-medium flex items-center gap-2">
-                      <MapPin size={16} className="text-slate-400" /> {selectedJob.location.split('(')[0].trim()}
+                      <MapPin size={16} className="text-slate-400" /> {selectedJob.location?.split('(')[0].trim() || "Non précisé"}
                     </div>
                   </div>
                   <div className="space-y-1.5 md:col-span-2 mt-2">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Description de l'entreprise</label>
                     <div className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 leading-relaxed min-h-[100px]">
-                      {selectedJob.company} est une entreprise technologique innovante offrant des solutions de pointe pour le marché africain. Notre mission est de simplifier les opérations quotidiennes grâce à des logiciels robustes et des interfaces intuitives. Nous valorisons la créativité, l'inclusion et l'impact.
+                      {selectedJob.recruiter?.companyName || "Cette entreprise"} est une entreprise technologique innovante offrant des solutions de pointe pour le marché africain. Notre mission est de simplifier les opérations quotidiennes grâce à des logiciels robustes et des interfaces intuitives. Nous valorisons la créativité, l'inclusion et l'impact.
                     </div>
                   </div>
                 </div>
@@ -472,7 +436,7 @@ export default function OffresEmplois() {
                       <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center bg-slate-100 border-r border-slate-200 rounded-l-xl text-[#0077b5]">
                         <Link2 size={16} />
                       </div>
-                      <input type="text" disabled value={`linkedin.com/company/${selectedJob.company.toLowerCase().replace(/[^a-z0-9]/g, '')}`} className="w-full pl-15 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium" />
+                      <input type="text" disabled value={`linkedin.com/company/${(selectedJob.recruiter?.companyName || "company").toLowerCase().replace(/[^a-z0-9]/g, '')}`} className="w-full pl-15 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium" />
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -481,7 +445,7 @@ export default function OffresEmplois() {
                       <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center bg-slate-100 border-r border-slate-200 rounded-l-xl text-slate-900 font-serif">
                         <span className="text-lg font-black">𝕏</span>
                       </div>
-                      <input type="text" disabled value={`twitter.com/${selectedJob.company.toLowerCase().replace(/[^a-z0-9]/g, '')}`} className="w-full pl-15 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium" />
+                      <input type="text" disabled value={`twitter.com/${(selectedJob.recruiter?.companyName || "company").toLowerCase().replace(/[^a-z0-9]/g, '')}`} className="w-full pl-15 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium" />
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -490,7 +454,7 @@ export default function OffresEmplois() {
                       <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center bg-slate-100 border-r border-slate-200 rounded-l-xl text-[#1877f2] font-bold text-lg">
                         f
                       </div>
-                      <input type="text" disabled value={`facebook.com/${selectedJob.company.toLowerCase().replace(/[^a-z0-9]/g, '')}`} className="w-full pl-15 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium" />
+                      <input type="text" disabled value={`facebook.com/${(selectedJob.recruiter?.companyName || "company").toLowerCase().replace(/[^a-z0-9]/g, '')}`} className="w-full pl-15 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium" />
                     </div>
                   </div>
                 </div>

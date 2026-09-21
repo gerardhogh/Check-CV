@@ -24,14 +24,7 @@ interface Affilie {
   gain: number;
 }
 
-const MOCK_AFFILIES: Affilie[] = [
-  { id: 1, name: "Kofi MENSAH", email: "kofi.mensah@email.com", dateInscription: "12/09/2024", statut: "Inscrit", gain: 2500 },
-  { id: 2, name: "Fatima DIALLO", email: "fatima.diallo@email.com", dateInscription: "08/09/2024", statut: "Inscrit", gain: 2500 },
-  { id: 3, name: "Jean-Marc HOUESSOU", email: "jm.houessou@email.com", dateInscription: "05/09/2024", statut: "En attente", gain: 0 },
-  { id: 4, name: "Aminata COULIBALY", email: "aminata.c@email.com", dateInscription: "01/09/2024", statut: "Inscrit", gain: 2500 },
-  { id: 5, name: "Pierre AGBOSSOU", email: "p.agbossou@email.com", dateInscription: "28/08/2024", statut: "En attente", gain: 0 },
-  { id: 6, name: "Mariam KEITA", email: "mariam.keita@email.com", dateInscription: "24/08/2024", statut: "Inactif", gain: 0 },
-];
+const MOCK_AFFILIES: Affilie[] = [];
 
 interface RetraitModalProps {
   cagnotte: number;
@@ -223,34 +216,44 @@ export default function AffiliationTab() {
             </span>
           </div>
           <div className="divide-y divide-slate-50">
-            {affilies.map((affilie) => (
-              <div key={affilie.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/60 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#32A8D7] to-[#0071a2] flex items-center justify-center text-white text-xs font-bold">
-                    {affilie.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">{affilie.name}</p>
-                    <p className="text-[10px] text-slate-400">{affilie.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] text-slate-400">{affilie.dateInscription}</span>
-                  <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                      affilie.statut === "Inscrit"
-                        ? "bg-green-50 text-green-600 border-green-100"
-                        : affilie.statut === "En attente"
-                        ? "bg-amber-50 text-amber-600 border-amber-100"
-                        : "bg-slate-100 text-slate-400 border-slate-200"
-                    }`}
-                  >
-                    {affilie.statut === "Inscrit" ? <CheckCircle size={9} /> : affilie.statut === "En attente" ? <Clock size={9} /> : <AlertCircle size={9} />}
-                    {affilie.statut}
-                  </span>
-                </div>
+            {affilies.length === 0 ? (
+              <div className="px-5 py-8 text-center">
+                <Users size={32} className="text-slate-300 mx-auto mb-3" />
+                <p className="text-sm font-semibold text-slate-600">Aucun affilié</p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Vous n'avez parrainé personne pour le moment. Partagez votre lien !
+                </p>
               </div>
-            ))}
+            ) : (
+              affilies.map((affilie) => (
+                <div key={affilie.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/60 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#32A8D7] to-[#0071a2] flex items-center justify-center text-white text-xs font-bold">
+                      {affilie.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">{affilie.name}</p>
+                      <p className="text-[10px] text-slate-400">{affilie.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] text-slate-400">{affilie.dateInscription}</span>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                        affilie.statut === "Inscrit"
+                          ? "bg-green-50 text-green-600 border-green-100"
+                          : affilie.statut === "En attente"
+                          ? "bg-amber-50 text-amber-600 border-amber-100"
+                          : "bg-slate-100 text-slate-400 border-slate-200"
+                      }`}
+                    >
+                      {affilie.statut === "Inscrit" ? <CheckCircle size={9} /> : affilie.statut === "En attente" ? <Clock size={9} /> : <AlertCircle size={9} />}
+                      {affilie.statut}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

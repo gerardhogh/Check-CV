@@ -70,8 +70,9 @@ export default function TalentDashboard() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Affiliation
-  const [affiliationCount, setAffiliationCount] = useState(4);
-  const [affiliationBalance, setAffiliationBalance] = useState(6000);
+  const [affiliationCount, setAffiliationCount] = useState(0);
+  const [affiliationBalance, setAffiliationBalance] = useState(0);
+  const [affiliations, setAffiliations] = useState<any[]>([]);
   const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
   const [withdrawPhone, setWithdrawPhone] = useState("");
   const [withdrawMethod, setWithdrawMethod] = useState("MTN MoMo");
@@ -95,70 +96,10 @@ export default function TalentDashboard() {
   // Jobs state
   const [jobSearch, setJobSearch] = useState("");
   const [appliedJobs, setAppliedJobs] = useState<string[]>([]);
-  const [allJobs] = useState([
-    {
-      id: "1",
-      title: "Développeur Front-end Next.js",
-      company: "TechAfrique",
-      location: "Cotonou, Bénin",
-      type: "Temps plein",
-      salary: "450 000 - 650 000 FCFA",
-    },
-    {
-      id: "2",
-      title: "Designer UI/UX & Figma",
-      company: "CreativX",
-      location: "Abidjan, Côte d'Ivoire",
-      type: "Hybride",
-      salary: "400 000 - 550 000 FCFA",
-    },
-    {
-      id: "3",
-      title: "Chef de Projet Digital",
-      company: "DigitGroup",
-      location: "Dakar, Sénégal",
-      type: "Temps plein",
-      salary: "600 000 - 800 000 FCFA",
-    },
-    {
-      id: "4",
-      title: "Data Analyst & Business Intelligence",
-      company: "DataCorp",
-      location: "Lomé, Togo",
-      type: "Télétravail",
-      salary: "500 000 - 700 000 FCFA",
-    },
-    {
-      id: "5",
-      title: "Développeur Mobile Flutter",
-      company: "InnovMobile",
-      location: "Douala, Cameroun",
-      type: "Temps plein",
-      salary: "500 000 - 650 000 FCFA",
-    },
-  ]);
+  const [allJobs] = useState<any[]>([]);
 
   // Notifications
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      text: "Votre CV a été consulté par 3 recruteurs aujourd'hui",
-      time: "Il y a 10 min",
-      read: false,
-    },
-    {
-      id: 2,
-      text: "Nouveau filleul inscrit avec votre code de parrainage (+1 500 FCFA)",
-      time: "Il y a 2h",
-      read: false,
-    },
-    {
-      id: 3,
-      text: "TechAfrique a publié une offre correspondant à votre profil",
-      time: "Hier",
-      read: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -388,20 +329,27 @@ export default function TalentDashboard() {
                     </button>
                   </div>
                   <div className="max-h-64 overflow-y-auto divide-y divide-slate-50">
-                    {notifications.map((notif) => (
-                      <div
-                        key={notif.id}
-                        className={`p-3 text-xs hover:bg-slate-50 transition-colors ${!notif.read ? "bg-blue-50/40" : ""
-                          }`}
-                      >
-                        <p className="text-slate-800 font-medium leading-snug">
-                          {notif.text}
-                        </p>
-                        <span className="text-[10px] text-slate-400 mt-1 block">
-                          {notif.time}
-                        </span>
+                    {notifications.length === 0 ? (
+                      <div className="p-5 text-center text-slate-400 text-xs">
+                        <Bell size={24} className="mx-auto text-slate-300 mb-2" />
+                        Aucune notification pour le moment
                       </div>
-                    ))}
+                    ) : (
+                      notifications.map((notif) => (
+                        <div
+                          key={notif.id}
+                          className={`p-3 text-xs hover:bg-slate-50 transition-colors ${!notif.read ? "bg-blue-50/40" : ""
+                            }`}
+                        >
+                          <p className="text-slate-800 font-medium leading-snug">
+                            {notif.text}
+                          </p>
+                          <span className="text-[10px] text-slate-400 mt-1 block">
+                            {notif.time}
+                          </span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
@@ -638,35 +586,42 @@ export default function TalentDashboard() {
                   </span>
                 </div>
                 <div className="space-y-3 mb-5">
-                  {allJobs.slice(0, 3).map((job) => {
-                    const isApplied = appliedJobs.includes(job.id);
-                    return (
-                      <div
-                        key={job.id}
-                        className="p-4 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                      >
-                        <div>
-                          <p className="font-bold text-slate-800 text-sm">{job.title}</p>
-                          <p className="text-xs text-slate-400 mt-0.5">
-                            {job.company} — {job.location} •{" "}
-                            <span className="text-blue-600 font-semibold">
-                              {job.salary}
-                            </span>
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleApplyJob(job.id, job.title)}
-                          disabled={isApplied}
-                          className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${isApplied
-                            ? "bg-green-100 text-green-700 cursor-default"
-                            : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
-                            }`}
+                  {allJobs.length === 0 ? (
+                    <div className="p-8 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                      <Briefcase size={24} className="mx-auto text-slate-300 mb-2" />
+                      Aucune offre recommandée pour le moment
+                    </div>
+                  ) : (
+                    allJobs.slice(0, 3).map((job) => {
+                      const isApplied = appliedJobs.includes(job.id);
+                      return (
+                        <div
+                          key={job.id}
+                          className="p-4 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                         >
-                          {isApplied ? "✓ Postulé" : "Postuler"}
-                        </button>
-                      </div>
-                    );
-                  })}
+                          <div>
+                            <p className="font-bold text-slate-800 text-sm">{job.title}</p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              {job.company} — {job.location} •{" "}
+                              <span className="text-blue-600 font-semibold">
+                                {job.salary}
+                              </span>
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleApplyJob(job.id, job.title)}
+                            disabled={isApplied}
+                            className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${isApplied
+                              ? "bg-green-100 text-green-700 cursor-default"
+                              : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+                              }`}
+                          >
+                            {isApplied ? "✓ Postulé" : "Postuler"}
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
                 <button
                   onClick={() => setActiveTab("emplois")}
@@ -802,12 +757,7 @@ export default function TalentDashboard() {
               <div>
                 <h4 className="text-sm font-bold text-slate-800 mb-3">Mes filleuls ({affiliationCount})</h4>
                 <div className="space-y-2">
-                  {[
-                    { name: "Marc A.", date: "12 sept. 2026", gain: 1500 },
-                    { name: "Sophie D.", date: "11 sept. 2026", gain: 1500 },
-                    { name: "Alain K.", date: "08 sept. 2026", gain: 1500 },
-                    { name: "Fatou M.", date: "05 sept. 2026", gain: 1500 },
-                  ].slice(0, affiliationCount).map((f) => (
+                  {affiliations.slice(0, affiliationCount).map((f) => (
                     <div key={f.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
                       <div>
                         <p className="text-sm font-bold text-slate-800">{f.name}</p>

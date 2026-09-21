@@ -21,18 +21,7 @@ import DetailOffreView, { JobDetailData } from "./DetailOffreView";
 import ModifierOffreView from "./ModifierOffreView";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
-const MOCK_CANDIDATURES = Array.from({ length: 15 }, (_, i) => ({
-  id: i + 1,
-  talent: "Alicia PARKER",
-  imageUrl: "/assets/candidate-alicia-parker.jpg",
-  offre: "Développeur Front-end",
-  offreId: "offre_1",
-  dateCandidat: `${10 + i}/09/2024`,
-  typeEmploi: i % 3 === 0 ? "Freelance" : i % 2 === 0 ? "CDD" : "CDI",
-  statut: (["Accepté", "En attente", "Rejeté"] as const)[i % 3],
-  videoTest: i % 4 !== 3,
-  cvJoint: i % 5 !== 4,
-}));
+const MOCK_CANDIDATURES: any[] = [];
 
 const MOCK_JOB: JobDetailData = {
   id: "offre_1",
@@ -133,7 +122,6 @@ export default function CandidaturesTab() {
       <CandidatProfilDetail
         candidat={candidatForDetail}
         onBack={() => setView({ type: "list" })}
-        onSendEmail={(email, name) => showToast(`Email envoyé à ${name}`)}
       />
     );
   }
@@ -152,11 +140,11 @@ export default function CandidaturesTab() {
       {/* Stats badges */}
       <div className="flex flex-wrap gap-3">
         {[
-          { label: "Total", value: 190, color: "bg-slate-100 text-slate-700" },
-          { label: "Actifs", value: 176, color: "bg-green-50 text-green-700" },
-          { label: "En attente", value: 5, color: "bg-amber-50 text-amber-700" },
-          { label: "Suspendus", value: 9, color: "bg-orange-50 text-orange-700" },
-          { label: "Supprimés", value: 5, color: "bg-red-50 text-red-600" },
+          { label: "Total", value: candidatures.length, color: "bg-slate-100 text-slate-700" },
+          { label: "Actifs", value: 0, color: "bg-green-50 text-green-700" },
+          { label: "En attente", value: 0, color: "bg-amber-50 text-amber-700" },
+          { label: "Suspendus", value: 0, color: "bg-orange-50 text-orange-700" },
+          { label: "Supprimés", value: 0, color: "bg-red-50 text-red-600" },
         ].map((stat) => (
           <span key={stat.label} className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold ${stat.color}`}>
             {stat.value} {stat.label}
@@ -204,90 +192,108 @@ export default function CandidaturesTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {paginated.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="px-4 py-3.5 text-xs text-slate-400 font-medium">
-                    {String(c.id).padStart(2, "0")}
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 relative shrink-0">
-                        <Image
-                          src={c.imageUrl}
-                          alt={c.talent}
-                          fill
-                          className="object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.talent)}&background=32A8D7&color=fff&size=64`;
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs font-semibold text-slate-800 whitespace-nowrap">{c.talent}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <button
-                      onClick={() => setView({ type: "detail-offre" })}
-                      className="text-xs font-semibold text-[#32A8D7] hover:underline whitespace-nowrap"
-                    >
-                      {c.offre}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3.5 text-xs text-slate-500 whitespace-nowrap">{c.dateCandidat}</td>
-                  <td className="px-4 py-3.5">
-                    <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">
-                      {c.typeEmploi}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <StatutBadge statut={c.statut} />
-                  </td>
-                  <td className="px-4 py-3.5">
-                    {c.videoTest ? (
-                      <button
-                        onClick={() => setView({ type: "profil-candidat", candidatId: c.id })}
-                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#32A8D7] hover:underline"
-                      >
-                        <Video size={10} /> Oui · Voir
-                      </button>
-                    ) : (
-                      <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
-                        <X size={10} /> Non
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3.5">
-                    {c.cvJoint ? (
-                      <button
-                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#32A8D7] hover:underline"
-                      >
-                        <FileText size={10} /> Oui · Voir
-                      </button>
-                    ) : (
-                      <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
-                        <X size={10} /> Non
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => setView({ type: "profil-candidat", candidatId: c.id })}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#32A8D7] hover:bg-[#2896c2] text-white text-[10px] font-semibold rounded-lg transition-colors whitespace-nowrap"
-                      >
-                        <Eye size={10} /> Voir profil
-                      </button>
-                      <button
-                        onClick={() => deleteCandidature(c.id)}
-                        className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-colors"
-                        title="Supprimer"
-                      >
-                        <Trash2 size={13} />
-                      </button>
+              {candidatures.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-4 py-16 text-center text-slate-400">
+                    <div className="flex flex-col items-center justify-center">
+                      <FileText size={48} className="text-slate-300 mb-3" />
+                      <p className="text-base font-semibold text-slate-600">Aucune candidature</p>
+                      <p className="text-sm">Vous n'avez reçu aucune candidature pour le moment.</p>
                     </div>
                   </td>
                 </tr>
-              ))}
+              ) : paginated.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-4 py-10 text-center text-slate-400 text-sm">
+                    Aucune candidature sur cette page.
+                  </td>
+                </tr>
+              ) : (
+                paginated.map((c) => (
+                  <tr key={c.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="px-4 py-3.5 text-xs text-slate-400 font-medium">
+                      {String(c.id).padStart(2, "0")}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 relative shrink-0">
+                          <Image
+                            src={c.imageUrl}
+                            alt={c.talent}
+                            fill
+                            className="object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.talent)}&background=32A8D7&color=fff&size=64`;
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs font-semibold text-slate-800 whitespace-nowrap">{c.talent}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <button
+                        onClick={() => setView({ type: "detail-offre" })}
+                        className="text-xs font-semibold text-[#32A8D7] hover:underline whitespace-nowrap"
+                      >
+                        {c.offre}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-slate-500 whitespace-nowrap">{c.dateCandidat}</td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {c.typeEmploi}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <StatutBadge statut={c.statut} />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      {c.videoTest ? (
+                        <button
+                          onClick={() => setView({ type: "profil-candidat", candidatId: c.id })}
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#32A8D7] hover:underline"
+                        >
+                          <Video size={10} /> Oui · Voir
+                        </button>
+                      ) : (
+                        <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                          <X size={10} /> Non
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      {c.cvJoint ? (
+                        <button
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#32A8D7] hover:underline"
+                        >
+                          <FileText size={10} /> Oui · Voir
+                        </button>
+                      ) : (
+                        <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                          <X size={10} /> Non
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => setView({ type: "profil-candidat", candidatId: c.id })}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#32A8D7] hover:bg-[#2896c2] text-white text-[10px] font-semibold rounded-lg transition-colors whitespace-nowrap"
+                        >
+                          <Eye size={10} /> Voir profil
+                        </button>
+                        <button
+                          onClick={() => deleteCandidature(c.id)}
+                          className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

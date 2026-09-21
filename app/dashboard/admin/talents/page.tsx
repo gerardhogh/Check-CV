@@ -1,169 +1,161 @@
 "use client";
-import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
-import { useAuth } from "../../../context/AuthContext";
-import {
-  Menu, Bell, ChevronDown, X, LogOut, Home, Users, Briefcase,
-  Settings, History, Search, Filter, MoreHorizontal, Eye, Ban, Trash2
-} from "lucide-react";
+import React, { useState } from "react";
+import { Search } from "lucide-react";
+import { TalentDetails } from "../components/TalentDetails";
 
-const sidebarItems = [
-  { href: "/dashboard/admin", icon: Home, label: "Tableau de bord" },
-  { href: "/dashboard/admin/talents", icon: Users, label: "Talents", active: true },
-  { href: "/dashboard/admin/recruteurs", icon: Briefcase, label: "Recruteurs" },
-  { href: "/dashboard/admin/emplois", icon: Briefcase, label: "Offres d'emploi" },
-  { href: "/dashboard/admin/transactions", icon: History, label: "Transactions" },
-  { href: "/dashboard/admin/parametres", icon: Settings, label: "Paramètres" },
-];
-
-const talents = [
-  { id: 1, name: "Kofi Mensah", email: "kofi@email.com", location: "Cotonou", plan: "Premium", cvUploaded: true, videoOk: true, status: "Actif", date: "12 Avr 2025" },
-  { id: 2, name: "Awa Diallo", email: "awa.d@email.com", location: "Dakar", plan: "Gratuit", cvUploaded: false, videoOk: true, status: "Actif", date: "8 Avr 2025" },
-  { id: 3, name: "Jean-Pierre Nzola", email: "jpn@email.com", location: "Abidjan", plan: "Premium", cvUploaded: true, videoOk: false, status: "Suspendu", date: "2 Avr 2025" },
-  { id: 4, name: "Fatima Sy", email: "fatima.sy@email.com", location: "Bamako", plan: "Gratuit", cvUploaded: true, videoOk: true, status: "Actif", date: "28 Mar 2025" },
-  { id: 5, name: "Samuel Kone", email: "samkone@email.com", location: "Lomé", plan: "Premium", cvUploaded: true, videoOk: true, status: "Actif", date: "20 Mar 2025" },
-];
+const mockTalents: any[] = [];
 
 export default function AdminTalents() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const { user, logout } = useAuth();
+  const [selectedTalent, setSelectedTalent] = useState<any>(null);
 
-  const filtered = talents.filter(t =>
+  const filtered = mockTalents.filter(t =>
     t.name.toLowerCase().includes(search.toLowerCase()) ||
     t.email.toLowerCase().includes(search.toLowerCase())
   );
 
+  const stats = {
+    total: mockTalents.length,
+    actifs: mockTalents.filter(t => t.status === "Actif").length,
+    attente: mockTalents.filter(t => t.status === "En attente").length,
+    suspendus: mockTalents.filter(t => t.status === "Suspendu").length,
+    supprimes: 0 // removed mock value
+  };
+
+  if (selectedTalent) {
+    return <TalentDetails talent={selectedTalent} onBack={() => setSelectedTalent(null)} />;
+  }
+
   return (
-    <div className="flex min-h-screen" style={{ background: "#edeeef" }}>
-      {/* Sidebar */}
-      {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`fixed md:static inset-y-0 left-0 z-40 w-64 min-h-screen bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-          <Link href="/" className="block">
-            <div className="relative h-9 w-36">
-              <Image src="/assets/CC blue png horiz 1.png" alt="Check CV" fill className="object-contain object-left" />
-            </div>
-          </Link>
-          <button onClick={() => setSidebarOpen(false)} className="md:hidden text-slate-400"><X size={18} /></button>
+    <div className="space-y-6 animate-fade-in-up">
+      {/* Header and Stats row */}
+      <div className="flex flex-col xl:flex-row xl:items-center gap-6 justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+        <h2 className="text-xl font-bold">
+          <span className="text-[#232323]">Liste des</span> <span className="text-[#32A8D7]">talents</span>
+        </h2>
+        
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Rechercher"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#32A8D7] w-48 sm:w-64"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <span className="px-3 py-1.5 bg-[#eaf6fc] border border-[#d6effa] text-[#32A8D7] text-sm font-semibold rounded-full">
+              {stats.total} talents au total
+            </span>
+            <span className="px-3 py-1.5 bg-green-50 border border-green-100 text-green-700 text-sm font-semibold rounded-full">
+              {stats.actifs} actifs
+            </span>
+            <span className="px-3 py-1.5 bg-yellow-50 border border-yellow-100 text-yellow-700 text-sm font-semibold rounded-full">
+              {stats.attente} en attente
+            </span>
+            <span className="px-3 py-1.5 bg-slate-50 border border-slate-200 text-slate-600 text-sm font-semibold rounded-full">
+              {stats.suspendus} suspendus
+            </span>
+            <span className="px-3 py-1.5 bg-red-50 border border-red-100 text-red-600 text-sm font-semibold rounded-full">
+              {stats.supprimes} supprimés
+            </span>
+          </div>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
-          {sidebarItems.map(({ href, icon: Icon, label, active }) => (
-            <Link key={href} href={href} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${active ? "bg-[#32A8D7] text-white shadow-md" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
-              <Icon size={18} /> {label}
-            </Link>
-          ))}
-        </nav>
-        <div className="p-4 border-t border-slate-100">
-          <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50 border border-slate-100">
-            <div className="w-10 h-10 rounded-full overflow-hidden relative border border-slate-200 flex-shrink-0">
-              <Image src={user?.avatar || "/assets/Avatar ByeWind.png"} alt="Avatar" width={40} height={40} className="object-cover" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-800 truncate">{user?.name || "Admin"}</p>
-              <p className="text-[11px] text-slate-400 truncate">{user?.email || "admin@check.cv"}</p>
-            </div>
-            <button onClick={logout} className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"><LogOut size={16} /></button>
-          </div>
-        </div>
-      </aside>
+      </div>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(true)} className="text-slate-500 md:hidden"><Menu size={22} /></button>
-            <h1 className="text-xl font-normal text-slate-700">Dashboard <span className="font-extrabold text-slate-900">Admin</span></h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="relative text-slate-500 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-            <div className="relative">
-              <button onClick={() => setProfileMenuOpen(!profileMenuOpen)} className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 transition-colors">
-                <div className="w-9 h-9 rounded-full overflow-hidden border border-slate-200">
-                  <Image src={user?.avatar || "/assets/Avatar ByeWind.png"} alt="Avatar" width={36} height={36} className="object-cover" />
-                </div>
-                <ChevronDown size={14} className="text-slate-400" />
-              </button>
-              {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-30">
-                  <div className="px-4 py-2 border-b border-slate-100">
-                    <p className="text-xs font-bold text-slate-800 truncate">{user?.name || "Admin"}</p>
-                    <p className="text-[11px] text-slate-400 truncate">{user?.email || "admin@check.cv"}</p>
-                  </div>
-                  <Link href="/dashboard/admin/parametres" className="block px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 font-medium">Paramètres</Link>
-                  <button onClick={logout} className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100 mt-1">Déconnexion</button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        <main className="flex-1 p-5 space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-black text-slate-900">Gestion des Talents</h2>
-              <p className="text-sm text-slate-500">{filtered.length} talent(s) trouvé(s)</p>
-            </div>
-            <div className="relative">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Rechercher un talent..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#32A8D7] w-64"
-              />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-50 border-b border-slate-100">
-                  <tr>
-                    {["Nom", "Email", "Localisation", "Plan", "CV", "Vidéo", "Statut", "Inscrit le", "Actions"].map(h => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                    ))}
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        {filtered.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-slate-50/50 border-b border-slate-100">
+                <tr>
+                  <th className="px-5 py-4 font-semibold text-slate-500">No</th>
+                  <th className="px-5 py-4 font-semibold text-slate-500">Nom complet</th>
+                  <th className="px-5 py-4 font-semibold text-slate-500">Domaine</th>
+                  <th className="px-5 py-4 font-semibold text-slate-500 whitespace-nowrap">Date d'inscription</th>
+                  <th className="px-5 py-4 font-semibold text-slate-500">Localisation</th>
+                  <th className="px-5 py-4 font-semibold text-slate-500">Contact</th>
+                  <th className="px-5 py-4 font-semibold text-slate-500">Email</th>
+                  <th className="px-5 py-4 font-semibold text-slate-500">Statut</th>
+                  <th className="px-5 py-4 font-semibold text-slate-500">Video test</th>
+                  <th className="px-5 py-4 font-semibold text-slate-500">Action admin</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filtered.map(t => (
+                  <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-5 py-4 text-slate-500">{t.no}</td>
+                    <td className="px-5 py-4">
+                      <button onClick={() => setSelectedTalent(t)} className="text-[#32A8D7] font-semibold hover:underline text-left">
+                        {t.name}
+                      </button>
+                    </td>
+                    <td className="px-5 py-4 text-slate-700 whitespace-nowrap">{t.domaine}</td>
+                    <td className="px-5 py-4 text-slate-500 whitespace-nowrap">{t.date}</td>
+                    <td className="px-5 py-4 text-slate-700">{t.location}</td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <span className="font-bold text-slate-800">{t.contact.substring(0, 4)}</span>
+                      <span className="text-slate-600">{t.contact.substring(4)}</span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <a href={`mailto:${t.email}`} className="text-[#32A8D7] hover:underline">{t.email}</a>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-semibold ${t.status === 'Actif' ? 'text-slate-700' : t.status === 'En attente' ? 'text-slate-700' : 'text-slate-700'}`}>
+                          {t.status}
+                        </span>
+                        <span className={`w-2 h-2 rounded-full ${t.status === 'Actif' ? 'bg-green-500' : t.status === 'En attente' ? 'bg-yellow-400' : 'bg-red-500'}`}></span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      {t.videoOk ? (
+                        <span className="text-slate-700">Oui <button className="text-[#32A8D7] font-semibold hover:underline ml-1">Voir</button></span>
+                      ) : (
+                        <span className="text-slate-700">Non</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex flex-col gap-1 text-xs font-semibold items-start">
+                        <button onClick={() => setSelectedTalent(t)} className="text-[#32A8D7] hover:underline">Voir profil</button>
+                        
+                        {t.status === 'En attente' && (
+                          <button className="text-green-500 hover:underline">Approuver</button>
+                        )}
+                        {t.status === 'Suspendu' && (
+                          <button className="text-green-500 hover:underline">Réactiver</button>
+                        )}
+                        
+                        <button className="text-[#32A8D7] hover:underline">Modifier</button>
+                        
+                        {t.status !== 'Suspendu' && (
+                          <button className="text-yellow-500 hover:underline">Suspendre</button>
+                        )}
+                        
+                        <button className="text-red-500 hover:underline">Supprimer</button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {filtered.map(t => (
-                    <tr key={t.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 font-semibold text-slate-900 whitespace-nowrap">{t.name}</td>
-                      <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{t.email}</td>
-                      <td className="px-4 py-3 text-slate-500">{t.location}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${t.plan === "Premium" ? "bg-yellow-50 text-yellow-700" : "bg-slate-100 text-slate-600"}`}>{t.plan}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-bold ${t.cvUploaded ? "text-green-600" : "text-slate-400"}`}>{t.cvUploaded ? "✓" : "—"}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-bold ${t.videoOk ? "text-green-600" : "text-slate-400"}`}>{t.videoOk ? "✓" : "—"}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${t.status === "Actif" ? "bg-green-50 text-green-700" : "bg-orange-50 text-orange-700"}`}>{t.status}</span>
-                      </td>
-                      <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">{t.date}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button title="Voir le profil" className="p-1.5 rounded-lg text-slate-400 hover:text-[#32A8D7] hover:bg-blue-50 transition-colors"><Eye size={14} /></button>
-                          <button title="Suspendre" className="p-1.5 rounded-lg text-slate-400 hover:text-orange-500 hover:bg-orange-50 transition-colors"><Ban size={14} /></button>
-                          <button title="Supprimer" className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"><Trash2 size={14} /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </main>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 text-slate-300">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <p className="text-lg font-medium text-slate-500 mb-1">Aucun talent trouvé</p>
+            <p className="text-sm">Il n'y a pas de talents correspondant à vos critères.</p>
+          </div>
+        )}
       </div>
     </div>
   );

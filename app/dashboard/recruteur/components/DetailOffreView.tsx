@@ -200,7 +200,6 @@ export default function DetailOffreView({
               profession={c.profession}
               imageUrl={c.imageUrl}
               isVerified={c.isVerified}
-              onSendEmail={() => showToast(`Envoi d'un message à ${c.name}`)}
               onViewProfile={() => onViewCandidate(c.id)}
             />
           ))}

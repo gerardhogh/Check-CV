@@ -43,16 +43,10 @@ export default function TransactionsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="pb-2">
-        <h2 className="text-2xl font-bold text-slate-900">
-          Mes <span className="text-[#008de4]">transactions</span>
-        </h2>
-        <p className="text-xs text-slate-400 mt-1">Consultez l'ensemble de vos paiements et leur statut</p>
-      </div>
+      {/* Header handled by parent page.tsx */}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
         <SummaryCard
           label="Total dépensé"
           value={`${total.toLocaleString("fr-FR")} FCFA`}
@@ -76,7 +70,7 @@ export default function TransactionsTab() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mt-4">
         <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <h3 className="font-bold text-[#08304c] text-base">Mes transactions</h3>
           <div className="relative w-full sm:w-72">
@@ -117,7 +111,7 @@ export default function TransactionsTab() {
                   const cfg = statusConfig[tx.status];
                   return (
                     <tr key={tx.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="px-5 py-3.5 text-[#008de4] font-semibold">{tx.id}</td>
+                      <td className="px-5 py-3.5 text-[#32A8D7] font-semibold">{tx.id}</td>
                       <td className="px-5 py-3.5 text-slate-600 whitespace-nowrap">{tx.date}</td>
                       <td className="px-5 py-3.5 text-slate-700 font-medium">{tx.reference}</td>
                       <td className="px-5 py-3.5 text-slate-600">{tx.method}</td>
@@ -132,7 +126,7 @@ export default function TransactionsTab() {
                       <td className="px-5 py-3.5">
                         <button
                           onClick={() => setDetailTx(tx)}
-                          className="text-[#008de4] hover:underline text-xs font-semibold flex items-center gap-1"
+                          className="text-[#32A8D7] hover:underline text-xs font-semibold flex items-center gap-1"
                         >
                           Voir <ArrowUpRight size={12} />
                         </button>
@@ -157,9 +151,9 @@ export default function TransactionsTab() {
               <X size={18} />
             </button>
 
-            <h3 className="text-xl font-bold text-slate-900 mb-1">Détails</h3>
+            <h3 className="text-xl font-bold text-[#232323] mb-1">Détails</h3>
             <p className="text-xs text-slate-500 mb-5">
-              Historique des Transactions · <span className="font-semibold">{detailTx.reference}</span> —{" "}
+              Historique des Transactions · <span className="font-semibold text-slate-700">{detailTx.reference}</span> —{" "}
               <span className={statusConfig[detailTx.status].textClass}>
                 Paiement {statusConfig[detailTx.status].label.toLowerCase()}
               </span>
@@ -179,10 +173,10 @@ export default function TransactionsTab() {
               </div>
             </div>
 
-            <button className="w-full bg-[#008de4] hover:bg-blue-600 text-white font-bold py-3 rounded-xl text-sm transition-colors mb-3">
-              Accéder à mon compte Premium
+            <button className="w-full bg-[#32A8D7] hover:bg-[#288fb8] text-white font-bold py-3 rounded-xl text-sm transition-colors mb-3">
+              Fermer
             </button>
-            <button className="w-full text-[#008de4] text-sm font-semibold hover:underline flex items-center justify-center gap-2">
+            <button className="w-full text-[#32A8D7] text-sm font-semibold hover:underline flex items-center justify-center gap-2">
               <Download size={14} />
               Télécharger le reçu
             </button>
@@ -206,7 +200,7 @@ function SummaryCard({
       className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col gap-3 cursor-pointer hover:border-slate-300 hover:shadow-md transition-all"
     >
       <p className="text-sm text-slate-500">{label}</p>
-      <p className="text-2xl font-black text-slate-900">{value}</p>
+      <p className="text-2xl font-black text-[#232323]">{value}</p>
     </div>
   );
 }
@@ -215,7 +209,7 @@ function DetailRow({ label, value, bold }: { label: string; value: string; bold?
   return (
     <div className="flex justify-between items-center">
       <span className="text-sm text-slate-500">{label}</span>
-      <span className={`text-sm text-slate-800 text-right ${bold ? "font-bold" : ""}`}>{value}</span>
+      <span className={`text-sm text-slate-800 text-right ${bold ? "font-bold text-[#232323]" : ""}`}>{value}</span>
     </div>
   );
 }

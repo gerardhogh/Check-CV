@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import useSWR from "swr";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "../../context/AuthContext";
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 import {
   Menu,
   Bell,
@@ -26,6 +29,7 @@ import {
   Gift,
   User,
   Globe,
+  CreditCard,
 } from "lucide-react";
 import { useLang, LOCALES } from "../../context/LangContext";
 import TalentCard from "@/app/components/TalentCard";
@@ -35,6 +39,7 @@ import FavorisTab from "./components/FavorisTab";
 import AffiliationTab from "./components/AffiliationTab";
 import ParametresTab from "./components/ParametresTab";
 import ProfilTab from "./components/ProfilTab";
+import TransactionsTab from "./components/TransactionsTab";
 import { LogoutModal } from "./components/Modals";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -43,25 +48,18 @@ type RecruiterTab =
   | "recherche"
   | "candidatures"
   | "emplois"
+  | "transactions"
   | "favoris"
   | "affiliation"
   | "parametres"
   | "profil";
 
-// ─── Mock Data ─────────────────────────────────────────────────────────────────
-const MOCK_TALENTS = Array.from({ length: 16 }).map((_, i) => ({
-  id: `alicia_${i}`,
-  name: "Alicia PARKER",
-  location: "Cotonou, Bénin",
-  profession: "Designer web",
-  imageUrl: "/assets/candidate-alicia-parker.jpg",
-  isVerified: true,
-}));
-
 // ─── Component ─────────────────────────────────────────────────────────────────
 export default function RecruteurDashboard() {
   const { user, logout } = useAuth();
   const { locale, setLocale, t } = useLang();
+  
+  const { data: talents = [] } = useSWR("/api/talents", fetcher);
 
   const [activeTab, setActiveTab] = useState<RecruiterTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -82,6 +80,7 @@ export default function RecruteurDashboard() {
           "recherche",
           "candidatures",
           "emplois",
+          "transactions",
           "favoris",
           "affiliation",
           "parametres",
@@ -97,11 +96,7 @@ export default function RecruteurDashboard() {
   const [favorites, setFavorites] = useState<string[]>([]);
 
   // Notifications
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: "3 nouveaux profils correspondent à votre recherche", time: "Il y a 25 min", read: false },
-    { id: 2, text: "Votre annonce 'Designer UI/UX' a 8 nouvelles candidatures", time: "Il y a 3h", read: false },
-    { id: 3, text: "Profil d'Alicia PARKER ajouté aux favoris", time: "Hier", read: true },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   const companyName = user?.company || "Grand-G Corp";
   const companyEmail = user?.email || "recruteur@grand-g.com";
@@ -130,6 +125,7 @@ export default function RecruteurDashboard() {
     { key: "recherche" as RecruiterTab, icon: Search, label: t("nav", "searchTalents") },
     { key: "candidatures" as RecruiterTab, icon: Users, label: t("nav", "applications") },
     { key: "emplois" as RecruiterTab, icon: Briefcase, label: t("nav", "myJobs") },
+    { key: "transactions" as RecruiterTab, icon: CreditCard, label: "Transactions" },
     { key: "favoris" as RecruiterTab, icon: Bookmark, label: t("nav", "favorites") },
     { key: "affiliation" as RecruiterTab, icon: Share2, label: t("nav", "affiliation") },
     { key: "parametres" as RecruiterTab, icon: Settings, label: t("nav", "settings") },
@@ -234,38 +230,43 @@ export default function RecruteurDashboard() {
             </button>
 
             {activeTab === "dashboard" && (
-              <h1 className="text-xl sm:text-2xl font-normal text-slate-800 tracking-tight">
-                Tableau de <span className="font-bold text-slate-900">bord</span>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
+                Tableau de <span className="text-[#32A8D7]">bord</span>
               </h1>
             )}
             {activeTab === "recherche" && (
-              <h1 className="text-xl sm:text-2xl font-normal text-slate-800 tracking-tight">
-                Recherche <span className="font-bold text-slate-900">profil</span>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
+                Recherche <span className="text-[#32A8D7]">profil</span>
               </h1>
             )}
             {activeTab === "candidatures" && (
-              <h1 className="text-xl sm:text-2xl font-normal text-slate-800 tracking-tight">
-                Candidatures <span className="font-bold text-slate-900">reçues</span>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
+                Candidatures <span className="text-[#32A8D7]">reçues</span>
               </h1>
             )}
             {activeTab === "emplois" && (
-              <h1 className="text-xl sm:text-2xl font-normal text-slate-800 tracking-tight">
-                Offres d&apos;<span className="font-bold text-slate-900">emplois</span>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
+                Offres d&apos;<span className="text-[#32A8D7]">emplois</span>
+              </h1>
+            )}
+            {activeTab === "transactions" && (
+              <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
+                Mes <span className="text-[#32A8D7]">transactions</span>
               </h1>
             )}
             {activeTab === "favoris" && (
-              <h1 className="text-xl sm:text-2xl font-normal text-slate-800 tracking-tight">
-                <span className="font-bold text-slate-900">Enregistrement</span>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
+                Mes <span className="text-[#32A8D7]">enregistrements</span>
               </h1>
             )}
             {activeTab === "affiliation" && (
-              <h1 className="text-xl sm:text-2xl font-normal text-slate-800 tracking-tight">
-                Parrainez et <span className="font-bold text-slate-900">gagnez</span>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
+                Parrainez et <span className="text-[#32A8D7]">gagnez</span>
               </h1>
             )}
             {activeTab === "parametres" && (
-              <h1 className="text-xl sm:text-2xl font-normal text-slate-800 tracking-tight">
-                Paramètres du <span className="font-bold text-slate-900">compte</span>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
+                Paramètres du <span className="text-[#32A8D7]">compte</span>
               </h1>
             )}
           </div>
@@ -403,11 +404,11 @@ export default function RecruteurDashboard() {
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-bold text-slate-900 text-base">Candidatures</h3>
                       <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700">
-                        25
+                        0
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-                      Candidatures reçues : Votre futur talent est ici !
+                      Aucune candidature reçue pour le moment.
                     </p>
                   </div>
                   <button
@@ -463,24 +464,14 @@ export default function RecruteurDashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-slate-900 text-base">Emplois créés</h3>
                   <span className="text-xs font-medium px-3.5 py-1 rounded-full bg-sky-50 text-[#0071a2]">
-                    7 emplois au total
+                    0 emplois
                   </span>
                 </div>
 
                 <div className="space-y-3 mb-5">
-                  {[
-                    { title: "Développeur Front-end", company: "TechAfrique", location: "Cotonou, Bénin" },
-                    { title: "Designer UI/UX", company: "CreativX", location: "Abidjan, Côte d'Ivoire" },
-                    { title: "Chef de Projet Digital", company: "DigitGroup", location: "Dakar, Sénégal" },
-                  ].map((job, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3.5 rounded-xl border border-slate-200/80 bg-white hover:border-[#32A8D7]/40 transition-colors"
-                    >
-                      <p className="font-bold text-slate-800 text-sm">{job.title}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{job.company} — {job.location}</p>
-                    </div>
-                  ))}
+                  <div className="p-4 rounded-xl border border-slate-100 bg-slate-50 text-center text-sm text-slate-500">
+                    Vous n'avez pas encore créé d'offre d'emploi.
+                  </div>
                 </div>
 
                 <button
@@ -583,21 +574,30 @@ export default function RecruteurDashboard() {
 
               {/* Talent Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
-                {MOCK_TALENTS.map((talent) => (
-                  <TalentCard
-                    key={talent.id}
-                    id={talent.id}
-                    name={talent.name}
-                    location={talent.location}
-                    profession={talent.profession}
-                    imageUrl={talent.imageUrl}
-                    isVerified={talent.isVerified}
-                    isFavorite={favorites.includes(talent.id)}
-                    onFavorite={toggleFavorite}
-                    onSendEmail={() => showToast(`Envoi d'un mail à ${talent.name}`)}
-
-                  />
-                ))}
+                {talents.length > 0 ? (
+                  talents.map((tItem: any) => {
+                    const profile = tItem.talentProfile || {};
+                    return (
+                      <TalentCard
+                        key={tItem.id}
+                        id={tItem.id}
+                        name={tItem.name || "Candidat Anonyme"}
+                        location={"Non précisé"} // Placeholder until db schema changes
+                        profession={profile.bio ? profile.bio.substring(0, 30) + "..." : "Professionnel"} // Placeholder
+                        imageUrl={tItem.image || "/assets/Avatar ByeWind.png"}
+                        isVerified={true}
+                        isFavorite={favorites.includes(tItem.id)}
+                        onFavorite={toggleFavorite}
+                      />
+                    );
+                  })
+                ) : (
+                  <div className="col-span-full flex flex-col items-center justify-center py-20 text-slate-400 bg-white rounded-xl border border-slate-100 shadow-sm">
+                    <Search className="w-12 h-12 mb-4 text-slate-300" />
+                    <p className="text-lg font-medium text-slate-500 mb-1">Aucun talent trouvé</p>
+                    <p className="text-sm">Nous n'avons pas trouvé de talents correspondant à votre recherche.</p>
+                  </div>
+                )}
               </div>
 
               {/* Pagination */}
@@ -633,6 +633,9 @@ export default function RecruteurDashboard() {
           {activeTab === "emplois" && (
             <EmploisTab />
           )}
+
+          {/* TAB: TRANSACTIONS */}
+          {activeTab === "transactions" && <TransactionsTab />}
 
           {/* TAB: FAVORIS */}
           {activeTab === "favoris" && (

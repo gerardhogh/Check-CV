@@ -23,6 +23,9 @@ import {
   Bookmark,
 } from "lucide-react";
 import { ConfirmModal, SuccessModal } from "./Modals";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,147 +50,11 @@ interface Emploi {
 
 const MOCK_COMPETENCES = ["JavaScript", "Vue.js", "React", "Node.js", "Python", "Figma", "SQL", "TypeScript"];
 
-const MOCK_EMPLOIS: Emploi[] = [
-  {
-    id: 1,
-    titre: "Développeur Front-end",
-    entreprise: "Grand-G",
-    lieu: "Cotonou, Bénin",
-    pays: "Bénin",
-    ville: "Cotonou",
-    typeEmploi: "CDI",
-    modeTravail: "Temps plein",
-    taille: "1-10 employés",
-    competences: ["JavaScript", "Vue.js", "React"],
-    description: "Nous recherchons un Développeur Front-end talentueux pour rejoindre notre équipe dynamique à San Francisco. En tant que membre clé de notre équipe de développement, vous contribuerez à la création de solutions web innovantes pour nos clients.\n\nVous travaillerez sur des projets passionnants, collaborerez avec des professionnels talentueux et contribuerez au succès continu de notre entreprise.",
-    candidatures: 5,
-    datePublication: "15/01/2025",
-    status: "Active",
-  },
-  {
-    id: 2,
-    titre: "Designer UI/UX",
-    entreprise: "CreativX Studio",
-    lieu: "Abidjan, Côte d'Ivoire",
-    pays: "Côte d'Ivoire",
-    ville: "Abidjan",
-    typeEmploi: "CDD",
-    modeTravail: "Temps plein",
-    taille: "10-50 employés",
-    competences: ["Figma", "Adobe XD"],
-    description: "Nous cherchons un designer UI/UX passionné pour améliorer l'expérience utilisateur de nos produits digitaux.\n\nVous travaillerez en étroite collaboration avec nos équipes produit et développement pour créer des interfaces intuitives et esthétiques.",
-    candidatures: 18,
-    datePublication: "08/09/2024",
-    status: "Active",
-  },
-  {
-    id: 3,
-    titre: "Chef de Projet Digital",
-    entreprise: "DigitGroup",
-    lieu: "Dakar, Sénégal",
-    pays: "Sénégal",
-    ville: "Dakar",
-    typeEmploi: "CDI",
-    modeTravail: "Temps plein",
-    taille: "50-200 employés",
-    competences: ["Gestion de projet", "Agile", "Scrum"],
-    description: "Nous recherchons un Chef de Projet Digital expérimenté pour piloter nos initiatives numériques et coordonner nos équipes pluridisciplinaires.\n\nVous serez responsable de la planification, de l'exécution et de la livraison des projets dans les délais et budgets impartis.",
-    candidatures: 31,
-    datePublication: "05/09/2024",
-    status: "Active",
-  },
-  {
-    id: 4,
-    titre: "Data Analyst",
-    entreprise: "DataBenin",
-    lieu: "Cotonou, Bénin",
-    pays: "Bénin",
-    ville: "Cotonou",
-    typeEmploi: "Stage",
-    modeTravail: "Temps partiel",
-    taille: "1-10 employés",
-    competences: ["Python", "SQL", "Excel"],
-    description: "Stage en analyse de données pour rejoindre notre équipe Analytics. Vous analyserez des jeux de données complexes et produirez des rapports et visualisations pour aider la prise de décision.",
-    candidatures: 12,
-    datePublication: "01/09/2024",
-    status: "Inactive",
-  },
-  {
-    id: 5,
-    titre: "Responsable Marketing",
-    entreprise: "MarketPro",
-    lieu: "Lomé, Togo",
-    pays: "Togo",
-    ville: "Lomé",
-    typeEmploi: "CDI",
-    modeTravail: "Temps plein",
-    taille: "10-50 employés",
-    competences: ["Marketing Digital", "SEO", "Google Ads"],
-    description: "Nous cherchons un Responsable Marketing créatif et orienté résultats pour développer et exécuter nos stratégies marketing.\n\nVous gérerez les campagnes digitales, le contenu, et coordonnerez avec les agences partenaires.",
-    candidatures: 9,
-    datePublication: "28/08/2024",
-    status: "Active",
-  },
-  {
-    id: 6,
-    titre: "Développeur Backend Node.js",
-    entreprise: "TechAfrique",
-    lieu: "Cotonou, Bénin",
-    pays: "Bénin",
-    ville: "Cotonou",
-    typeEmploi: "Freelance",
-    modeTravail: "Temps partiel",
-    taille: "1-10 employés",
-    competences: ["Node.js", "TypeScript", "MongoDB"],
-    description: "Mission freelance pour développer et maintenir des APIs RESTful robustes pour notre plateforme SaaS. Vous travaillerez en remote avec une équipe distribuée.",
-    candidatures: 7,
-    datePublication: "24/08/2024",
-    status: "Inactive",
-  },
-  {
-    id: 7,
-    titre: "Community Manager",
-    entreprise: "SocialHub Africa",
-    lieu: "Abidjan, Côte d'Ivoire",
-    pays: "Côte d'Ivoire",
-    ville: "Abidjan",
-    typeEmploi: "CDI",
-    modeTravail: "Temps plein",
-    taille: "10-50 employés",
-    competences: ["Réseaux sociaux", "Copywriting", "Canva"],
-    description: "Nous recrutons un Community Manager dynamique pour animer nos communautés en ligne et renforcer notre présence sur les réseaux sociaux.\n\nVous créerez du contenu engageant, gérerez les interactions et analyserez les performances.",
-    candidatures: 15,
-    datePublication: "20/08/2024",
-    status: "Active",
-  },
-  {
-    id: 8,
-    titre: "Comptable Senior",
-    entreprise: "FinanceGroup",
-    lieu: "Cotonou, Bénin",
-    pays: "Bénin",
-    ville: "Cotonou",
-    typeEmploi: "CDI",
-    modeTravail: "Temps plein",
-    taille: "50-200 employés",
-    competences: ["Comptabilité", "OHADA", "Sage"],
-    description: "Nous recherchons un Comptable Senior rigoureux pour gérer la comptabilité générale et analytique de notre groupe.\n\nVous superviserez les clôtures mensuelles, la déclaration fiscale et le reporting financier.",
-    candidatures: 22,
-    datePublication: "15/08/2024",
-    status: "Active",
-  },
-];
+const MOCK_EMPLOIS: Emploi[] = [];
 
 // ─── Mock candidates ──────────────────────────────────────────────────────────
 
-const MOCK_CANDIDATES = Array.from({ length: 9 }, (_, i) => ({
-  id: i + 1,
-  nom: "Alicia PARKER",
-  localisation: "Cotonou, Bénin",
-  profession: "Designer web",
-  certifie: i % 3 === 1,
-  avatar: "/assets/candidate-alicia-parker.jpg",
-}));
+const MOCK_CANDIDATES: any[] = [];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -253,8 +120,13 @@ function PublierModal({ onClose, onPublish }: PublierModalProps) {
   const [modeTravail, setModeTravail] = useState("Temps plein");
   const [description, setDescription] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    await fetch("/api/jobs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ titre, entreprise, pays, ville, typeEmploi, modeTravail, description, lieu: `${ville}, ${pays}` })
+    });
     onPublish({ titre, entreprise, pays, ville, typeEmploi, modeTravail, description, lieu: `${ville}, ${pays}` });
     onClose();
   };
@@ -366,7 +238,7 @@ function DetailOffreView({ emploi, onBack, onModifier, onSupprimer, onCloturer }
         <ChevronRight size={12} />
         <button onClick={onBack} className="hover:text-[#32A8D7] transition-colors">Offres d&apos;emplois</button>
         <ChevronRight size={12} />
-        <span className="text-slate-700 font-medium truncate max-w-[180px]">{emploi.titre}</span>
+        <span className="text-slate-700 font-medium truncate max-w-[180px]">{emploi.titre || (emploi as any).title}</span>
       </nav>
 
       {/* Info card */}
@@ -374,14 +246,14 @@ function DetailOffreView({ emploi, onBack, onModifier, onSupprimer, onCloturer }
         <div className="flex items-start justify-between gap-4 mb-3">
           <div>
             <p className="text-xs text-slate-400 mb-1">
-              Publié le : <span className="font-semibold">{emploi.datePublication}</span>
+              Publié le : <span className="font-semibold">{emploi.datePublication || (emploi as any).createdAt ? new Date((emploi as any).createdAt).toLocaleDateString("fr-FR") : "Récent"}</span>
               &nbsp;·&nbsp;
-              <span className="font-bold text-slate-700">{emploi.candidatures} candidats</span>
+              <span className="font-bold text-slate-700">{emploi.candidatures || 0} candidats</span>
             </p>
-            <h2 className="text-2xl font-extrabold text-[#32A8D7]">{emploi.titre}</h2>
+            <h2 className="text-2xl font-extrabold text-[#32A8D7]">{emploi.titre || (emploi as any).title}</h2>
             <p className="text-sm text-slate-700 mt-0.5">
-              <span className="font-semibold">Entreprise :</span> {emploi.entreprise}&nbsp;&nbsp;
-              <span className="font-semibold">– Localisation :</span> {emploi.lieu}
+              <span className="font-semibold">Entreprise :</span> {emploi.entreprise || (emploi as any).recruiter?.companyName}&nbsp;&nbsp;
+              <span className="font-semibold">– Localisation :</span> {emploi.lieu || (emploi as any).location}
             </p>
           </div>
           <button className="p-2.5 rounded-xl border border-slate-200 text-slate-400 hover:text-[#32A8D7] hover:border-[#32A8D7] transition-colors shrink-0">
@@ -390,26 +262,26 @@ function DetailOffreView({ emploi, onBack, onModifier, onSupprimer, onCloturer }
         </div>
 
         <div className="mt-3 space-y-1 text-sm text-slate-600">
-          <p>{emploi.modeTravail}</p>
-          <p>{emploi.taille}</p>
-          <p>Type de Contrat : {emploi.typeEmploi} (Contrat à Durée Indéterminée)</p>
+          <p>{emploi.modeTravail || "Non précisé"}</p>
+          <p>{emploi.taille || "Non précisé"}</p>
+          <p>Type de Contrat : {emploi.typeEmploi || (emploi as any).contractType} (Contrat à Durée Indéterminée)</p>
           <p>
-            Compétences : {emploi.competences.slice(0, 3).join(", ")}
-            {emploi.competences.length > 3 && ` et ${emploi.competences.length - 3} en plus`}
+            Compétences : {(emploi.competences || []).slice(0, 3).join(", ")}
+            {(emploi.competences || []).length > 3 && ` et ${(emploi.competences || []).length - 3} en plus`}
           </p>
         </div>
 
         <div className="flex items-center justify-between mt-5">
           <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-            emploi.status === "Active" ? "bg-amber-50 text-amber-600 border border-amber-200" : "bg-slate-100 text-slate-500"
+            (emploi.status === "Active" || emploi.status === "PUBLISHED") ? "bg-amber-50 text-amber-600 border border-amber-200" : "bg-slate-100 text-slate-500"
           }`}>
-            {emploi.status === "Active" ? (
+            {(emploi.status === "Active" || emploi.status === "PUBLISHED") ? (
               <><span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />Offre en cours</>
             ) : (
               <><Clock size={11} />Offre clôturée</>
             )}
           </span>
-          {emploi.status === "Active" && (
+          {(emploi.status === "Active" || emploi.status === "PUBLISHED") && (
             <button
               onClick={onCloturer}
               className="px-4 py-2 bg-[#32A8D7] hover:bg-[#2896c2] text-white text-sm font-semibold rounded-xl transition-colors"
@@ -432,11 +304,19 @@ function DetailOffreView({ emploi, onBack, onModifier, onSupprimer, onCloturer }
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
         <h3 className="text-base font-bold text-[#32A8D7] mb-1">Candidats postulés</h3>
         <p className="text-sm text-slate-500 mb-5">{emploi.candidatures} candidatures reçues</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {MOCK_CANDIDATES.map((c) => (
-            <CandidateCard key={c.id} c={c} />
-          ))}
-        </div>
+        {MOCK_CANDIDATES.length === 0 ? (
+          <div className="text-center py-8">
+            <Users size={32} className="text-slate-300 mx-auto mb-3" />
+            <p className="text-sm font-medium text-slate-600">Aucun candidat</p>
+            <p className="text-xs text-slate-400">Aucun talent n'a encore postulé à cette offre.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {MOCK_CANDIDATES.map((c) => (
+              <CandidateCard key={c.id} c={c} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Footer actions */}
@@ -467,13 +347,13 @@ interface ModifierOffreViewProps {
 }
 
 function ModifierOffreView({ emploi, onBack, onSave }: ModifierOffreViewProps) {
-  const [titre, setTitre] = useState(emploi.titre);
-  const [entreprise, setEntreprise] = useState(emploi.entreprise);
-  const [pays, setPays] = useState(emploi.pays);
-  const [ville, setVille] = useState(emploi.ville);
-  const [typeEmploi, setTypeEmploi] = useState(emploi.typeEmploi);
-  const [modeTravail, setModeTravail] = useState(emploi.modeTravail);
-  const [description, setDescription] = useState(emploi.description);
+  const [titre, setTitre] = useState(emploi.titre || (emploi as any).title);
+  const [entreprise, setEntreprise] = useState(emploi.entreprise || (emploi as any).recruiter?.companyName);
+  const [pays, setPays] = useState(emploi.pays || "Bénin");
+  const [ville, setVille] = useState(emploi.ville || (emploi as any).location?.split(',')[0]);
+  const [typeEmploi, setTypeEmploi] = useState(emploi.typeEmploi || (emploi as any).contractType);
+  const [modeTravail, setModeTravail] = useState(emploi.modeTravail || "Temps plein");
+  const [description, setDescription] = useState(emploi.description || (emploi as any).description);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -572,7 +452,8 @@ function ModifierOffreView({ emploi, onBack, onSave }: ModifierOffreViewProps) {
 type EmploisView = "grid" | "detail" | "modifier";
 
 export default function EmploisTab() {
-  const [emplois, setEmplois] = useState<Emploi[]>(MOCK_EMPLOIS);
+  const { data: emploisFetched = [], error, mutate } = useSWR("/api/jobs", fetcher);
+  const emplois = emploisFetched; // Assure la compatibilité avec le reste du code
   const [view, setView] = useState<EmploisView>("grid");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -593,31 +474,17 @@ export default function EmploisTab() {
   };
 
   const handlePublish = (data: Partial<Emploi>) => {
-    const newEmploi: Emploi = {
-      id: Date.now(),
-      titre: data.titre || "Nouveau poste",
-      entreprise: data.entreprise || "Mon entreprise",
-      lieu: data.lieu || "Cotonou, Bénin",
-      pays: data.pays || "Bénin",
-      ville: data.ville || "Cotonou",
-      typeEmploi: data.typeEmploi || "CDI",
-      modeTravail: data.modeTravail || "Temps plein",
-      taille: "1-10 employés",
-      competences: [],
-      description: data.description || "",
-      candidatures: 0,
-      datePublication: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
-      status: "Active",
-    };
-    const newId = newEmploi.id;
-    setEmplois((prev) => [newEmploi, ...prev]);
-    setJustPublishedId(newId);
+    // La route POST a déjà été appelée dans PublierModal
+    // On refetch simplement la liste des offres
+    mutate();
+    setJustPublishedId(Date.now()); // Fallback since we don't have the new ID without returning it properly yet
     setShowPublishedSuccess(true);
   };
 
   // Confirmed delete
   const confirmDelete = (id: number) => {
-    setEmplois(emplois.filter((e) => e.id !== id));
+    // Ici appeler DELETE /api/jobs/:id plus tard
+    mutate();
     setConfirmDeleteId(null);
     showToast("Offre supprimée.");
     if (view === "detail" || view === "modifier") {
@@ -628,23 +495,26 @@ export default function EmploisTab() {
 
   // Confirmed cloture
   const confirmCloturer = (id: number) => {
-    setEmplois(emplois.map((e) => (e.id === id ? { ...e, status: "Inactive" } : e)));
+    // Ici appeler PATCH /api/jobs/:id plus tard
+    mutate();
     setConfirmCloturerId(null);
     showToast("Offre clôturée.");
   };
 
   const handleSaveModification = (updated: Emploi) => {
-    setEmplois(emplois.map((e) => (e.id === updated.id ? updated : e)));
+    // Ici appeler PUT /api/jobs/:id plus tard
+    mutate();
     showToast("Offre mise à jour !");
     setView("detail");
   };
 
   const toggleStatus = (id: number) => {
-    const emp = emplois.find((e) => e.id === id);
-    if (emp?.status === "Active") {
+    const emp = emplois.find((e: any) => e.id === id);
+    if (emp?.status === "PUBLISHED" || emp?.status === "Active") {
       setConfirmCloturerId(id);
     } else {
-      setEmplois(emplois.map((e) => (e.id === id ? { ...e, status: "Active" } : e)));
+      // Toggle
+      mutate();
       showToast("Offre réactivée.");
     }
     setOpenMenuId(null);
@@ -777,78 +647,96 @@ export default function EmploisTab() {
           </div>
 
           {/* Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {emplois.map((emploi) => (
-              <div
-                key={emploi.id}
-                className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all flex flex-col"
-              >
-                {/* Card header */}
-                <div className="p-4 pb-3 flex items-start justify-between">
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                    emploi.status === "Active" ? "bg-green-50 text-green-600" : "bg-slate-100 text-slate-500"
-                  }`}>
-                    {emploi.status === "Active" ? <CheckCircle2 size={10} /> : <Clock size={10} />}
-                    {emploi.status}
-                  </span>
-
-                  {/* More menu */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setOpenMenuId(openMenuId === emploi.id ? null : emploi.id)}
-                      className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      <MoreHorizontal size={16} />
-                    </button>
-                    {openMenuId === emploi.id && (
-                      <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-20">
-                        <button onClick={() => toggleStatus(emploi.id)} className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2">
-                          {emploi.status === "Active" ? <Clock size={13} /> : <CheckCircle2 size={13} />}
-                          {emploi.status === "Active" ? "Clôturer l'offre" : "Réactiver l'offre"}
-                        </button>
-                        <button onClick={() => openDetail(emploi.id)} className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2">
-                          <Eye size={13} /> Voir détail
-                        </button>
-                        <button onClick={() => { setConfirmDeleteId(emploi.id); setOpenMenuId(null); }} className="w-full text-left px-3.5 py-2 text-xs font-medium text-red-500 hover:bg-red-50 flex items-center gap-2">
-                          <Trash2 size={13} /> Supprimer
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Card body */}
-                <div className="px-4 pb-4 flex-1">
-                  <h3 className="font-bold text-slate-900 text-sm leading-snug mb-0.5">{emploi.titre}</h3>
-                  <p className="text-xs text-slate-500 font-medium">{emploi.entreprise}</p>
-                  <div className="mt-3 space-y-1.5">
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                      <MapPin size={11} className="shrink-0" /><span>{emploi.lieu}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                      <Briefcase size={11} className="shrink-0" /><span>{emploi.typeEmploi}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                      <Users size={11} className="shrink-0" /><span>{emploi.candidatures} candidature{emploi.candidatures !== 1 ? "s" : ""}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                      <Calendar size={11} className="shrink-0" /><span>{emploi.datePublication}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card footer */}
-                <div className="px-4 pb-4">
-                  <button
-                    onClick={() => openDetail(emploi.id)}
-                    className="w-full py-2.5 rounded-xl bg-[#f0f9ff] hover:bg-[#e0f3fc] text-[#0071a2] text-xs font-semibold border border-sky-100 hover:border-sky-200 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Eye size={13} /> Voir détail
-                  </button>
-                </div>
+          {emplois.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
+              <div className="flex flex-col items-center justify-center">
+                <Briefcase size={48} className="text-slate-300 mb-4" />
+                <h3 className="text-lg font-bold text-slate-700 mb-2">Aucune offre publiée</h3>
+                <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">
+                  Vous n'avez pas encore publié d'offres d'emploi. Publiez votre première offre pour commencer à recevoir des candidatures.
+                </p>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-[#32A8D7] hover:bg-[#2896c2] text-white rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition-all"
+                >
+                  <Plus size={16} /> Publier une offre
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {emplois.map((emploi) => (
+                <div
+                  key={emploi.id}
+                  className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all flex flex-col"
+                >
+                  {/* Card header */}
+                  <div className="p-4 pb-3 flex items-start justify-between">
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                      (emploi.status === "Active" || emploi.status === "PUBLISHED") ? "bg-green-50 text-green-600" : "bg-slate-100 text-slate-500"
+                    }`}>
+                      {(emploi.status === "Active" || emploi.status === "PUBLISHED") ? <CheckCircle2 size={10} /> : <Clock size={10} />}
+                      {emploi.status === "PUBLISHED" ? "Active" : emploi.status}
+                    </span>
+
+                    {/* More menu */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setOpenMenuId(openMenuId === emploi.id ? null : emploi.id)}
+                        className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        <MoreHorizontal size={16} />
+                      </button>
+                      {openMenuId === emploi.id && (
+                        <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-20">
+                          <button onClick={() => toggleStatus(emploi.id)} className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                            {emploi.status === "Active" ? <Clock size={13} /> : <CheckCircle2 size={13} />}
+                            {emploi.status === "Active" ? "Clôturer l'offre" : "Réactiver l'offre"}
+                          </button>
+                          <button onClick={() => openDetail(emploi.id)} className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                            <Eye size={13} /> Voir détail
+                          </button>
+                          <button onClick={() => { setConfirmDeleteId(emploi.id); setOpenMenuId(null); }} className="w-full text-left px-3.5 py-2 text-xs font-medium text-red-500 hover:bg-red-50 flex items-center gap-2">
+                            <Trash2 size={13} /> Supprimer
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card body */}
+                  <div className="px-4 pb-4 flex-1">
+                    <h3 className="font-bold text-slate-900 text-sm leading-snug mb-0.5">{emploi.titre || (emploi as any).title}</h3>
+                    <p className="text-xs text-slate-500 font-medium">{emploi.entreprise || (emploi as any).recruiter?.companyName}</p>
+                    <div className="mt-3 space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                        <MapPin size={11} className="shrink-0" /><span>{emploi.lieu || (emploi as any).location}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                        <Briefcase size={11} className="shrink-0" /><span>{emploi.typeEmploi || (emploi as any).contractType}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                        <Users size={11} className="shrink-0" /><span>{emploi.candidatures || 0} candidature{emploi.candidatures !== 1 ? "s" : ""}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                        <Calendar size={11} className="shrink-0" /><span>{emploi.datePublication || new Date((emploi as any).createdAt).toLocaleDateString("fr-FR")}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card footer */}
+                  <div className="px-4 pb-4">
+                    <button
+                      onClick={() => openDetail(emploi.id)}
+                      className="w-full py-2.5 rounded-xl bg-[#f0f9ff] hover:bg-[#e0f3fc] text-[#0071a2] text-xs font-semibold border border-sky-100 hover:border-sky-200 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Eye size={13} /> Voir détail
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

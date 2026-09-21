@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import {
   Eye,
   EyeOff,
@@ -16,14 +17,14 @@ import {
   AlertCircle,
   FileCheck,
 } from "lucide-react";
-import { useAuth, UserRole } from "../context/AuthContext";
 import GoogleAuthModal from "../components/GoogleAuthModal";
 import Navbar from "../components/Navbar";
+
+type UserRole = "talent" | "recruteur" | "admin";
 
 function InscriptionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { register, loginWithGoogle } = useAuth();
 
   const defaultRole: UserRole =
     searchParams.get("type") === "recruteur" ? "recruteur" : "talent";
@@ -56,8 +57,8 @@ function InscriptionForm() {
       setError("Veuillez renseigner votre adresse e-mail.");
       return;
     }
-    if (!password.trim() || password.length < 6) {
-      setError("Le mot de passe doit comporter au moins 6 caractères.");
+    if (!password.trim() || password.length < 8) {
+      setError("Le mot de passe doit comporter au moins 8 caractères.");
       return;
     }
     if (!acceptTerms) {
@@ -67,23 +68,48 @@ function InscriptionForm() {
 
     setIsLoading(true);
     try {
-      const ok = await register({
-        name,
-        email,
-        role,
-        phone,
-        company: role === "recruteur" ? name : undefined,
+      const roleName = role === "recruteur" ? "RECRUTEUR" : "TALENT";
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          roleName,
+        }),
       });
-      if (ok) {
-        if (role === "recruteur") {
-          router.push("/dashboard/recruteur");
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.errors) {
+          // Flatten the zod errors
+          const errorMsg = Object.values(data.errors).flat().join(", ");
+          setError(errorMsg || data.message);
         } else {
-          router.push("/dashboard/talent");
+          setError(data.message || "Erreur lors de la création de compte.");
         }
+        setIsLoading(false);
+        return;
+      }
+
+      // Automatically sign in after register
+      await signIn("credentials", {
+        email: email.trim(),
+        password,
+        redirect: false,
+      });
+
+      if (role === "recruteur") {
+        router.push("/dashboard/recruteur");
+      } else {
+        router.push("/dashboard/talent");
       }
     } catch (err) {
       setError("Erreur lors de la création de compte. Veuillez réessayer.");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -91,12 +117,7 @@ function InscriptionForm() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      const success = await loginWithGoogle(role);
-      if (success) {
-        if (role === "admin") router.push("/dashboard/admin");
-        else if (role === "recruteur") router.push("/dashboard/recruteur");
-        else router.push("/dashboard/talent");
-      }
+      await signIn("google");
     } catch (e) {
       console.error(e);
     } finally {

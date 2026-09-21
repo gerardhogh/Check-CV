@@ -67,8 +67,8 @@ export default function RechercheProfil() {
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
-          <h1 className="text-xl font-normal text-slate-800">
-            Recherche <span className="font-bold">profil</span>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
+            Recherche <span className="text-[#32A8D7]">profil</span>
           </h1>
 
           {/* Navigation Dropdown Menu */}
@@ -184,8 +184,6 @@ export default function RechercheProfil() {
               isVerified={talent.isVerified}
               isFavorite={favorites.includes(talent.id)}
               onFavorite={toggleFavorite}
-              onSendEmail={() => showToast(`Envoi d'un mail à ${talent.name}`)}
-              onViewProfile={() => showToast(`Consultation du profil de ${talent.name}`)}
             />
           ))}
         </div>

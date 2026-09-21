@@ -143,7 +143,15 @@ export default function CandidatProfilDetail({
 
             <button
               type="button"
-              onClick={() => onSendEmail ? onSendEmail(email, name) : showNotification(`Email adressé à ${name}`)}
+              onClick={() => {
+                if (onSendEmail) {
+                  onSendEmail(email, name);
+                } else {
+                  const subject = encodeURIComponent(`Contact Candidat ${name}`);
+                  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}`;
+                  window.open(gmailUrl, "_blank", "noopener,noreferrer");
+                }
+              }}
               className="w-full py-2.5 px-4 text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors shadow-xs"
             >
               Envoyer un mail
