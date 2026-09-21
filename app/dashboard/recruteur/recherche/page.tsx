@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -14,21 +14,34 @@ import {
 } from "lucide-react";
 import TalentCard from "@/app/components/TalentCard";
 
-// Mock Data reproducing Figma
-const MOCK_TALENTS = Array.from({ length: 16 }).map((_, i) => ({
-  id: `alicia_${i}`,
-  name: "Alicia PARKER",
-  location: "Cotonou, Bénin",
-  profession: "Designer web",
-  imageUrl: "/assets/candidate-alicia-parker.jpg",
-  isVerified: true,
-}));
+// No MOCK_TALENTS anymore
 
 export default function RechercheProfil() {
-  const [searchQuery, setSearchQuery] = useState("graphisme");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  
+  const [talents, setTalents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchTalents = async (q = "") => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/talents?q=${q}`);
+      const data = await res.json();
+      if (res.ok) setTalents(data);
+    } catch (e) {
+      console.error(e);
+      showToast("Erreur lors de la récupération des talents.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTalents();
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -135,7 +148,10 @@ export default function RechercheProfil() {
             {searchQuery && (
               <button 
                 type="button"
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  setSearchQuery("");
+                  fetchTalents("");
+                }}
                 className="p-1 hover:bg-slate-100 rounded-md text-slate-400 transition-colors"
                 aria-label="Effacer"
               >
@@ -145,6 +161,7 @@ export default function RechercheProfil() {
           </div>
           <button 
             type="button"
+            onClick={() => fetchTalents(searchQuery)}
             className="px-6 py-2.5 bg-[#32A8D7] hover:bg-[#2896c2] text-white rounded-md text-sm font-semibold transition-colors shadow-xs hover:shadow"
           >
             Rechercher
@@ -172,21 +189,49 @@ export default function RechercheProfil() {
         </div>
 
         {/* Talent Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
-          {MOCK_TALENTS.map((talent) => (
-            <TalentCard 
-              key={talent.id}
-              id={talent.id}
-              name={talent.name}
-              location={talent.location}
-              profession={talent.profession}
-              imageUrl={talent.imageUrl}
-              isVerified={talent.isVerified}
-              isFavorite={favorites.includes(talent.id)}
-              onFavorite={toggleFavorite}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center p-12">
+            <p className="text-slate-500 font-medium">Recherche en cours...</p>
+          </div>
+        ) : talents.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center my-6">
+            <div className="flex flex-col items-center justify-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                <Search size={32} className="text-slate-300" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Aucun talent trouvé</h3>
+              <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">
+                Nous n'avons trouvé aucun profil correspondant à vos critères de recherche.
+                Essayez d'élargir votre recherche en modifiant les mots-clés ou les filtres.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  fetchTalents("");
+                }}
+                className="px-5 py-2.5 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-sm font-semibold transition-all"
+              >
+                Réinitialiser la recherche
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+            {talents.map((talent) => (
+              <TalentCard 
+                key={talent.id}
+                id={talent.id}
+                name={talent.name}
+                location={talent.location}
+                profession={talent.profession}
+                imageUrl={talent.imageUrl}
+                isVerified={talent.isVerified}
+                isFavorite={favorites.includes(talent.id)}
+                onFavorite={toggleFavorite}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Pagination */}
         <div className="mt-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6">
