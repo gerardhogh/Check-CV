@@ -5,8 +5,6 @@ import useSWR from "swr";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "../../context/AuthContext";
-
-const fetcher = (url: string) => fetch(url).then(res => res.json());
 import {
   Menu,
   Bell,
@@ -41,6 +39,8 @@ import ParametresTab from "./components/ParametresTab";
 import ProfilTab from "./components/ProfilTab";
 import TransactionsTab from "./components/TransactionsTab";
 import { LogoutModal } from "./components/Modals";
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type RecruiterTab =
@@ -98,7 +98,7 @@ export default function RecruteurDashboard() {
   // Notifications
   const [notifications, setNotifications] = useState<any[]>([]);
 
-  const companyName = user?.company || "Grand-G Corp";
+  const companyName = (user as any)?.company || user?.name || "Grand-G Corp";
   const companyEmail = user?.email || "recruteur@grand-g.com";
   const unreadCount = notifications.filter((n) => !n.read).length;
 
