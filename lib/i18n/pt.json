@@ -1,0 +1,98 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "nav": {
+    "home": "Início",
+    "searchTalents": "Buscar talentos",
+    "applications": "Candidaturas",
+    "myJobs": "Meus empregos",
+    "favorites": "Favoritos",
+    "affiliation": "Afiliação",
+    "settings": "Configurações",
+    "myProfile": "Meu perfil",
+    "logout": "Sair"
+  },
+  "settings": {
+    "title": "Configurações",
+    "language": "Idioma da plataforma",
+    "languageUpdated": "Idioma atualizado",
+    "notifications": "Preferências de notificações",
+    "emailNotif": "Notificações por e-mail",
+    "emailNotifDesc": "Receba atualizações por e-mail",
+    "smsNotif": "Notificações por SMS",
+    "smsNotifDesc": "Receba alertas por SMS",
+    "changePassword": "Alterar senha",
+    "currentPassword": "Senha atual",
+    "newPassword": "Nova senha",
+    "confirmPassword": "Confirmar nova senha",
+    "updatePassword": "Atualizar senha",
+    "dangerZone": "Zona de perigo",
+    "deactivateDesc": "A desativação da sua conta é irreversível. Todas as suas ofertas, candidaturas e dados associados serão excluídos permanentemente.",
+    "deactivateBtn": "Desativar minha conta"
+  },
+  "profile": {
+    "title": "Meu perfil",
+    "companyName": "Nome da empresa",
+    "sector": "Setor de atividade",
+    "email": "E-mail de contato",
+    "phone": "Telefone",
+    "website": "Site",
+    "address": "Endereço",
+    "description": "Descrição da empresa",
+    "skills": "Competências-chave",
+    "updateProfile": "Atualizar perfil",
+    "saveInfo": "Salvar informações",
+    "information": "Informações",
+    "networks": "Redes"
+  },
+  "jobs": {
+    "title": "Meus empregos",
+    "postJob": "Publicar vaga",
+    "viewDetail": "Ver detalhes",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "close": "Encerrar",
+    "activate": "Reativar",
+    "active": "Ativo",
+    "inactive": "Inativo"
+  },
+  "modals": {
+    "logout": {
+      "title": "Sair",
+      "message": "Você está prestes a sair",
+      "confirm": "Sair",
+      "cancel": "Cancelar"
+    },
+    "deleteJob": {
+      "title": "Confirmar exclusão",
+      "message": "Tem certeza de que deseja excluir esta vaga?",
+      "confirm": "Sim, excluir",
+      "cancel": "Não, continuar"
+    },
+    "closeJob": {
+      "title": "Confirmar encerramento",
+      "message": "Tem certeza de que deseja encerrar esta vaga?",
+      "confirm": "Sim, encerrar",
+      "cancel": "Não, continuar"
+    },
+    "jobPublished": {
+      "title": "Vaga publicada",
+      "message": "Sua vaga foi publicada com sucesso",
+      "view": "Ver a vaga",
+      "back": "Voltar"
+    },
+    "deactivate": {
+      "title": "Confirmar desativação",
+      "message": "Por favor, selecione o motivo da sua desativação:",
+      "confirm": "Desativar minha conta",
+      "cancel": "Cancelar"
+    }
+  }
+}

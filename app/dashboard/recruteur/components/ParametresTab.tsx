@@ -13,9 +13,12 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { DeactivateModal } from "./Modals";
-
+import { useLang, LOCALES } from "../../../context/LangContext";
 
 export default function ParametresTab() {
+  // i18n
+  const { locale, setLocale, t } = useLang();
+
   // Notifications
   const [emailNotif, setEmailNotif] = useState(true);
   const [smsNotif, setSmsNotif] = useState(false);
@@ -28,9 +31,6 @@ export default function ParametresTab() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Language
-  const [language, setLanguage] = useState("Français");
-
   // Deactivate
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
 
@@ -41,6 +41,7 @@ export default function ParametresTab() {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 3000);
   };
+
 
   const handleSavePassword = (e: React.FormEvent) => {
     e.preventDefault();
@@ -233,46 +234,52 @@ export default function ParametresTab() {
         </form>
       </div>
 
-      {/* ── Language ───────────────────────────────────────────────────────────── */}
+      {/* ── Language ─────────────────────────────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
         <div className="flex items-center gap-2.5 mb-5">
           <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center">
             <Globe size={15} className="text-indigo-600" />
           </div>
-          <h3 className="font-bold text-slate-900 text-sm">Langue de la plateforme</h3>
+          <h3 className="font-bold text-slate-900 text-sm">{t("settings", "language")}</h3>
         </div>
 
         <div className="relative">
           <select
-            value={language}
-            onChange={(e) => { setLanguage(e.target.value); showToast(`Langue changée en ${e.target.value}`); }}
+            value={locale}
+            onChange={(e) => {
+              const newLocale = e.target.value as typeof locale;
+              setLocale(newLocale);
+              const label = LOCALES.find((l) => l.code === newLocale)?.label ?? newLocale;
+              showToast(`${t("settings", "languageUpdated")} : ${label}`);
+            }}
             className="w-full appearance-none px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 font-medium outline-none focus:border-[#32A8D7] focus:bg-white transition-colors cursor-pointer"
           >
-            <option>Français</option>
-            <option>English</option>
-            <option>Español</option>
-            <option>Português</option>
+            {LOCALES.map(({ code, label, flag }) => (
+              <option key={code} value={code}>
+                {flag} {label}
+              </option>
+            ))}
           </select>
           <ChevronDown size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         </div>
       </div>
 
-      {/* ── Deactivate account ─────────────────────────────────────────────────── */}
+      {/* ── Deactivate account ───────────────────────────────────────────── */}
       <div className="bg-red-50 rounded-2xl border border-red-100 p-6">
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
             <AlertTriangle size={15} className="text-red-500" />
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-red-700 text-sm mb-1">Zone dangereuse</h3>
+            <h3 className="font-bold text-red-700 text-sm mb-1">{t("settings", "dangerZone")}</h3>
             <p className="text-xs text-red-500 leading-relaxed mb-4">
-              La désactivation de votre compte est irréversible. Toutes vos offres, candidatures et données associées seront définitivement supprimées.
+              {t("settings", "deactivateDesc")}
             </p>
             <button
               onClick={() => setShowDeactivateModal(true)}
               className="px-5 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold shadow-sm transition-colors"
             >
-              Désactiver mon compte
+              {t("settings", "deactivateBtn")}
             </button>
           </div>
         </div>

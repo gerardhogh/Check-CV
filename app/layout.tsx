@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from "./context/AuthContext";
+import { LangProvider } from "./context/LangContext";
 
 export default function RootLayout({
   children,
@@ -31,8 +32,11 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <LangProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </LangProvider>
       </body>
     </html>
   );
 }
+

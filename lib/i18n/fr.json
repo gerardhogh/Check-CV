@@ -1,0 +1,98 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "nav": {
+    "home": "Accueil",
+    "searchTalents": "Recherche talents",
+    "applications": "Candidatures",
+    "myJobs": "Mes emplois",
+    "favorites": "Favoris",
+    "affiliation": "Affiliation",
+    "settings": "Paramètres",
+    "myProfile": "Mon profil",
+    "logout": "Déconnexion"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue de la plateforme",
+    "languageUpdated": "Langue mise à jour",
+    "notifications": "Préférences de notifications",
+    "emailNotif": "Notifications par email",
+    "emailNotifDesc": "Recevez des mises à jour par email",
+    "smsNotif": "Notifications par SMS",
+    "smsNotifDesc": "Recevez des alertes par SMS",
+    "changePassword": "Changer le mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "updatePassword": "Mettre à jour le mot de passe",
+    "dangerZone": "Zone dangereuse",
+    "deactivateDesc": "La désactivation de votre compte est irréversible. Toutes vos offres, candidatures et données associées seront définitivement supprimées.",
+    "deactivateBtn": "Désactiver mon compte"
+  },
+  "profile": {
+    "title": "Mon profil",
+    "companyName": "Nom de l'entreprise",
+    "sector": "Secteur d'activité",
+    "email": "Email de contact",
+    "phone": "Téléphone",
+    "website": "Site web",
+    "address": "Adresse",
+    "description": "Description de l'entreprise",
+    "skills": "Compétences clés",
+    "updateProfile": "Mettre à jour le profil",
+    "saveInfo": "Enregistrer les informations",
+    "information": "Informations",
+    "networks": "Réseaux"
+  },
+  "jobs": {
+    "title": "Mes emplois",
+    "postJob": "Publier une offre",
+    "viewDetail": "Voir détail",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "close": "Clôturer",
+    "activate": "Réactiver",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "modals": {
+    "logout": {
+      "title": "Déconnexion",
+      "message": "Vous êtes sur le point de vous déconnecter",
+      "confirm": "Se déconnecter",
+      "cancel": "Annuler"
+    },
+    "deleteJob": {
+      "title": "Confirmer la suppression",
+      "message": "Êtes-vous sûr de vouloir supprimer cette offre ?",
+      "confirm": "Oui, supprimer",
+      "cancel": "Non, continuer"
+    },
+    "closeJob": {
+      "title": "Confirmer la clôture",
+      "message": "Êtes-vous sûr de vouloir clôturer cette offre ?",
+      "confirm": "Oui, clôturer",
+      "cancel": "Non, continuer"
+    },
+    "jobPublished": {
+      "title": "Offre publiée",
+      "message": "Votre offre a été publiée avec succès",
+      "view": "Voir l'offre",
+      "back": "Retour"
+    },
+    "deactivate": {
+      "title": "Confirmer la désactivation",
+      "message": "Veuillez sélectionner la raison de votre désactivation :",
+      "confirm": "Désactiver mon compte",
+      "cancel": "Annuler"
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "home": "Home",
+    "searchTalents": "Search talents",
+    "applications": "Applications",
+    "myJobs": "My jobs",
+    "favorites": "Favorites",
+    "affiliation": "Affiliation",
+    "settings": "Settings",
+    "myProfile": "My profile",
+    "logout": "Sign out"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Platform language",
+    "languageUpdated": "Language updated",
+    "notifications": "Notification preferences",
+    "emailNotif": "Email notifications",
+    "emailNotifDesc": "Receive updates by email",
+    "smsNotif": "SMS notifications",
+    "smsNotifDesc": "Receive alerts by SMS",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "updatePassword": "Update password",
+    "dangerZone": "Danger zone",
+    "deactivateDesc": "Deactivating your account is irreversible. All your job offers, applications and associated data will be permanently deleted.",
+    "deactivateBtn": "Deactivate my account"
+  },
+  "profile": {
+    "title": "My profile",
+    "companyName": "Company name",
+    "sector": "Industry",
+    "email": "Contact email",
+    "phone": "Phone",
+    "website": "Website",
+    "address": "Address",
+    "description": "Company description",
+    "skills": "Key skills",
+    "updateProfile": "Update profile",
+    "saveInfo": "Save information",
+    "information": "Information",
+    "networks": "Networks"
+  },
+  "jobs": {
+    "title": "My jobs",
+    "postJob": "Post a job",
+    "viewDetail": "View details",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "activate": "Reactivate",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "modals": {
+    "logout": {
+      "title": "Sign out",
+      "message": "You are about to sign out",
+      "confirm": "Sign out",
+      "cancel": "Cancel"
+    },
+    "deleteJob": {
+      "title": "Confirm deletion",
+      "message": "Are you sure you want to delete this job offer?",
+      "confirm": "Yes, delete",
+      "cancel": "No, continue"
+    },
+    "closeJob": {
+      "title": "Confirm closing",
+      "message": "Are you sure you want to close this job offer?",
+      "confirm": "Yes, close",
+      "cancel": "No, continue"
+    },
+    "jobPublished": {
+      "title": "Job published",
+      "message": "Your job offer has been successfully published",
+      "view": "View the offer",
+      "back": "Back"
+    },
+    "deactivate": {
+      "title": "Confirm deactivation",
+      "message": "Please select the reason for your deactivation:",
+      "confirm": "Deactivate my account",
+      "cancel": "Cancel"
+    }
+  }
+}
