@@ -24,6 +24,7 @@ import {
   LayoutDashboard,
   FileText,
   Gift,
+  User,
 } from "lucide-react";
 import TalentCard from "@/app/components/TalentCard";
 import CandidaturesTab from "./components/CandidaturesTab";
@@ -31,6 +32,8 @@ import EmploisTab from "./components/EmploisTab";
 import FavorisTab from "./components/FavorisTab";
 import AffiliationTab from "./components/AffiliationTab";
 import ParametresTab from "./components/ParametresTab";
+import ProfilTab from "./components/ProfilTab";
+import { LogoutModal } from "./components/Modals";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type RecruiterTab =
@@ -40,7 +43,8 @@ type RecruiterTab =
   | "emplois"
   | "favoris"
   | "affiliation"
-  | "parametres";
+  | "parametres"
+  | "profil";
 
 // ─── Mock Data ─────────────────────────────────────────────────────────────────
 const MOCK_TALENTS = Array.from({ length: 16 }).map((_, i) => ({
@@ -61,6 +65,7 @@ export default function RecruteurDashboard() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -127,6 +132,7 @@ export default function RecruteurDashboard() {
   ];
 
   return (
+    <>
     <div className="flex min-h-screen bg-slate-50 text-slate-800 font-sans">
 
       {/* ── Toast ─────────────────────────────────────────────────────────────── */}
@@ -199,7 +205,7 @@ export default function RecruteurDashboard() {
         {/* Logout */}
         <div className="p-4 border-t border-slate-100 shrink-0">
           <button
-            onClick={logout}
+            onClick={() => { setSidebarOpen(false); setIsLogoutModalOpen(true); }}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
           >
             <LogOut size={18} />
@@ -328,10 +334,10 @@ export default function RecruteurDashboard() {
                     <p className="text-[11px] text-slate-400 truncate">{companyEmail}</p>
                   </div>
                   <button
-                    onClick={() => { setActiveTab("emplois"); setProfileMenuOpen(false); }}
+                    onClick={() => { setActiveTab("profil"); setProfileMenuOpen(false); }}
                     className="w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 font-medium flex items-center gap-2"
                   >
-                    <Briefcase size={14} /> Mes Emplois
+                    <User size={14} /> Mon profil
                   </button>
                   <button
                     onClick={() => { setActiveTab("parametres"); setProfileMenuOpen(false); }}
@@ -340,7 +346,7 @@ export default function RecruteurDashboard() {
                     <Settings size={14} /> Paramètres
                   </button>
                   <button
-                    onClick={logout}
+                    onClick={() => { setProfileMenuOpen(false); setIsLogoutModalOpen(true); }}
                     className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100 mt-1 flex items-center gap-2"
                   >
                     <LogOut size={14} /> Déconnexion
@@ -593,9 +599,7 @@ export default function RecruteurDashboard() {
 
           {/* TAB: EMPLOIS */}
           {activeTab === "emplois" && (
-            <EmploisTab
-              onViewDetail={(id) => showToast(`Détail de l'offre #${id}`)}
-            />
+            <EmploisTab />
           )}
 
           {/* TAB: FAVORIS */}
@@ -612,8 +616,20 @@ export default function RecruteurDashboard() {
           {/* TAB: PARAMETRES */}
           {activeTab === "parametres" && <ParametresTab />}
 
+          {/* TAB: PROFIL */}
+          {activeTab === "profil" && <ProfilTab />}
+
         </main>
       </div>
     </div>
+
+    {/* ── LOGOUT MODAL ─────────────────────────────────────────────────────── */}
+    {isLogoutModalOpen && (
+      <LogoutModal
+        onCancel={() => setIsLogoutModalOpen(false)}
+        onConfirm={() => { setIsLogoutModalOpen(false); logout(); }}
+      />
+    )}
+    </>
   );
 }

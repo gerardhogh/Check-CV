@@ -11,64 +11,9 @@ import {
   ChevronDown,
   AlertTriangle,
   CheckCircle,
-  X,
 } from "lucide-react";
+import { DeactivateModal } from "./Modals";
 
-interface DeactivateModalProps {
-  onClose: () => void;
-  onConfirm: () => void;
-}
-
-function DeactivateModal({ onClose, onConfirm }: DeactivateModalProps) {
-  const [confirmText, setConfirmText] = useState("");
-  const canConfirm = confirmText === "DÉSACTIVER";
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="flex items-start gap-4 p-6 border-b border-slate-100">
-          <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-            <AlertTriangle size={18} className="text-red-500" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-slate-900">Désactiver le compte</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Cette action est irréversible. Toutes vos données seront perdues.</p>
-          </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 ml-auto">
-            <X size={16} />
-          </button>
-        </div>
-        <div className="p-6 space-y-4">
-          <p className="text-sm text-slate-600 leading-relaxed">
-            Pour confirmer la désactivation, veuillez saisir <span className="font-bold text-red-500">DÉSACTIVER</span> dans le champ ci-dessous :
-          </p>
-          <input
-            type="text"
-            value={confirmText}
-            onChange={(e) => setConfirmText(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 outline-none focus:border-red-400 focus:bg-white transition-colors"
-            placeholder="Tapez DÉSACTIVER pour confirmer"
-          />
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
-            >
-              Annuler
-            </button>
-            <button
-              onClick={onConfirm}
-              disabled={!canConfirm}
-              className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold shadow-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Désactiver
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function ParametresTab() {
   // Notifications
@@ -124,7 +69,7 @@ export default function ParametresTab() {
       {/* Deactivate modal */}
       {showDeactivateModal && (
         <DeactivateModal
-          onClose={() => setShowDeactivateModal(false)}
+          onCancel={() => setShowDeactivateModal(false)}
           onConfirm={() => { setShowDeactivateModal(false); showToast("Compte désactivé. Au revoir !"); }}
         />
       )}
