@@ -1,25 +1,59 @@
 "use client";
-import React, { useState } from "react";
-import { Search } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, Mail, Eye, Edit, Trash2 } from "lucide-react";
 import { RecruteurDetails } from "../components/RecruteurDetails";
 
 const mockRecruteurs: any[] = [];
 
 export default function AdminRecruteurs() {
   const [search, setSearch] = useState("");
+  const [recruteurs, setRecruteurs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedRecruteur, setSelectedRecruteur] = useState<any>(null);
 
-  const filtered = mockRecruteurs.filter(r =>
-    r.name.toLowerCase().includes(search.toLowerCase()) ||
+  useEffect(() => {
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(data => {
+        if (!Array.isArray(data)) {
+          setRecruteurs([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Filter those with recruiterProfile or role name "Recruteur"
+        const recs = data.filter((u: any) => u.recruiterProfile || u.role?.name === "Recruteur");
+        
+        const formatted = recs.map((r: any, index: number) => ({
+          id: r.id,
+          no: (index + 1).toString().padStart(2, '0'),
+          name: r.recruiterProfile?.companyName || r.name || "Entreprise",
+          offresPubliees: r.recruiterProfile?.jobOffers?.length || 0,
+          email: r.email || "",
+          contact: r.recruiterProfile?.phone || r.phone || "Non spécifié",
+          candidats: r.recruiterProfile?.jobOffers?.reduce((acc: number, job: any) => acc + (job.applications?.length || 0), 0) || 0,
+          abonnement: "Standard",
+          date: new Date(r.createdAt).toLocaleDateString("fr-FR"),
+          status: r.active ? "Actif" : "Suspendu"
+        }));
+        
+        setRecruteurs(formatted);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const filtered = recruteurs.filter(r => 
+    r.name.toLowerCase().includes(search.toLowerCase()) || 
     r.email.toLowerCase().includes(search.toLowerCase())
   );
 
   const stats = {
-    total: mockRecruteurs.length,
-    actifs: mockRecruteurs.filter(r => r.status === "Actif").length,
-    attente: mockRecruteurs.filter(r => r.status === "En attente").length,
-    suspendus: mockRecruteurs.filter(r => r.status === "Suspendu").length,
-    supprimes: 0 // removed mock value
+    total: recruteurs.length,
+    actifs: recruteurs.filter(r => r.status === "Actif").length,
+    attente: recruteurs.filter(r => r.status === "En attente").length,
+    suspendus: recruteurs.filter(r => r.status === "Suspendu").length,
+    supprimes: 0
   };
 
   if (selectedRecruteur) {
@@ -68,7 +102,9 @@ export default function AdminRecruteurs() {
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-        {filtered.length > 0 ? (
+        {loading ? (
+          <div className="p-8 text-center text-slate-500">Chargement des recruteurs...</div>
+        ) : filtered.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="bg-[#f4f9fd] border-b border-slate-100">

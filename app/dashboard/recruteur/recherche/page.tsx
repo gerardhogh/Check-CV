@@ -18,6 +18,11 @@ import TalentCard from "@/app/components/TalentCard";
 
 export default function RechercheProfil() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterDegree, setFilterDegree] = useState("");
+  const [filterGender, setFilterGender] = useState("");
+  const [filterCountry, setFilterCountry] = useState("");
+  const [filterCity, setFilterCity] = useState("");
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -25,10 +30,23 @@ export default function RechercheProfil() {
   const [talents, setTalents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchTalents = async (q = "") => {
+  const fetchTalents = async (
+    q = searchQuery, 
+    d = filterDegree, 
+    g = filterGender, 
+    c = filterCountry, 
+    cy = filterCity
+  ) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/talents?q=${q}`);
+      const params = new URLSearchParams();
+      if (q) params.append("q", q);
+      if (d && !d.startsWith("Toutes")) params.append("degree", d);
+      if (g && !g.startsWith("Tous")) params.append("gender", g);
+      if (c && !c.startsWith("Tous")) params.append("country", c);
+      if (cy && !cy.startsWith("Toutes")) params.append("city", cy);
+
+      const res = await fetch(`/api/talents?${params.toString()}`);
       const data = await res.json();
       if (res.ok) setTalents(data);
     } catch (e) {
@@ -161,7 +179,7 @@ export default function RechercheProfil() {
           </div>
           <button 
             type="button"
-            onClick={() => fetchTalents(searchQuery)}
+            onClick={() => fetchTalents()}
             className="px-6 py-2.5 bg-[#32A8D7] hover:bg-[#2896c2] text-white rounded-md text-sm font-semibold transition-colors shadow-xs hover:shadow"
           >
             Rechercher
@@ -170,22 +188,73 @@ export default function RechercheProfil() {
 
         {/* Filters */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          {[
-            { label: "License", options: ["Toutes les licenses", "Licence Pro", "Master / Ingénieur", "Doctorat", "Certifié Check CV"] },
-            { label: "Genre", options: ["Tous les genres", "Femme", "Homme"] },
-            { label: "Pays", options: ["Tous les pays", "Bénin", "Côte d'Ivoire", "Sénégal", "Togo", "Cameroun", "France"] },
-            { label: "Ville", options: ["Toutes les villes", "Cotonou", "Porto-Novo", "Abidjan", "Dakar", "Lomé", "Douala", "Paris"] },
-          ].map((filter) => (
-            <div key={filter.label} className="relative">
-              <select className="w-full appearance-none bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 rounded-md py-2.5 pl-4 pr-9 text-sm font-medium text-slate-700 outline-hidden hover:border-slate-300 focus:border-[#32A8D7] focus:bg-white cursor-pointer transition-colors">
-                <option value="">{filter.label}</option>
-                {filter.options.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          ))}
+          <div className="relative">
+            <select 
+              value={filterDegree} 
+              onChange={(e) => {
+                setFilterDegree(e.target.value);
+                fetchTalents(searchQuery, e.target.value, filterGender, filterCountry, filterCity);
+              }}
+              className="w-full appearance-none bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 rounded-md py-2.5 pl-4 pr-9 text-sm font-medium text-slate-700 outline-hidden hover:border-slate-300 focus:border-[#32A8D7] focus:bg-white cursor-pointer transition-colors"
+            >
+              <option value="">Toutes les licenses</option>
+              {["Licence Pro", "Master / Ingénieur", "Doctorat", "Certifié Check CV"].map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          <div className="relative">
+            <select 
+              value={filterGender} 
+              onChange={(e) => {
+                setFilterGender(e.target.value);
+                fetchTalents(searchQuery, filterDegree, e.target.value, filterCountry, filterCity);
+              }}
+              className="w-full appearance-none bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 rounded-md py-2.5 pl-4 pr-9 text-sm font-medium text-slate-700 outline-hidden hover:border-slate-300 focus:border-[#32A8D7] focus:bg-white cursor-pointer transition-colors"
+            >
+              <option value="">Tous les genres</option>
+              {["Femme", "Homme"].map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          <div className="relative">
+            <select 
+              value={filterCountry} 
+              onChange={(e) => {
+                setFilterCountry(e.target.value);
+                fetchTalents(searchQuery, filterDegree, filterGender, e.target.value, filterCity);
+              }}
+              className="w-full appearance-none bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 rounded-md py-2.5 pl-4 pr-9 text-sm font-medium text-slate-700 outline-hidden hover:border-slate-300 focus:border-[#32A8D7] focus:bg-white cursor-pointer transition-colors"
+            >
+              <option value="">Tous les pays</option>
+              {["Bénin", "Côte d'Ivoire", "Sénégal", "Togo", "Cameroun", "France"].map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          <div className="relative">
+            <select 
+              value={filterCity} 
+              onChange={(e) => {
+                setFilterCity(e.target.value);
+                fetchTalents(searchQuery, filterDegree, filterGender, filterCountry, e.target.value);
+              }}
+              className="w-full appearance-none bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 rounded-md py-2.5 pl-4 pr-9 text-sm font-medium text-slate-700 outline-hidden hover:border-slate-300 focus:border-[#32A8D7] focus:bg-white cursor-pointer transition-colors"
+            >
+              <option value="">Toutes les villes</option>
+              {["Cotonou", "Porto-Novo", "Abidjan", "Dakar", "Lomé", "Douala", "Paris"].map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
         </div>
 
         {/* Talent Grid */}
@@ -207,7 +276,11 @@ export default function RechercheProfil() {
               <button
                 onClick={() => {
                   setSearchQuery("");
-                  fetchTalents("");
+                  setFilterDegree("");
+                  setFilterGender("");
+                  setFilterCountry("");
+                  setFilterCity("");
+                  fetchTalents("", "", "", "", "");
                 }}
                 className="px-5 py-2.5 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-sm font-semibold transition-all"
               >

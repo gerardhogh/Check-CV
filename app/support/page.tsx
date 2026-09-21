@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useState } from "react";
 import { Plus, Minus, Search, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+
 import Link from "next/link";
 
 export default function SupportPage() {
@@ -17,19 +17,19 @@ export default function SupportPage() {
   };
 
   const talentFaqs = [
-    { q: "Comment fonctionne le test vidéo IA ?", a: "Une fois votre CV téléversé, vous pouvez passer une simulation d'entretien de 3 questions générées par l'IA en fonction de votre domaine. L'IA évalue la clarté de votre communication et la structure de vos réponses pour vous attribuer un badge et des étoiles sur votre profil." },
-    { q: "Pourquoi l'abonnement est-il payant (700 FCFA/mois) ?", a: "Cet abonnement symbolique permet d'assurer un niveau d'engagement élevé de la part des candidats, d'entretenir les serveurs d'analyse IA et de garantir aux recruteurs un accès exclusif à une base de profils vérifiés et motivés." },
+    { q: "Comment fonctionne le test vidéo IA ?", a: "Une fois votre CV téléversé, vous pouvez passer une simulation d&apos;entretien de 3 questions générées par l&apos;IA en fonction de votre domaine. L&apos;IA évalue la clarté de votre communication et la structure de vos réponses pour vous attribuer un badge et des étoiles sur votre profil." },
+    { q: "Pourquoi l&apos;abonnement est-il payant (700 FCFA/mois) ?", a: "Cet abonnement symbolique permet d&apos;assurer un niveau d&apos;engagement élevé de la part des candidats, d&apos;entretenir les serveurs d&apos;analyse IA et de garantir aux recruteurs un accès exclusif à une base de profils vérifiés et motivés." },
     { q: "Comment sont attribués les badges et les étoiles ?", a: "Les étoiles reflètent la complétude de votre profil et la qualité globale de vos réponses lors du test vidéo IA. Les badges certifient la véracité des informations de votre CV après modération." },
   ];
 
   const recruteurFaqs = [
     { q: "Comment sont vérifiés les profils des talents ?", a: "Chaque candidat passe par une double étape : une modération automatique pour vérifier la lisibilité du CV et une évaluation via le test vidéo IA. Les profils certifiés garantissent que les compétences orales et le parcours sont valides." },
-    { q: "Puis-je visionner les prestations vidéo avant d'échanger avec un candidat ?", a: "Oui, en tant que recruteur abonné, vous avez un accès illimité aux séquences vidéo des tests IA afin d'évaluer le savoir-être et la communication orale de chaque candidat avant de planifier un entretien." },
+    { q: "Puis-je visionner les prestations vidéo avant d&apos;échanger avec un candidat ?", a: "Oui, en tant que recruteur abonné, vous avez un accès illimité aux séquences vidéo des tests IA afin d&apos;évaluer le savoir-être et la communication orale de chaque candidat avant de planifier un entretien." },
   ];
 
   const techniqueFaqs = [
     { q: "Quels sont les modes de paiement acceptés ?", a: "Nous acceptons les paiements par Mobile Money (MTN MoMo, Moov Money, Wave, Orange Money selon le pays) et par carte bancaire (Visa, Mastercard)." },
-    { q: "Que faire si mon navigateur ne détecte pas ma caméra pour le test vidéo ?", a: "Assurez-vous d'avoir autorisé l'accès à la caméra et au microphone dans les paramètres de votre navigateur (Chrome, Safari ou Edge). Si le problème persiste, videz le cache ou tentez l'enregistrement depuis notre application mobile/navigateur smartphone." },
+    { q: "Que faire si mon navigateur ne détecte pas ma caméra pour le test vidéo ?", a: "Assurez-vous d&apos;avoir autorisé l&apos;accès à la caméra et au microphone dans les paramètres de votre navigateur (Chrome, Safari ou Edge). Si le problème persiste, videz le cache ou tentez l&apos;enregistrement depuis notre application mobile/navigateur smartphone." },
   ];
 
   const faqsToDisplay = activeFaqTab === "talents" ? talentFaqs : activeFaqTab === "recruteurs" ? recruteurFaqs : techniqueFaqs;
@@ -71,7 +71,7 @@ export default function SupportPage() {
               ].map(tab => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveFaqTab(tab.id as any)}
+                  onClick={() => setActiveFaqTab(tab.id as "talents" | "recruteurs" | "technique")}
                   className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${
                     activeFaqTab === tab.id
                       ? "bg-blue-600 text-white shadow-md"
@@ -110,7 +110,7 @@ export default function SupportPage() {
               })
             ) : (
               <div className="text-center py-12 text-slate-500">
-                Aucun résultat trouvé pour "{searchQuery}".
+                Aucun résultat trouvé pour &quot;{searchQuery}&quot;.
               </div>
             )}
           </div>
@@ -130,9 +130,9 @@ export default function SupportPage() {
         {/* CTA Contact */}
         <section className="py-12 px-6 mb-12">
           <div className="max-w-4xl mx-auto rounded-3xl p-10 md:p-14 text-center shadow-xl border border-blue-100 bg-white bg-gradient-to-br from-white to-blue-50/50">
-            <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-4">Vous n'avez pas trouvé votre réponse ?</h2>
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-4">Vous n&apos;avez pas trouvé votre réponse ?</h2>
             <p className="text-slate-600 mb-8 max-w-lg mx-auto">
-              Notre équipe d'assistance est à votre disposition pour répondre à toutes vos questions complémentaires.
+              Notre équipe d&apos;assistance est à votre disposition pour répondre à toutes vos questions complémentaires.
             </p>
             <Link
               href="/contact"

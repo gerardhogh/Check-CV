@@ -1,28 +1,56 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Search, PlusCircle, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 
-const mockToutesOffres: any[] = [];
-
-const mockMesOffres: any[] = [];
-
 export default function AdminEmplois() {
   const [activeTab, setActiveTab] = useState("Toutes les offres");
   const [search, setSearch] = useState("");
+  const [offres, setOffres] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredToutesOffres = mockToutesOffres.filter(o => 
+  useEffect(() => {
+    fetch('/api/jobs')
+      .then(res => res.json())
+      .then(data => {
+        if (!Array.isArray(data)) {
+          setOffres([]);
+          setLoading(false);
+          return;
+        }
+        const formatted = data.map((j: any) => ({
+          id: j.id.substring(0, 8),
+          rawId: j.id,
+          titre: j.title,
+          entreprise: j.recruiter?.companyName || "Entreprise Inconnue",
+          date: new Date(j.createdAt).toLocaleDateString("fr-FR"),
+          contrat: j.contractType || "Non spécifié",
+          localisation: j.location || "Non spécifié",
+          candidatures: 0,
+          status: j.status === "PUBLISHED" ? "Actif" : (j.status === "CLOSED" ? "Suspendu" : "En attente"),
+          isAdminCreated: false,
+          candidats: 0
+        }));
+        setOffres(formatted);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const filteredToutesOffres = offres.filter(o => 
     o.titre.toLowerCase().includes(search.toLowerCase()) || 
     o.entreprise.toLowerCase().includes(search.toLowerCase())
   );
 
+  const mockMesOffres = offres.filter(o => o.isAdminCreated);
+
   const stats = {
-    total: mockToutesOffres.length,
-    actifs: mockToutesOffres.filter(o => o.status === "Actif").length,
-    attente: mockToutesOffres.filter(o => o.status === "En attente").length,
-    suspendus: mockToutesOffres.filter(o => o.status === "Suspendu").length,
-    supprimes: 0 // removed mock value
+    total: offres.length,
+    actifs: offres.filter(o => o.status === "Actif").length,
+    attente: offres.filter(o => o.status === "En attente").length,
+    suspendus: offres.filter(o => o.status === "Suspendu").length,
+    supprimes: 0
   };
 
   return (
@@ -86,7 +114,9 @@ export default function AdminEmplois() {
 
           {/* Table */}
           <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-            {filteredToutesOffres.length > 0 ? (
+            {loading ? (
+              <div className="p-8 text-center text-slate-500">Chargement des offres...</div>
+            ) : filteredToutesOffres.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-[#f4f9fd] border-b border-slate-100">

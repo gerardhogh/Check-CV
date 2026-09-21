@@ -10,16 +10,16 @@ export async function GET(request: Request) {
     const country = searchParams.get('country') || '';
     const city = searchParams.get('city') || '';
 
+    const filters: any = { isNot: null };
+    if (degree) filters.degree = degree;
+    if (gender) filters.gender = gender;
+    if (country) filters.country = country;
+    if (city) filters.city = city;
+
     // Return users that have a TalentProfile
     const talents = await prisma.user.findMany({
       where: {
-        talentProfile: {
-          isNot: null,
-          ...(degree ? { degree } : {}),
-          ...(gender ? { gender } : {}),
-          ...(country ? { country } : {}),
-          ...(city ? { city } : {})
-        },
+        talentProfile: filters,
         ...(query ? {
           OR: [
             { name: { contains: query, mode: 'insensitive' } },
@@ -36,10 +36,19 @@ export async function GET(request: Request) {
       }
     });
 
-    const formattedTalents = talents.map(t => ({
+    const formattedTalents = talents.map((t: any, index) => ({
       id: t.id,
+      no: (index + 1).toString().padStart(2, '0'),
       name: t.name || "Talent Anonyme",
-      location: "Non spécifié", // Placeholder since location isn't in schema yet
+      email: t.email || "",
+      contact: t.talentProfile?.phone || "Non spécifié",
+      date: new Date(t.createdAt).toLocaleDateString('fr-FR'),
+      status: t.active ? "Actif" : "Suspendu",
+      videoOk: !!t.talentProfile?.videoUrl,
+      domaine: t.talentProfile?.degree || "Général",
+      location: (t.talentProfile?.city && t.talentProfile?.country) 
+        ? `${t.talentProfile.city}, ${t.talentProfile.country}` 
+        : (t.talentProfile?.city || t.talentProfile?.country || "Non spécifié"),
       profession: t.talentProfile?.bio?.substring(0, 30) || "Talent", 
       imageUrl: t.image || "/assets/candidate-alicia-parker.jpg",
       isVerified: true,

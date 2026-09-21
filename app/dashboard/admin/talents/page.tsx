@@ -1,25 +1,35 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { TalentDetails } from "../components/TalentDetails";
-
-const mockTalents: any[] = [];
 
 export default function AdminTalents() {
   const [search, setSearch] = useState("");
   const [selectedTalent, setSelectedTalent] = useState<any>(null);
 
-  const filtered = mockTalents.filter(t =>
+  const [talents, setTalents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/talents')
+      .then(res => res.json())
+      .then(data => {
+        setTalents(data);
+        setLoading(false);
+      });
+  }, []);
+
+  const filtered = talents.filter(t =>
     t.name.toLowerCase().includes(search.toLowerCase()) ||
     t.email.toLowerCase().includes(search.toLowerCase())
   );
 
   const stats = {
-    total: mockTalents.length,
-    actifs: mockTalents.filter(t => t.status === "Actif").length,
-    attente: mockTalents.filter(t => t.status === "En attente").length,
-    suspendus: mockTalents.filter(t => t.status === "Suspendu").length,
-    supprimes: 0 // removed mock value
+    total: talents.length,
+    actifs: talents.filter(t => t.status === "Actif").length,
+    attente: talents.filter(t => t.status === "En attente").length,
+    suspendus: talents.filter(t => t.status === "Suspendu").length,
+    supprimes: 0
   };
 
   if (selectedTalent) {
@@ -68,7 +78,9 @@ export default function AdminTalents() {
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-        {filtered.length > 0 ? (
+        {loading ? (
+          <div className="p-8 text-center text-slate-500">Chargement des talents...</div>
+        ) : filtered.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="bg-slate-50/50 border-b border-slate-100">
@@ -98,8 +110,7 @@ export default function AdminTalents() {
                     <td className="px-5 py-4 text-slate-500 whitespace-nowrap">{t.date}</td>
                     <td className="px-5 py-4 text-slate-700">{t.location}</td>
                     <td className="px-5 py-4 whitespace-nowrap">
-                      <span className="font-bold text-slate-800">{t.contact.substring(0, 4)}</span>
-                      <span className="text-slate-600">{t.contact.substring(4)}</span>
+                      <span className="font-bold text-slate-800">{t.contact}</span>
                     </td>
                     <td className="px-5 py-4">
                       <a href={`mailto:${t.email}`} className="text-[#32A8D7] hover:underline">{t.email}</a>

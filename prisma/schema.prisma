@@ -222,14 +222,15 @@ model InterviewSession {
 // ==========================================
 
 model Transaction {
-  id          String   @id @default(cuid())
-  amount      Float
-  currency    String   @default("EUR")
-  status      String   @default("PENDING") // SUCCESS, FAILED, PENDING
-  type        String   // SUBSCRIPTION, ONE_TIME
+  id            String   @id @default(cuid())
+  amount        Float
+  currency      String   @default("EUR")
+  status        String   @default("PENDING") // SUCCESS, FAILED, PENDING
+  type          String   // SUBSCRIPTION, ONE_TIME
+  paymentMethod String   @default("Carte Bancaire") // Carte Bancaire, Mobile Money, etc.
   
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  createdAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
 }

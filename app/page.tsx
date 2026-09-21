@@ -20,7 +20,7 @@ export default function HomePage() {
   const talentFaqs = [
     {
       q: "1. Est-ce que la plateforme est gratuite ?",
-      a: "L'accès aux fonctionnalités clés nécessite un petit abonnement de 700 FCFA/mois pour les talents afin de garantir la qualité des profils certifiés.",
+      a: "L&apos;accès aux fonctionnalités clés nécessite un petit abonnement de 700 FCFA/mois pour les talents afin de garantir la qualité des profils certifiés.",
     },
     {
       q: "2. Comment mon CV est-il évalué ?",
@@ -32,7 +32,7 @@ export default function HomePage() {
     },
     {
       q: "4. Le test vidéo est-il obligatoire ?",
-      a: "Il n'est pas obligatoire mais vivement recommandé car les profils avec vidéo certifiée sont 3 fois plus consultés par les recruteurs.",
+      a: "Il n&apos;est pas obligatoire mais vivement recommandé car les profils avec vidéo certifiée sont 3 fois plus consultés par les recruteurs.",
     },
     {
       q: "5. Puis-je refaire le test vidéo ?",
@@ -50,15 +50,15 @@ export default function HomePage() {
       a: "Après création de votre compte recruteur, accédez instantanément à notre vivier de talents avec filtres multicritères.",
     },
     {
-      q: "8. Puis-je poster des offres d'emploi ?",
-      a: "Oui, vous pouvez publier vos offres d'emploi gratuitement et recevoir des candidatures qualifiées directement sur votre tableau de bord.",
+      q: "8. Puis-je poster des offres d&apos;emploi ?",
+      a: "Oui, vous pouvez publier vos offres d&apos;emploi gratuitement et recevoir des candidatures qualifiées directement sur votre tableau de bord.",
     },
     {
       q: "9. Comment est vérifiée la qualité des profils ?",
       a: "Chaque talent passe une vérification automatisée de CV et un entretien vidéo avec scoring IA transparent.",
     },
     {
-      q: "10. Est-ce qu'il y a un coût pour les recruteurs ?",
+      q: "10. Est-ce qu&apos;il y a un coût pour les recruteurs ?",
       a: "Check CV propose une version gratuite pour démarrer, et un plan mensuel à 1 000 FCFA/mois pour des recherches et téléchargements illimités.",
     },
   ];
@@ -313,7 +313,7 @@ export default function HomePage() {
           <p className="text-slate-600 text-base sm:text-lg max-w-3xl mx-auto mb-12 leading-relaxed">
             Vous connecter aux meilleures opportunités, valoriser votre parcours
             professionnel, améliorer votre carrière et décrocher encore plus
-            d'opportunités.
+            d&apos;opportunités.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
@@ -326,7 +326,7 @@ export default function HomePage() {
             <div className="bg-white/80 backdrop-blur-md rounded-3xl py-8 px-6 shadow-xl border border-white/80">
               <p className="text-4xl font-black text-blue-600 mb-2">+10 000</p>
               <p className="text-sm font-semibold text-slate-600">
-                CV analysés par l'IA
+                CV analysés par l&apos;IA
               </p>
             </div>
             <div className="bg-white/80 backdrop-blur-md rounded-3xl py-8 px-6 shadow-xl border border-white/80">
@@ -420,7 +420,7 @@ export default function HomePage() {
                     iconBg: "bg-amber-100",
                     iconColor: "#F59E0B",
                     title: "Obtiens ta certification",
-                    desc: "L'IA note ta prestation et t'attribue un badge et des étoiles visibles.",
+                    desc: "L&apos;IA note ta prestation et t&apos;attribue un badge et des étoiles visibles.",
                     align: "left",
                   },
                   {
@@ -435,8 +435,8 @@ export default function HomePage() {
                     num: "06",
                     iconBg: "bg-amber-100",
                     iconColor: "#F59E0B",
-                    title: "Gagne avec l'affiliation",
-                    desc: "Partage ton code et reçois des bonus quand tes filleuls s'inscrivent.",
+                    title: "Gagne avec l&apos;affiliation",
+                    desc: "Partage ton code et reçois des bonus quand tes filleuls s&apos;inscrivent.",
                     align: "left",
                   },
                 ]
@@ -470,15 +470,15 @@ export default function HomePage() {
                     iconBg: "bg-amber-100",
                     iconColor: "#F59E0B",
                     title: "Contactez directement les talents ou publiez une offre",
-                    desc: "Entrez en contact avec les talents qui correspondent à vos critères ou publiez une nouvelle offre d'emploi.",
+                    desc: "Entrez en contact avec les talents qui correspondent à vos critères ou publiez une nouvelle offre d&apos;emploi.",
                     align: "left",
                   },
                   {
                     num: "05",
                     iconBg: "bg-purple-100",
                     iconColor: "#A855F7",
-                    title: "Gagnez avec l'affiliation",
-                    desc: "Partagez votre code et recevez des bonus quand vos filleuls s'inscrivent.",
+                    title: "Gagnez avec l&apos;affiliation",
+                    desc: "Partagez votre code et recevez des bonus quand vos filleuls s&apos;inscrivent.",
                     align: "right",
                   },
                 ]
@@ -631,7 +631,7 @@ export default function HomePage() {
               Rejoignez la révolution du recrutement
             </h2>
             <p className="text-slate-600 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
-              Que vous soyez à la recherche d'un emploi ou d'un profil qualifié,
+              Que vous soyez à la recherche d&apos;un emploi ou d&apos;un profil qualifié,
               Check CV est la solution.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

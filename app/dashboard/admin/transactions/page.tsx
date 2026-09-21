@@ -1,16 +1,76 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, ChevronDown } from "lucide-react";
 
-const mockTransactions: any[] = [];
+interface UserData {
+  name: string | null;
+  role: { name: string } | null;
+}
+
+interface TransactionData {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  type: string;
+  paymentMethod: string;
+  createdAt: string;
+  user: UserData;
+}
 
 export default function AdminTransactions() {
   const [search, setSearch] = useState("");
+  const [transactions, setTransactions] = useState<TransactionData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredTx = mockTransactions.filter(t => 
-    t.user.toLowerCase().includes(search.toLowerCase()) || 
-    t.ref.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('/api/transactions');
+        if (response.ok) {
+          const data = await response.json();
+          setTransactions(data.transactions || []);
+        } else {
+          console.error("Erreur lors de la récupération des transactions");
+        }
+      } catch (error) {
+        console.error("Erreur réseau:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  const getStatusInFrench = (status: string) => {
+    switch(status) {
+      case "SUCCESS": return "Réussie";
+      case "FAILED": return "Échouée";
+      case "PENDING": return "En attente";
+      default: return status;
+    }
+  };
+
+  const getTypeInFrench = (type: string) => {
+    if (type === "SUBSCRIPTION") return "Abonnement";
+    if (type === "ONE_TIME") return "Achat unique";
+    return type;
+  };
+
+  const filteredTx = transactions.filter(t => {
+    const userName = t.user?.name || "Inconnu";
+    return userName.toLowerCase().includes(search.toLowerCase()) || 
+           t.id.toLowerCase().includes(search.toLowerCase());
+  });
+
+  // Calculate metrics
+  const totalRevenue = transactions
+    .filter(t => t.status === "SUCCESS")
+    .reduce((sum, t) => sum + t.amount, 0);
+  const totalTx = transactions.length;
+  const successTx = transactions.filter(t => t.status === "SUCCESS").length;
+  const pendingTx = transactions.filter(t => t.status === "PENDING").length;
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -20,7 +80,7 @@ export default function AdminTransactions() {
         {/* Card 1 */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-40">
           <p className="text-[#1e4869] text-sm">Chiffre d'affaires</p>
-          <p className="text-3xl font-bold text-[#0c2f4a]">0 CFA</p>
+          <p className="text-3xl font-bold text-[#0c2f4a]">{totalRevenue.toLocaleString()} CFA</p>
           <button className="w-full py-2 bg-[#51B7E6] text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity">
             Voir tout
           </button>
@@ -29,7 +89,7 @@ export default function AdminTransactions() {
         {/* Card 2 */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-40">
           <p className="text-[#1e4869] text-sm">Transactions</p>
-          <p className="text-3xl font-bold text-[#0c2f4a]">0</p>
+          <p className="text-3xl font-bold text-[#0c2f4a]">{totalTx}</p>
           <button className="w-full py-2 bg-[#62D852] text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity">
             Voir tout
           </button>
@@ -38,7 +98,7 @@ export default function AdminTransactions() {
         {/* Card 3 */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-40">
           <p className="text-[#1e4869] text-sm">Transactions réussies</p>
-          <p className="text-3xl font-bold text-[#0c2f4a]">0</p>
+          <p className="text-3xl font-bold text-[#0c2f4a]">{successTx}</p>
           <button className="w-full py-2 bg-[#FE7BF4] text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity">
             Voir tout
           </button>
@@ -47,7 +107,7 @@ export default function AdminTransactions() {
         {/* Card 4 */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-40">
           <p className="text-[#1e4869] text-sm">En attente</p>
-          <p className="text-3xl font-bold text-[#0c2f4a]">0</p>
+          <p className="text-3xl font-bold text-[#0c2f4a]">{pendingTx}</p>
           <button className="w-full py-2 bg-[#D0D71B] text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity">
             Voir tout
           </button>
@@ -89,7 +149,11 @@ export default function AdminTransactions() {
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-        {filteredTx.length > 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#32A8D7]"></div>
+          </div>
+        ) : filteredTx.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="bg-[#f4f9fd] border-b border-slate-100">
@@ -107,30 +171,35 @@ export default function AdminTransactions() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredTx.map(t => (
-                  <tr key={t.no} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-4 py-3 text-[#1e4869]">{t.no}</td>
-                    <td className="px-4 py-3 text-[#1e4869] whitespace-pre-line leading-relaxed">{t.date}</td>
-                    <td className="px-4 py-3 text-[#1e4869]">{t.ref}</td>
-                    <td className="px-4 py-3 text-[#1e4869]">{t.user}</td>
-                    <td className="px-4 py-3 text-[#1e4869]">{t.profil}</td>
-                    <td className="px-4 py-3 text-[#1e4869]">{t.moyen}</td>
-                    <td className="px-4 py-3 font-bold text-[#1e4869]">{t.montant}</td>
-                    <td className="px-4 py-3 text-[#1e4869] max-w-[150px]">{t.service}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-full w-max text-[11px] font-semibold" style={{
-                        backgroundColor: t.status === 'Réussie' ? '#f0fdf4' : '#fef2f2',
-                        color: '#475569'
-                      }}>
-                        {t.status}
-                        <span className={`w-1.5 h-1.5 rounded-full ${t.status === 'Réussie' ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button className="text-[#32A8D7] font-semibold hover:underline">Voir</button>
-                    </td>
-                  </tr>
-                ))}
+                {filteredTx.map((t, index) => {
+                  const statusFr = getStatusInFrench(t.status);
+                  return (
+                    <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-4 py-3 text-[#1e4869]">#{index + 1}</td>
+                      <td className="px-4 py-3 text-[#1e4869] whitespace-pre-line leading-relaxed">
+                        {new Date(t.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '\n')}
+                      </td>
+                      <td className="px-4 py-3 text-[#1e4869] font-mono text-xs">{t.id.slice(-8)}</td>
+                      <td className="px-4 py-3 text-[#1e4869]">{t.user?.name || "Inconnu"}</td>
+                      <td className="px-4 py-3 text-[#1e4869]">{t.user?.role?.name || "Non défini"}</td>
+                      <td className="px-4 py-3 text-[#1e4869]">{t.paymentMethod}</td>
+                      <td className="px-4 py-3 font-bold text-[#1e4869]">{t.amount} {t.currency}</td>
+                      <td className="px-4 py-3 text-[#1e4869] max-w-[150px]">{getTypeInFrench(t.type)}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full w-max text-[11px] font-semibold" style={{
+                          backgroundColor: t.status === 'SUCCESS' ? '#f0fdf4' : t.status === 'PENDING' ? '#fefce8' : '#fef2f2',
+                          color: '#475569'
+                        }}>
+                          {statusFr}
+                          <span className={`w-1.5 h-1.5 rounded-full ${t.status === 'SUCCESS' ? 'bg-green-500' : t.status === 'PENDING' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button className="text-[#32A8D7] font-semibold hover:underline">Voir</button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -142,7 +211,7 @@ export default function AdminTransactions() {
               <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
             </svg>
             <p className="text-lg font-medium text-slate-500 mb-1">Aucune transaction trouvée</p>
-            <p className="text-sm">Il n'y a pas de transactions correspondant à vos critères.</p>
+            <p className="text-sm">Il n&apos;y a pas de transactions correspondant à vos critères.</p>
           </div>
         )}
       </div>

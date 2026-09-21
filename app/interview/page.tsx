@@ -341,6 +341,7 @@ export default function InterviewPage() {
   // ── Countdown timer + beeps + TTS ─────────────────────────────────────────────
   useEffect(() => {
     if (phase !== "countdown") return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCountdown(10);
     const ctx = audioCtxRef.current ?? new AudioContext();
     if (!audioCtxRef.current) audioCtxRef.current = ctx;
@@ -375,6 +376,7 @@ export default function InterviewPage() {
   // ── Recording timer ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== "recording" || !currentQuestion) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRecordingTime(0);
     const maxDuration = currentQuestion.duration;
     const timer = setInterval(() => {
@@ -434,6 +436,7 @@ export default function InterviewPage() {
 
   const handleSkip = () => {
     window.speechSynthesis?.cancel();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRecordingTime(0);
     const nextIndex = questionIndex + 1;
     if (nextIndex < totalQuestions) {
