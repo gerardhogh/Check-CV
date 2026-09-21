@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Search, Plus, Trash2, Edit2, Eye, X, ChevronLeft, ChevronRight, Shield } from "lucide-react";
+import { Search, Plus, Trash2, Edit2, Eye, X, ChevronLeft, ChevronRight, Shield, ChevronDown } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
 
 type Role = {

@@ -88,7 +88,7 @@ export default function TalentDashboard() {
   // Profile editable state
   const [userName, setUserName] = useState(user?.name || "Jules Kofi");
   const [userTitle, setUserTitle] = useState("Développeur Full-Stack & UI");
-  const [userPhone, setUserPhone] = useState(user?.phone || "+229 97 00 00 00");
+  const [userPhone, setUserPhone] = useState((user as any)?.phone || "+229 97 00 00 00");
   const [userBio, setUserBio] = useState(
     "Passionné par le développement web moderne, l'architecture logicielle et les interfaces fluides."
   );

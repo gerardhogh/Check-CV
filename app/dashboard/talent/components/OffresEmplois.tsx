@@ -16,7 +16,8 @@ import {
   Phone,
   Globe,
   Link2,
-  MoreHorizontal
+  MoreHorizontal,
+  AlertTriangle
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";

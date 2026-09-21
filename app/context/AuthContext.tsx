@@ -21,10 +21,10 @@ export function useAuth() {
 
   const user = session?.user
     ? {
-        id: session.user.id || "",
+        id: (session.user as any).id || "",
         name: session.user.name || "",
         email: session.user.email || "",
-        role: (session.user.role as UserRole) || "talent",
+        role: ((session.user as any).role as UserRole) || "talent",
         avatar: session.user.image || "/assets/Avatar ByeWind.png",
       }
     : null;
@@ -39,9 +39,9 @@ export function useAuth() {
     logout,
     // Méthodes de compatibilité (non utilisées maintenant que /api/register gère ça)
     login: async () => false,
-    loginWithGoogle: async () => false,
+    loginWithGoogle: async (role?: string, data?: any) => false,
     register: async () => false,
-    updateUser: () => {},
+    updateUser: (data?: any) => {},
   };
 }
 

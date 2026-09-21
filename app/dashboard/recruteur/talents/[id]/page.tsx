@@ -409,7 +409,7 @@ export default function TalentDetailPage() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const companyName = user?.company || "Grand-G Corp";
+  const companyName = (user as any)?.company || "Grand-G Corp";
   const companyEmail = user?.email || "recruteur@grand-g.com";
 
   const notifications = [

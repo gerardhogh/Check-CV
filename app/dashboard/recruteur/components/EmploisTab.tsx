@@ -43,7 +43,7 @@ interface Emploi {
   description: string;
   candidatures: number;
   datePublication: string;
-  status: "Active" | "Inactive";
+  status: "Active" | "Inactive" | "PUBLISHED" | "CLOSED" | string;
 }
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
@@ -466,7 +466,7 @@ export default function EmploisTab() {
   const [showPublishedSuccess, setShowPublishedSuccess] = useState(false);
   const [justPublishedId, setJustPublishedId] = useState<number | null>(null);
 
-  const selectedEmploi = emplois.find((e) => e.id === selectedId) ?? null;
+  const selectedEmploi = emplois.find((e: any) => e.id === selectedId) ?? null;
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -665,7 +665,7 @@ export default function EmploisTab() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {emplois.map((emploi) => (
+              {emplois.map((emploi: any) => (
                 <div
                   key={emploi.id}
                   className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all flex flex-col"

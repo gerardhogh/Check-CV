@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = (session.user as any).id;
     const body = await req.json();
 
     // S'assurer que le RecruiterProfile existe pour cet utilisateur
