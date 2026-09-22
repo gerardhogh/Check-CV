@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import GoogleAuthModal from "../components/GoogleAuthModal";
 import Navbar from "../components/Navbar";
 
@@ -60,15 +61,32 @@ export default function ConnexionPage() {
     }
   };
 
+  const [googleLoading, setGoogleLoading] = useState(false);
+
   const handleGoogleLogin = async () => {
-    setIsLoading(true);
+    setGoogleLoading(true);
+    setError("");
     try {
-      // Intégration Google via NextAuth (à faire plus tard)
-      await signIn("google");
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?role=${tab}`,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
+      });
+
+      if (oauthError) {
+        console.error("Google OAuth error:", oauthError);
+        setError("Erreur lors de la connexion avec Google. Veuillez réessayer.");
+        setGoogleLoading(false);
+      }
     } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoading(false);
+      console.error("Unexpected error:", e);
+      setError("Une erreur inattendue s'est produite.");
+      setGoogleLoading(false);
     }
   };
 
@@ -221,18 +239,27 @@ export default function ConnexionPage() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              disabled={isLoading}
+              disabled={isLoading || googleLoading}
               id="btn-google-connexion"
               className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 active:scale-[0.99] transition-all text-sm font-bold text-slate-700 shadow-sm disabled:opacity-50"
             >
-              <Image
-                src="/assets/google 1.png"
-                alt="Google Logo"
-                width={20}
-                height={20}
-                className="object-contain"
-              />
-              Connexion avec Google
+              {googleLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                  Connexion à Google...
+                </>
+              ) : (
+                <>
+                  <Image
+                    src="/assets/google 1.png"
+                    alt="Google Logo"
+                    width={20}
+                    height={20}
+                    className="object-contain"
+                  />
+                  Connexion avec Google
+                </>
+              )}
             </button>
           </div>
         </div>

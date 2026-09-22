@@ -17,6 +17,7 @@ import {
   AlertCircle,
   FileCheck,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import GoogleAuthModal from "../components/GoogleAuthModal";
 import Navbar from "../components/Navbar";
 
@@ -114,14 +115,33 @@ function InscriptionForm() {
     }
   };
 
+  const [googleLoading, setGoogleLoading] = useState(false);
+
   const handleGoogleLogin = async () => {
-    setIsLoading(true);
+    setGoogleLoading(true);
+    setError("");
     try {
-      await signIn("google");
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?role=${role}`,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
+      });
+
+      if (oauthError) {
+        console.error("Google OAuth error:", oauthError);
+        setError("Erreur lors de la connexion avec Google. Veuillez réessayer.");
+        setGoogleLoading(false);
+      }
+      // Si pas d'erreur, l'utilisateur est redirigé automatiquement vers Google
     } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoading(false);
+      console.error("Unexpected error:", e);
+      setError("Une erreur inattendue s'est produite.");
+      setGoogleLoading(false);
     }
   };
 
@@ -398,18 +418,27 @@ function InscriptionForm() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              disabled={isLoading}
+              disabled={isLoading || googleLoading}
               id="btn-google-inscription"
               className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 active:scale-[0.99] transition-all text-sm font-bold text-slate-700 shadow-sm disabled:opacity-50"
             >
-              <Image
-                src="/assets/google 1.png"
-                alt="Google Logo"
-                width={20}
-                height={20}
-                className="object-contain"
-              />
-              S'inscrire avec Google
+              {googleLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                  Connexion à Google...
+                </>
+              ) : (
+                <>
+                  <Image
+                    src="/assets/google 1.png"
+                    alt="Google Logo"
+                    width={20}
+                    height={20}
+                    className="object-contain"
+                  />
+                  S'inscrire avec Google
+                </>
+              )}
             </button>
           </div>
 
