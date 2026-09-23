@@ -41,6 +41,7 @@ function ProfilTalentContent() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [completionPercent, setCompletionPercent] = useState(0);
+  const [userAvatar, setUserAvatar] = useState<string>(user?.avatar || "/assets/avatar_africain.jpg");
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -78,7 +79,10 @@ function ProfilTalentContent() {
            let filled = 0;
            const total = 9;
            if (data.name) filled++;
-           if (data.avatar) filled++;
+           if (data.avatar) {
+             filled++;
+             setUserAvatar(data.avatar);
+           }
            if (data.talentProfile?.degree) filled++;
            if (data.talentProfile?.phone) filled++;
            if (data.talentProfile?.city) filled++;
@@ -273,7 +277,7 @@ function ProfilTalentContent() {
             >
               <div className="w-full h-full rounded-full overflow-hidden relative">
                 <Image
-                  src={user?.avatar || "/assets/avatar_africain.jpg"}
+                  src={userAvatar}
                   alt="Avatar"
                   fill
                   className="object-cover object-center w-full h-full group-hover:scale-105 transition-transform duration-300"
