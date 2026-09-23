@@ -6,11 +6,26 @@ import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
+interface TalentData {
+  id: string;
+  no: string;
+  name: string;
+  domaine: string;
+  date: string;
+  location: string;
+  contact: string;
+  email: string;
+  status: string;
+  videoOk: boolean;
+}
+
 export default function AdminTalents() {
   const [search, setSearch] = useState("");
-  const [selectedTalent, setSelectedTalent] = useState<any>(null);
+  const [selectedTalent, setSelectedTalent] = useState<TalentData | null>(null);
 
-  const { data: talents = [], isLoading: loading } = useSWR("/api/talents", fetcher);
+  const { data: talentsData = [], isLoading: loading } = useSWR("/api/talents", fetcher);
+
+  const talents: TalentData[] = talentsData;
 
   const filtered = talents.filter(t =>
     t.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -81,7 +96,7 @@ export default function AdminTalents() {
                   <th className="px-5 py-4 font-semibold text-slate-500">No</th>
                   <th className="px-5 py-4 font-semibold text-slate-500">Nom complet</th>
                   <th className="px-5 py-4 font-semibold text-slate-500">Domaine</th>
-                  <th className="px-5 py-4 font-semibold text-slate-500 whitespace-nowrap">Date d'inscription</th>
+                  <th className="px-5 py-4 font-semibold text-slate-500 whitespace-nowrap">Date d&apos;inscription</th>
                   <th className="px-5 py-4 font-semibold text-slate-500">Localisation</th>
                   <th className="px-5 py-4 font-semibold text-slate-500">Contact</th>
                   <th className="px-5 py-4 font-semibold text-slate-500">Email</th>
@@ -157,7 +172,7 @@ export default function AdminTalents() {
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
             <p className="text-lg font-medium text-slate-500 mb-1">Aucun talent trouvé</p>
-            <p className="text-sm">Il n'y a pas de talents correspondant à vos critères.</p>
+            <p className="text-sm">Il n&apos;y a pas de talents correspondant à vos critères.</p>
           </div>
         )}
       </div>

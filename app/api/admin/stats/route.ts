@@ -12,14 +12,14 @@ export async function GET() {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const talentsCount = await prisma.user.count({ where: { role: 'TALENT' } });
-    const recruteursCount = await prisma.user.count({ where: { role: 'RECRUITER' } });
+    const talentsCount = await prisma.user.count({ where: { role: { name: "TALENT" } } });
+    const recruteursCount = await prisma.user.count({ where: { role: { name: "RECRUITER" } } });
     const jobsCount = await prisma.jobOffer.count();
     const applicationsCount = await prisma.application.count();
 
     // Mock videos count for now since it's not a distinct model
     const videosCount = await prisma.talentProfile.count({
-      where: { videoTestUrl: { not: null } }
+      where: { videoUrl: { not: null } }
     });
 
     return NextResponse.json({

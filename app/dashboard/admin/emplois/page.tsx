@@ -1,11 +1,24 @@
 "use client";
 import React, { useState } from "react";
-import Image from "next/image";
-import { Search, PlusCircle, MoreHorizontal } from "lucide-react";
+import { Search, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
+
+interface JobOfferData {
+  id: string;
+  rawId: string;
+  titre: string;
+  entreprise: string;
+  date: string;
+  contrat: string;
+  localisation: string;
+  candidatures: number;
+  status: string;
+  isAdminCreated: boolean;
+  candidats: number;
+}
 
 export default function AdminEmplois() {
   const [activeTab, setActiveTab] = useState("Toutes les offres");
@@ -13,18 +26,18 @@ export default function AdminEmplois() {
 
   const { data: data = [], isLoading: loading } = useSWR("/api/admin/jobs", fetcher);
 
-  const offres = Array.isArray(data) ? data.map((j: any) => ({
-    id: j.id.substring(0, 8),
-    rawId: j.id,
-    titre: j.title,
-    entreprise: j.recruiter?.companyName || "Entreprise Inconnue",
-    date: new Date(j.createdAt).toLocaleDateString("fr-FR"),
-    contrat: j.contractType || "Non spécifié",
-    localisation: j.location || "Non spécifié",
-    candidatures: j.applications?.length || 0,
+  const offres: JobOfferData[] = Array.isArray(data) ? data.map((j: Record<string, unknown>) => ({
+    id: String(j.id).substring(0, 8),
+    rawId: String(j.id),
+    titre: String(j.title),
+    entreprise: (j.recruiter as any)?.companyName || "Entreprise Inconnue",
+    date: new Date(String(j.createdAt)).toLocaleDateString("fr-FR"),
+    contrat: String(j.contractType || "Non spécifié"),
+    localisation: String(j.location || "Non spécifié"),
+    candidatures: (j.applications as any[])?.length || 0,
     status: j.status === "PUBLISHED" ? "Actif" : (j.status === "CLOSED" ? "Suspendu" : "En attente"),
     isAdminCreated: false,
-    candidats: j.applications?.length || 0
+    candidats: (j.applications as any[])?.length || 0
   })) : [];
 
   const filteredToutesOffres = offres.filter(o => 
@@ -145,7 +158,7 @@ export default function AdminEmplois() {
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex flex-col gap-1 text-xs font-semibold items-start">
-                            <button className="text-[#32A8D7] hover:underline">Voir l'offre</button>
+                            <button className="text-[#32A8D7] hover:underline">Voir l&apos;offre</button>
                             
                             {o.status === 'En attente' && (
                               <button className="text-green-500 hover:underline">Approuver</button>
@@ -178,7 +191,7 @@ export default function AdminEmplois() {
                   <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                 </svg>
                 <p className="text-lg font-medium text-slate-500 mb-1">Aucune offre trouvée</p>
-                <p className="text-sm">Il n'y a pas d'offres correspondant à vos critères.</p>
+                <p className="text-sm">Il n&apos;y a pas d&apos;offres correspondant à vos critères.</p>
               </div>
             )}
           </div>
@@ -222,15 +235,15 @@ export default function AdminEmplois() {
 
                     <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
                       <span>Publié le: {o.date}</span>
-                      <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full ${o.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
+                      <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full ${o.status === 'Actif' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
                         <span>{o.status}</span>
-                        <span className={`w-1.5 h-1.5 rounded-full ${o.status === 'Active' ? 'bg-green-500' : 'bg-yellow-400'}`}></span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${o.status === 'Actif' ? 'bg-green-500' : 'bg-yellow-400'}`}></span>
                       </div>
                     </div>
                     
                     <h3 className="font-bold text-slate-800 text-base mb-1">{o.titre}</h3>
                     <p className="text-sm text-slate-500 mb-1">Entreprise : <span className="font-semibold text-[#32A8D7]">{o.entreprise}</span></p>
-                    <p className="text-sm text-slate-500 mb-4">{o.location}</p>
+                    <p className="text-sm text-slate-500 mb-4">{o.localisation}</p>
                     
                     <p className="text-xs text-slate-400 mb-4">{o.candidats} Candidats</p>
                     
@@ -258,8 +271,8 @@ export default function AdminEmplois() {
                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
               </svg>
-              <p className="text-lg font-medium text-slate-500 mb-1">Vous n'avez publié aucune offre</p>
-              <p className="text-sm mb-4">Cliquez sur le bouton "Publier une offre" pour créer votre première annonce.</p>
+              <p className="text-lg font-medium text-slate-500 mb-1">Vous n&apos;avez publié aucune offre</p>
+              <p className="text-sm mb-4">Cliquez sur le bouton &quot;Publier une offre&quot; pour créer votre première annonce.</p>
               <button className="px-6 py-2 bg-[#32A8D7] text-white font-bold rounded-lg hover:bg-[#2b91bb] transition-colors">
                 + Publier une offre
               </button>

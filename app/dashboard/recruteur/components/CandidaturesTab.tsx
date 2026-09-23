@@ -22,7 +22,8 @@ import ModifierOffreView from "./ModifierOffreView";
 import useSWR from "swr";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
-const MOCK_CANDIDATURES: any[] = [];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const MOCK_CANDIDATURES: unknown[] = [];
 
 const MOCK_JOB: JobDetailData = {
   id: "offre_1",
@@ -53,6 +54,31 @@ function StatutBadge({ statut }: { statut: "Accepté" | "En attente" | "Rejeté"
   );
 }
 
+interface ApplicationData {
+  id: string | number;
+  talent: string;
+  role: string;
+  offreId: string;
+  offre?: string; // added to match properties
+  dateCandidat?: string; // added to match properties
+  typeEmploi?: string; // added to match properties
+  videoTest?: boolean; // added to match properties
+  cvJoint?: boolean; // added to match properties
+  statut: "Accepté" | "En attente" | "Rejeté";
+  date: string;
+  score: number;
+  imageUrl: string;
+}
+
+interface ApiApplication {
+  id: string | number;
+  talent?: { user?: { name?: string } };
+  jobOffer?: { title?: string };
+  jobOfferId: string;
+  status: string;
+  createdAt: string;
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function CandidaturesTab() {
   type ViewState =
@@ -68,19 +94,24 @@ export default function CandidaturesTab() {
   const fetcher = (url: string) => fetch(url).then(res => res.json());
   const { data: candidaturesFetched = [], mutate } = useSWR("/api/applications?role=recruiter", fetcher);
   
-  const candidatures = candidaturesFetched.map((app: any) => ({
+  const candidatures: ApplicationData[] = candidaturesFetched.map((app: ApiApplication) => ({
     id: app.id,
     talent: app.talent?.user?.name || "Talent sans nom",
     role: app.jobOffer?.title || "Offre",
     offreId: app.jobOfferId,
+    offre: app.jobOffer?.title || "Offre",
     statut: app.status === "PENDING" ? "En attente" : app.status === "ACCEPTED" ? "Accepté" : "Rejeté",
     date: new Date(app.createdAt).toLocaleDateString("fr-FR"),
+    dateCandidat: new Date(app.createdAt).toLocaleDateString("fr-FR"),
+    typeEmploi: "CDI",
+    videoTest: false,
+    cvJoint: false,
     score: Math.floor(Math.random() * 20) + 70, // Mock score for now
     imageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(app.talent?.user?.name || "T")}&background=random`
   }));
 
   const perPage = 8;
-  const totalPages = Math.ceil(candidatures.length / perPage);
+  const totalPages = Math.ceil(candidatures.length / perPage) || 1;
   const paginated = candidatures.slice((currentPage - 1) * perPage, currentPage * perPage);
 
   const showToast = (msg: string) => {
@@ -107,7 +138,7 @@ export default function CandidaturesTab() {
   const selectedCandidatData = candidatures.find((c) => c.id === selectedCandidatId);
   const candidatForDetail: CandidatData | undefined = selectedCandidatData
     ? {
-        id: selectedCandidatData.id,
+        id: selectedCandidatData.id as number,
         name: selectedCandidatData.talent,
         profession: "Développeur Front-end",
         location: "Cotonou, Bénin",
@@ -221,7 +252,7 @@ export default function CandidaturesTab() {
                     <div className="flex flex-col items-center justify-center">
                       <FileText size={48} className="text-slate-300 mb-3" />
                       <p className="text-base font-semibold text-slate-600">Aucune candidature</p>
-                      <p className="text-sm">Vous n'avez reçu aucune candidature pour le moment.</p>
+                      <p className="text-sm">Vous n&apos;avez reçu aucune candidature pour le moment.</p>
                     </div>
                   </td>
                 </tr>
@@ -273,7 +304,7 @@ export default function CandidaturesTab() {
                     <td className="px-4 py-3.5">
                       {c.videoTest ? (
                         <button
-                          onClick={() => setView({ type: "profil-candidat", candidatId: c.id })}
+                          onClick={() => setView({ type: "profil-candidat", candidatId: typeof c.id === 'string' ? parseInt(c.id) : c.id })}
                           className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#32A8D7] hover:underline"
                         >
                           <Video size={10} /> Oui · Voir
@@ -300,7 +331,7 @@ export default function CandidaturesTab() {
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() => setView({ type: "profil-candidat", candidatId: c.id })}
+                          onClick={() => setView({ type: "profil-candidat", candidatId: typeof c.id === 'string' ? parseInt(c.id) : c.id })}
                           className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#32A8D7] hover:bg-[#2896c2] text-white text-[10px] font-semibold rounded-lg transition-colors whitespace-nowrap"
                         >
                           <Eye size={10} /> Voir
