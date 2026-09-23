@@ -33,8 +33,8 @@ export async function POST(req: Request) {
     const isPlaceholder = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder");
 
     if (isPlaceholder) {
-      console.warn("Using placeholder Supabase URL, skipping actual upload and using fallback PDF");
-      fileUrl = "/Docs/Check CV.pdf";
+      console.warn("Using placeholder Supabase URL, cannot upload CV.");
+      return NextResponse.json({ error: "Supabase n'est pas configuré. Veuillez configurer NEXT_PUBLIC_SUPABASE_URL." }, { status: 500 });
     } else {
       try {
         const { data: uploadData, error: uploadError } = await supabase
@@ -46,15 +46,15 @@ export async function POST(req: Request) {
           });
 
         if (uploadError) {
-          console.warn("Supabase upload error, using fallback URL:", uploadError);
-          fileUrl = "/Docs/Check CV.pdf";
+          console.error("Supabase upload error:", uploadError);
+          return NextResponse.json({ error: "Erreur Supabase: " + (uploadError.message || "Impossible d'importer le CV.") + " (Le bucket 'cvs' existe-t-il ?)" }, { status: 500 });
         } else {
           const { data: publicUrlData } = supabase.storage.from('cvs').getPublicUrl(fileName);
           fileUrl = publicUrlData.publicUrl;
         }
-      } catch (uploadException) {
-        console.warn("Supabase upload exception (network/config), using fallback URL:", uploadException);
-        fileUrl = "/Docs/Check CV.pdf";
+      } catch (uploadException: any) {
+        console.error("Supabase upload exception:", uploadException);
+        return NextResponse.json({ error: "Exception Supabase: " + (uploadException.message || "Erreur réseau.") }, { status: 500 });
       }
     }
 
