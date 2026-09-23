@@ -93,7 +93,7 @@ function ProfilTalentContent() {
   }, [searchParams]);
 
   // Handle Avatar Change
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -102,15 +102,28 @@ function ProfilTalentContent() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      if (base64) {
-        updateUser({ avatar: base64 });
-        showToast("Photo de profil mise à jour avec succès !");
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      showToast("Mise à jour de la photo en cours...");
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const res = await fetch("/api/talents/avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Erreur lors de l'upload");
+
+      showToast("Photo de profil mise à jour avec succès !");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err: any) {
+      console.error("Erreur sauvegarde avatar", err);
+      showToast(err.message || "Une erreur s'est produite lors de la sauvegarde de la photo.");
+    }
   };
 
   // Handle CV Selection
