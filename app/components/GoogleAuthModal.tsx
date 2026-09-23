@@ -161,7 +161,7 @@ export default function GoogleAuthModal({
                   >
                     <div className="w-11 h-11 rounded-full overflow-hidden relative border border-slate-200 flex-shrink-0">
                       <Image
-                        src="/assets/Avatar ByeWind.png"
+                        src="/assets/avatar_africain.jpg"
                         alt="Jules Kofi"
                         width={44}
                         height={44}

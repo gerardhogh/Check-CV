@@ -95,7 +95,7 @@ export default function Navbar({
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden relative border border-slate-200">
                   <Image
-                    src={user.avatar || "/assets/Avatar ByeWind.png"}
+                    src={user.avatar || "/assets/avatar_africain.jpg"}
                     alt={user.name}
                     width={32}
                     height={32}

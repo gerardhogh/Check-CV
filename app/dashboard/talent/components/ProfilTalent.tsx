@@ -238,7 +238,7 @@ function ProfilTalentContent() {
             >
               <div className="w-full h-full rounded-full overflow-hidden relative">
                 <Image
-                  src={user?.avatar || "/assets/Avatar ByeWind.png"}
+                  src={user?.avatar || "/assets/avatar_africain.jpg"}
                   alt="Avatar"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"

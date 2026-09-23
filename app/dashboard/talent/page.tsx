@@ -367,7 +367,7 @@ export default function TalentDashboard() {
               >
                 <div className="w-9 h-9 rounded-full overflow-hidden relative border border-slate-200">
                   <Image
-                    src={user?.avatar || "/assets/Avatar ByeWind.png"}
+                    src={user?.avatar || "/assets/avatar_africain.jpg"}
                     alt="Avatar"
                     width={36}
                     height={36}

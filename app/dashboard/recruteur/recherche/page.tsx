@@ -137,7 +137,7 @@ export default function RechercheProfil() {
           <div className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 pr-2 rounded-full transition-colors border border-transparent hover:border-slate-200">
             <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 relative">
               <Image
-                src="/assets/Avatar ByeWind.png"
+                src="/assets/avatar_africain.jpg"
                 alt="Profile"
                 width={32}
                 height={32}

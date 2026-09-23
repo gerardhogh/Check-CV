@@ -534,7 +534,7 @@ export default function TalentDetailPage() {
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 relative">
                   <Image
-                    src={user?.avatar || "/assets/Avatar ByeWind.png"}
+                    src={user?.avatar || "/assets/avatar_africain.jpg"}
                     alt="Avatar"
                     width={32}
                     height={32}

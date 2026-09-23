@@ -591,7 +591,7 @@ export default function InterviewPage() {
             className="flex items-center gap-2 cursor-pointer group"
           >
             <div className="w-10 h-10 rounded-full overflow-hidden bg-blue-100 relative border-2 border-transparent group-hover:border-[#008de4] transition-colors">
-              <Image src={user?.avatar || "/assets/Avatar ByeWind.png"} alt="Avatar" fill className="object-cover" />
+              <Image src={user?.avatar || "/assets/avatar_africain.jpg"} alt="Avatar" fill className="object-cover" />
             </div>
             <ChevronDown className="text-white opacity-80 group-hover:opacity-100" size={16} />
           </div>
@@ -942,7 +942,7 @@ export default function InterviewPage() {
               <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
                 <div className="w-10 h-10 rounded-full overflow-hidden relative border border-white/20 flex-shrink-0">
                   <Image
-                    src={user?.avatar || "/assets/Avatar ByeWind.png"}
+                    src={user?.avatar || "/assets/avatar_africain.jpg"}
                     alt="Avatar"
                     width={40}
                     height={40}

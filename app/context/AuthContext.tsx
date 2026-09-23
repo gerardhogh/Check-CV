@@ -25,7 +25,7 @@ export function useAuth() {
         name: session.user.name || "",
         email: session.user.email || "",
         role: ((session.user as any).role as UserRole) || "talent",
-        avatar: session.user.image || "/assets/Avatar ByeWind.png",
+        avatar: session.user.image || "/assets/avatar_africain.jpg",
       }
     : null;
 

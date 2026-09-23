@@ -349,7 +349,7 @@ export default function RecruteurDashboard() {
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 relative">
                   <Image
-                    src={user?.avatar || "/assets/Avatar ByeWind.png"}
+                    src={user?.avatar || "/assets/avatar_africain.jpg"}
                     alt="Avatar"
                     width={32}
                     height={32}
@@ -583,7 +583,7 @@ export default function RecruteurDashboard() {
                         name={tItem.name || "Candidat Anonyme"}
                         location={"Non précisé"} // Placeholder until db schema changes
                         profession={profile.bio ? profile.bio.substring(0, 30) + "..." : "Professionnel"} // Placeholder
-                        imageUrl={tItem.image || "/assets/Avatar ByeWind.png"}
+                        imageUrl={tItem.image || "/assets/avatar_africain.jpg"}
                         isVerified={true}
                         isFavorite={favorites.includes(tItem.id)}
                         onFavorite={toggleFavorite}
