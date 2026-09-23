@@ -511,7 +511,7 @@ export default function AdminPermissions() {
                                   if (e.target.checked) setSelectedPermissions([...selectedPermissions, perm.id]);
                                   else setSelectedPermissions(selectedPermissions.filter(id => id !== perm.id));
                                 }}
-                                className="w-4 h-4 text-[#32A8D7] rounded focus:ring-[#32A8D7]"
+                                className="custom-checkbox"
                               />
                               <span className="text-sm text-slate-700">{perm.label}</span>
                             </label>

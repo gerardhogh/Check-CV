@@ -362,7 +362,7 @@ function InscriptionForm() {
                 id="terms"
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
-                className="mt-0.5 w-[20px] h-[20px] rounded-[6px] border-slate-300 text-[#1E8AE9] focus:ring-[#1E8AE9] accent-[#1E8AE9] cursor-pointer flex-shrink-0"
+                className="custom-checkbox mt-0.5"
               />
               <label
                 htmlFor="terms"

@@ -316,3 +316,39 @@ html, body {
 .animate-wave-bar   { animation: wave-bar   0.9s ease-in-out infinite; }
 .animate-spin-slow  { animation: spin-slow  1.4s linear infinite; }
 .animate-step-in    { animation: step-in    0.5s ease forwards; }
+
+.custom-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background-color: transparent;
+  border: 1px solid #cbd5e1;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  flex-shrink: 0;
+}
+
+.custom-checkbox:checked {
+  background-color: #1E8AE9;
+  border-color: #1E8AE9;
+}
+
+.custom-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.custom-checkbox:focus-visible {
+  box-shadow: 0 0 0 2px rgba(30, 138, 233, 0.4);
+}
