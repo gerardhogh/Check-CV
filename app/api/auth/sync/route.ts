@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       if (existingRoleName && existingRoleName !== targetRoleName) {
         return NextResponse.json(
           { 
-            error: `Ce compte est enregistré en tant que ${existingRoleName === 'TALENT' ? 'Talent' : 'Recruteur'}. Veuillez utiliser l'onglet approprié.` 
+            error: `Cette adresse e-mail est déjà associée à un autre type de profil. Veuillez vérifier l'onglet sélectionné ou utiliser une autre adresse.` 
           },
           { status: 403 }
         );
