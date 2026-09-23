@@ -44,6 +44,7 @@ interface Emploi {
   candidatures: number;
   datePublication: string;
   status: "Active" | "Inactive" | "PUBLISHED" | "CLOSED" | string;
+  _count?: { applications: number };
 }
 
 // ─── Mock data ────────────────────────────────────────────────────────────────

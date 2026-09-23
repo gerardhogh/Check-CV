@@ -53,6 +53,7 @@ interface FullCandidatProfile {
     aiScore?: number;
     aiFeedback?: string;
   } | null;
+  cvUrl?: string;
 }
 
 interface CandidatProfilDetailProps {
