@@ -84,15 +84,16 @@ export async function POST(request: NextRequest) {
         await prisma.talentProfile.create({ data: { userId: user.id } });
       }
     } else {
-      // Le user existe déjà. On met à jour ses infos et potentiellement son rôle
-      // s'il essaie de se connecter via un autre onglet (ex: Talent -> Recruteur)
+      const existingRoleName = user.role?.name;
       const targetRoleName = roleParam === "recruteur" ? "RECRUTEUR" : "TALENT";
-      let targetRole = await prisma.role.findUnique({ where: { name: targetRoleName } });
 
-      if (!targetRole) {
-        targetRole = await prisma.role.create({
-          data: { name: targetRoleName, permissions: JSON.stringify([]) },
-        });
+      if (existingRoleName && existingRoleName !== targetRoleName) {
+        return NextResponse.json(
+          { 
+            error: `Ce compte est enregistré en tant que ${existingRoleName === 'TALENT' ? 'Talent' : 'Recruteur'}. Veuillez utiliser l'onglet approprié.` 
+          },
+          { status: 403 }
+        );
       }
 
       await prisma.user.update({
@@ -101,21 +102,8 @@ export async function POST(request: NextRequest) {
           name: name || user.name,
           image: image || user.image,
           emailVerified: user.emailVerified || new Date(),
-          roleId: targetRole.id,
         },
       });
-
-      // S'assurer que le profil spécifique existe
-      if (targetRoleName === "RECRUTEUR") {
-        const profile = await prisma.recruiterProfile.findUnique({ where: { userId: user.id } });
-        if (!profile) await prisma.recruiterProfile.create({ data: { userId: user.id } });
-      } else {
-        const profile = await prisma.talentProfile.findUnique({ where: { userId: user.id } });
-        if (!profile) await prisma.talentProfile.create({ data: { userId: user.id } });
-      }
-
-      // Mettre à jour l'objet local pour la redirection
-      user.role = targetRole;
     }
 
     // Déterminer la redirection basée sur le nouveau rôle
