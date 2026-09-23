@@ -41,6 +41,7 @@ function ProfilTalentContent() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [completionPercent, setCompletionPercent] = useState(0);
+  const [stars, setStars] = useState(0);
   const [userAvatar, setUserAvatar] = useState<string>(user?.avatar || "/assets/avatar_africain.jpg");
 
   const showToast = (msg: string) => {
@@ -76,21 +77,30 @@ function ProfilTalentContent() {
       .then(res => res.json())
       .then(data => {
         if (!data.error) {
-           let filled = 0;
-           const total = 9;
-           if (data.name) filled++;
-           if (data.avatar) {
-             filled++;
-             setUserAvatar(data.avatar);
-           }
-           if (data.talentProfile?.degree) filled++;
-           if (data.talentProfile?.phone) filled++;
-           if (data.talentProfile?.city) filled++;
-           if (data.talentProfile?.bio) filled++;
-           if (data.talentProfile?.skills) filled++;
-           if (data.talentProfile?.cvUrl || localStorage.getItem("check_cv_has_pdf") === "true") filled++;
-           if (data.talentProfile?.videoUrl) filled++;
-           setCompletionPercent(Math.round((filled / total) * 100));
+          if (data.avatar) setUserAvatar(data.avatar);
+
+          // Same 5-step weighted formula as the main dashboard
+          // info=20, avatar=10, cv=20, social=10, video=40
+          let pct = 0;
+          if (data.name) pct += 20;
+          if (data.avatar) pct += 10;
+          if (data.talentProfile?.cvUrl) pct += 20;
+
+          const hasSocial = !!(data.talentProfile?.facebook || data.talentProfile?.linkedin || data.talentProfile?.twitter || data.talentProfile?.pinterest || data.talentProfile?.behance);
+          if (hasSocial) pct += 10;
+
+          const hasVid = !!(data.talentProfile?.videoUrl) || localStorage.getItem("interview_recorded") === "true";
+          if (hasVid) pct += 40;
+
+          setCompletionPercent(pct);
+
+          // Stars: 0% → 0⭐, 1-39% → 1⭐, 40-59% → 2⭐, 60-79% → 3⭐, 80-99% → 4⭐, 100% → 5⭐
+          if (pct === 100) setStars(5);
+          else if (pct >= 80) setStars(4);
+          else if (pct >= 60) setStars(3);
+          else if (pct >= 40) setStars(2);
+          else if (pct >= 1) setStars(1);
+          else setStars(0);
         }
       })
       .catch(console.error);
@@ -242,11 +252,19 @@ function ProfilTalentContent() {
           </h3>
           <div className="w-full bg-[#e2e8f0] rounded-full h-[14px] mb-2 overflow-hidden">
             <div
-              className="bg-[#007cc0] h-full rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${completionPercent}%` }}
+              className={`h-full rounded-full transition-all duration-700 ease-out ${
+                completionPercent === 0
+                  ? "bg-red-400"
+                  : completionPercent === 100
+                  ? "bg-green-500"
+                  : "bg-[#007cc0]"
+              }`}
+              style={{ width: `${Math.max(completionPercent, 2)}%` }}
             />
           </div>
-          <p className="text-sm text-[#007cc0] font-medium">{completionPercent}% complété</p>
+          <p className={`text-sm font-medium ${
+            completionPercent === 100 ? "text-green-600" : completionPercent === 0 ? "text-red-500" : "text-[#007cc0]"
+          }`}>{completionPercent}% complété</p>
         </div>
 
         <div className="bg-white rounded-lg p-6 border border-slate-100 shadow-sm flex flex-col justify-center">
@@ -254,13 +272,17 @@ function ProfilTalentContent() {
             Niveau de certification
           </h3>
           <div className="flex items-center gap-1.5 mb-3">
-            <Star className="text-amber-400 fill-amber-400" size={26} />
-            <Star className="text-amber-400 fill-amber-400" size={26} />
-            <Star className="text-amber-400 fill-amber-400" size={26} />
-            <Star className="text-amber-400/30" size={26} />
-            <Star className="text-amber-400/30" size={26} />
+            {[1, 2, 3, 4, 5].map((s) => (
+              <Star
+                key={s}
+                size={26}
+                className={s <= stars ? "text-amber-400 fill-amber-400" : "text-amber-200 fill-amber-100"}
+              />
+            ))}
           </div>
-          <p className="text-sm text-[#007cc0] font-medium">3 étoiles obtenues</p>
+          <p className="text-sm text-[#007cc0] font-medium">
+            {stars === 0 ? "Aucune étoile" : stars === 1 ? "1 étoile obtenue" : `${stars} étoiles obtenues`}
+          </p>
         </div>
       </div>
 

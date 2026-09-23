@@ -64,7 +64,7 @@ export default function TalentDashboard() {
 
   // Dynamic Dashboard States
   const [profilePct, setProfilePct] = useState(0);
-  const [stars, setStars] = useState(3);
+  const [stars, setStars] = useState(0);
   const [hasValidVideo, setHasValidVideo] = useState(false);
   const [hasSocialLinks, setHasSocialLinks] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -142,6 +142,15 @@ export default function TalentDashboard() {
           if (hasVid) pct += 40;
 
           setProfilePct(pct);
+
+          // Stars derived from pct: same thresholds as ProfilTalent
+          if (pct === 100) setStars(5);
+          else if (pct >= 80) setStars(4);
+          else if (pct >= 60) setStars(3);
+          else if (pct >= 40) setStars(2);
+          else if (pct >= 1) setStars(1);
+          else setStars(0);
+
           if (pct === 100) {
             setShowConfetti(true);
             setTimeout(() => setShowConfetti(false), 4000);
