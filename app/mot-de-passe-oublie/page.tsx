@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
               <h3 className="text-xl font-bold text-slate-800 mb-2">E-mail envoyé !</h3>
               <p className="text-slate-500 mb-6 text-sm">
                 Un lien pour réinitialiser votre mot de passe a été envoyé à <strong>{email}</strong>. 
-                Veuillez vérifier votre boîte de réception.
+                Veuillez vérifier votre boîte de réception. Si vous ne le voyez pas, pensez à consulter vos <strong>dossiers de spams (courriers indésirables)</strong>.
               </p>
             </div>
           ) : (
