@@ -21,6 +21,7 @@ export default function ConnexionPage() {
   const [tab, setTab] = useState<UserRole>("talent");
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,10 @@ export default function ConnexionPage() {
       const errorParam = params.get("error");
       if (errorParam) {
         setError(errorParam);
+      }
+      const messageParam = params.get("message");
+      if (messageParam) {
+        setSuccessMessage(messageParam);
       }
     }
   }, []);
@@ -111,6 +116,15 @@ export default function ConnexionPage() {
     }
   };
 
+  const clearSuccess = () => {
+    setSuccessMessage("");
+    if (typeof window !== "undefined") {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("message");
+      window.history.replaceState({}, "", newUrl.toString());
+    }
+  };
+
   return (
     <div
       className="min-h-screen flex flex-col relative"
@@ -181,6 +195,26 @@ export default function ConnexionPage() {
             <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2 text-xs text-red-600">
               <AlertCircle size={16} className="flex-shrink-0" />
               <span>{formError}</span>
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="mb-4 p-3 rounded-xl bg-green-50 border border-green-200 flex items-start gap-2 text-xs text-green-700 relative pr-8">
+              <div className="mt-0.5">
+                <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span className="font-medium">{successMessage}</span>
+              <button 
+                onClick={clearSuccess}
+                className="absolute top-2.5 right-2 text-green-500 hover:text-green-800 transition-colors"
+                aria-label="Fermer"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           )}
 
