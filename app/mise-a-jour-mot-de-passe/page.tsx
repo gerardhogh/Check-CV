@@ -56,6 +56,14 @@ export default function UpdatePasswordPage() {
 
     setIsLoading(true);
 
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      setError("Session expirée. Veuillez refaire la demande.");
+      setIsLoading(false);
+      return;
+    }
+
+    // 1. Update password in Supabase Auth
     const { error: updateError } = await supabase.auth.updateUser({
       password: password
     });
@@ -63,12 +71,34 @@ export default function UpdatePasswordPage() {
     if (updateError) {
       setError(updateError.message);
       setIsLoading(false);
-    } else {
-      // Supabase will automatically sign in the user after password update (if they aren't already), 
-      // but the flow requires redirecting them to login to re-enter credentials for security.
-      await supabase.auth.signOut();
-      router.push("/connexion?message=Mot+de+passe+mis+%C3%A0+jour+avec+succ%C3%A8s.+Veuillez+vous+connecter.");
+      return;
     }
+
+    // 2. Sync new password hash to Prisma DB for NextAuth Credentials
+    try {
+      const res = await fetch("/api/auth/update-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_token: sessionData.session.access_token,
+          password: password,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Erreur lors de la synchronisation de la base de données");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError("Une erreur est survenue lors de l'enregistrement de votre nouveau mot de passe.");
+      setIsLoading(false);
+      return;
+    }
+
+    // Supabase will automatically sign in the user after password update (if they aren't already), 
+    // but the flow requires redirecting them to login to re-enter credentials for security.
+    await supabase.auth.signOut();
+    router.push("/connexion?message=Mot+de+passe+mis+%C3%A0+jour+avec+succ%C3%A8s.+Veuillez+vous+connecter.");
   };
 
   return (
