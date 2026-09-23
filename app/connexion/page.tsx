@@ -138,13 +138,13 @@ export default function ConnexionPage() {
             </Link>
           </p>
 
-          <div className="flex gap-3 mb-8 justify-center">
+          <div className="flex gap-3 mb-8 w-full">
             {(["talent", "recruteur"] as const).map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setTab(t)}
-                className={`px-4 py-2 text-sm font-semibold rounded-lg capitalize transition-all border ${
+                className={`flex-1 px-4 py-2 text-sm font-semibold rounded-lg capitalize transition-all border ${
                   tab === t
                     ? "bg-[#32A8D7] text-white border-transparent shadow-md"
                     : "bg-transparent text-[#32A8D7] border-[#32A8D7] hover:bg-blue-50"
@@ -227,8 +227,7 @@ export default function ConnexionPage() {
               <div className="flex justify-end mt-2">
                 <Link
                   href="/mot-de-passe-oublie"
-                  className="text-xs font-medium"
-                  style={{ color: "#F7815B" }}
+                  className="text-xs font-medium text-slate-500 hover:text-slate-700 transition-colors"
                 >
                   Mot de passe oublié ?
                 </Link>

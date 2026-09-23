@@ -16,6 +16,8 @@ import {
   Upload,
   AlertCircle,
   FileCheck,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import GoogleAuthModal from "../components/GoogleAuthModal";
@@ -42,6 +44,11 @@ function InscriptionForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -58,8 +65,8 @@ function InscriptionForm() {
       setError("Veuillez renseigner votre adresse e-mail.");
       return;
     }
-    if (!password.trim() || password.length < 8) {
-      setError("Le mot de passe doit comporter au moins 8 caractères.");
+    if (!hasMinLength || !hasUppercase || !hasNumber || !hasSpecial) {
+      setError("Le mot de passe ne respecte pas les critères requis.");
       return;
     }
     if (!acceptTerms) {
@@ -168,11 +175,11 @@ function InscriptionForm() {
           </p>
 
           {/* Role selector */}
-          <div className="flex gap-3 mb-8 justify-center">
+          <div className="flex gap-3 mb-8 w-full">
             <button
               type="button"
               onClick={() => setRole("talent")}
-              className={`px-4 py-2 text-sm font-semibold rounded-lg capitalize transition-all border ${
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg capitalize transition-all border ${
                 role === "talent"
                   ? "bg-[#32A8D7] text-white border-transparent shadow-md"
                   : "bg-transparent text-[#32A8D7] border-[#32A8D7] hover:bg-blue-50"
@@ -184,7 +191,7 @@ function InscriptionForm() {
             <button
               type="button"
               onClick={() => setRole("recruteur")}
-              className={`px-4 py-2 text-sm font-semibold rounded-lg capitalize transition-all border ${
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg capitalize transition-all border ${
                 role === "recruteur"
                   ? "bg-[#32A8D7] text-white border-transparent shadow-md"
                   : "bg-transparent text-[#32A8D7] border-[#32A8D7] hover:bg-blue-50"
@@ -289,7 +296,7 @@ function InscriptionForm() {
                   type={showPwd ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="•••••••••••• (au moins 6 caractères)"
+                  placeholder="••••••••••••"
                   className="w-full pl-10 pr-11 py-3 bg-[#F9FAFB] border-0 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#32A8D7] transition-all"
                   id="password-inscription"
                 />
@@ -300,6 +307,24 @@ function InscriptionForm() {
                 >
                   {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
+              </div>
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center gap-2 text-xs">
+                  {hasMinLength ? <CheckCircle2 size={14} className="text-green-500" /> : <XCircle size={14} className="text-slate-300" />}
+                  <span className={hasMinLength ? "text-green-600 font-medium" : "text-slate-500"}>Au moins 8 caractères</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  {hasUppercase ? <CheckCircle2 size={14} className="text-green-500" /> : <XCircle size={14} className="text-slate-300" />}
+                  <span className={hasUppercase ? "text-green-600 font-medium" : "text-slate-500"}>Une lettre majuscule</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  {hasNumber ? <CheckCircle2 size={14} className="text-green-500" /> : <XCircle size={14} className="text-slate-300" />}
+                  <span className={hasNumber ? "text-green-600 font-medium" : "text-slate-500"}>Un chiffre</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  {hasSpecial ? <CheckCircle2 size={14} className="text-green-500" /> : <XCircle size={14} className="text-slate-300" />}
+                  <span className={hasSpecial ? "text-green-600 font-medium" : "text-slate-500"}>Un caractère spécial</span>
+                </div>
               </div>
             </div>
 
