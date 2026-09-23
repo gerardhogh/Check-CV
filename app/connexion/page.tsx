@@ -100,6 +100,15 @@ export default function ConnexionPage() {
     }
   };
 
+  const clearError = () => {
+    setError("");
+    if (typeof window !== "undefined") {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("error");
+      window.history.replaceState({}, "", newUrl.toString());
+    }
+  };
+
   return (
     <div
       className="min-h-screen flex flex-col relative"
@@ -148,7 +157,7 @@ export default function ConnexionPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <div 
                 className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" 
-                onClick={() => setError("")}
+                onClick={clearError}
               ></div>
               <div className="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 text-center animate-fade-in-up border border-slate-100">
                 <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm border border-red-100">
@@ -157,7 +166,7 @@ export default function ConnexionPage() {
                 <h3 className="text-2xl font-black text-slate-800 mb-3 tracking-tight">Oups !</h3>
                 <p className="text-sm text-slate-500 mb-8 leading-relaxed font-medium">{error}</p>
                 <button
-                  onClick={() => setError("")}
+                  onClick={clearError}
                   className="w-full py-3.5 bg-[#32A8D7] hover:bg-[#2a95c2] text-white rounded-xl font-bold transition-all active:scale-[0.98] shadow-md shadow-blue-500/20"
                 >
                   J'ai compris
