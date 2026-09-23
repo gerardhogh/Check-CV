@@ -50,16 +50,19 @@ export function TalentDetails({ talent, onBack }: { talent: any, onBack: () => v
 
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
             <p className="text-sm font-bold text-slate-800 mb-4">CV actualisé le {talent.date}</p>
-            <div className="border border-slate-200 rounded-lg overflow-hidden bg-slate-50 aspect-[1/1.4] relative mb-4 flex flex-col">
-              <div className="flex-1 p-4 relative">
-                {/* Mock CV Preview */}
-                <div className="w-1/3 bg-[#0B3A5A] absolute left-0 top-0 bottom-0"></div>
-                <div className="w-2/3 bg-white absolute right-0 top-0 bottom-0 p-4">
-                  <div className="h-2 w-1/2 bg-slate-200 rounded mb-2"></div>
-                  <div className="h-2 w-full bg-slate-100 rounded mb-1"></div>
-                  <div className="h-2 w-3/4 bg-slate-100 rounded mb-1"></div>
-                  <div className="h-2 w-5/6 bg-slate-100 rounded"></div>
-                </div>
+            <div className="border border-slate-200 rounded-lg overflow-hidden bg-slate-50 aspect-[1/1.4] relative mb-4 flex flex-col group">
+              <div className="flex-1 relative">
+                {talent.cvUrl ? (
+                  <iframe
+                    src={`${talent.cvUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                    className="w-full h-full rounded border-0 bg-white pointer-events-none"
+                    title="Aperçu du CV"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center w-full h-full text-slate-400 p-6">
+                    <span className="text-sm font-medium">Aucun CV disponible</span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">

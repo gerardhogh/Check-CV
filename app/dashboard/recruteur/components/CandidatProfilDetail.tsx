@@ -239,13 +239,17 @@ export default function CandidatProfilDetail({
 
             {/* Document Preview */}
             <div className="relative w-full aspect-[1/1.3] rounded-lg overflow-hidden border border-slate-200 bg-slate-50 shadow-inner group">
-              <Image
-                src="/assets/candidate-alicia-parker.jpg"
-                alt="Aperçu CV"
-                fill
-                sizes="300px"
-                className="object-cover opacity-90 group-hover:scale-102 transition-transform duration-300"
-              />
+              {(fullProfile?.cvUrl || candidat?.cvUrl) ? (
+                <iframe
+                  src={`${fullProfile?.cvUrl || candidat?.cvUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                  className="w-full h-full rounded border-0 bg-white pointer-events-none"
+                  title="Aperçu du CV"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center w-full h-full text-slate-400 p-6">
+                  <span className="text-sm font-medium">Aucun CV disponible</span>
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-3">
                 <span className="text-[11px] text-white font-medium bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded">
                   Document certifié Check CV
