@@ -121,7 +121,7 @@ export default function ConnexionPage() {
             Connectez -vous
           </h1>
           <p className="text-center text-sm mb-6 text-slate-500">
-            Je n'ai pas de compte sur Check-CV{" "}
+            Je n&apos;ai pas de compte sur Check-CV{" "}
             <Link href="/inscription" className="font-bold" style={{ color: "#32A8D7" }}>
               En créer un !
             </Link>
