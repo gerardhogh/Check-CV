@@ -137,9 +137,9 @@ function ProfilTalentContent() {
       setSelectedCvFile(null);
       setSelectedCvName("");
       showToast("CV mis à jour avec succès !");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erreur sauvegarde CV", err);
-      showToast("Une erreur s'est produite lors de la sauvegarde du CV.");
+      showToast(err.message || "Une erreur s'est produite lors de la sauvegarde du CV.");
     }
   };
 

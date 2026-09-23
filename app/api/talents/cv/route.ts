@@ -21,12 +21,9 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get("cv") as File;
 
-    if (!file) {
-      return NextResponse.json({ error: "Aucun fichier fourni" }, { status: 400 });
+    if (!file || typeof file === 'string' || typeof file.arrayBuffer !== 'function') {
+      return NextResponse.json({ error: "Aucun fichier valide fourni" }, { status: 400 });
     }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
 
     // Nom de fichier unique pour éviter les collisions
     const fileName = `${userId}-${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
@@ -43,7 +40,7 @@ export async function POST(req: Request) {
         const { data: uploadData, error: uploadError } = await supabase
           .storage
           .from('cvs')
-          .upload(fileName, buffer, {
+          .upload(fileName, file, {
             contentType: file.type,
             upsert: true
           });
@@ -85,8 +82,8 @@ export async function POST(req: Request) {
       cvUrl: fileUrl,
       fileName: file.name
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erreur POST /api/talents/cv:", error);
-    return NextResponse.json({ error: "Erreur lors de l'upload du CV" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Erreur lors de l'upload du CV" }, { status: 500 });
   }
 }
