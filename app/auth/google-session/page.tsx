@@ -9,6 +9,7 @@ function GoogleSessionHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const role = searchParams.get("role") || "talent";
+  const action = searchParams.get("action") || "login";
 
   useEffect(() => {
     let mounted = true;
@@ -33,6 +34,7 @@ function GoogleSessionHandler() {
           body: JSON.stringify({
             access_token: session.access_token,
             roleParam: role,
+            actionParam: action,
           }),
         });
 

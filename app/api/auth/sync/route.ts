@@ -84,6 +84,15 @@ export async function POST(request: NextRequest) {
         await prisma.talentProfile.create({ data: { userId: user.id } });
       }
     } else {
+      if (actionParam === "signup") {
+        return NextResponse.json(
+          { 
+            error: `Ce compte Google est déjà associé à un compte Check CV. Veuillez vous connecter.` 
+          },
+          { status: 403 }
+        );
+      }
+
       const existingRoleName = user.role?.name;
       const targetRoleName = roleParam === "recruteur" ? "RECRUTEUR" : "TALENT";
 
