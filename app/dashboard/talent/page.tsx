@@ -115,11 +115,28 @@ export default function TalentDashboard() {
             setCvFileName("Aucun CV ajouté");
             setCvUploadedAt("Pas de CV");
           }
+          
+          let hasVid = false;
           if (data.talentProfile?.videoUrl) {
-            setHasValidVideo(true);
+            hasVid = true;
           } else {
-            setHasValidVideo(false);
+            // Fallback to checking localStorage since videos are saved in IndexedDB currently
+            const isRecorded = typeof window !== "undefined" && localStorage.getItem("interview_recorded") === "true";
+            hasVid = isRecorded;
           }
+          setHasValidVideo(hasVid);
+
+          // Calculate profile percentage dynamically
+          let filled = 0;
+          const totalFields = 6;
+          if (data.name) filled++;
+          if (data.talentProfile?.bio) filled++;
+          if (data.talentProfile?.phone) filled++;
+          if (data.avatar) filled++;
+          if (data.talentProfile?.cvUrl) filled++;
+          if (hasVid) filled++;
+
+          setProfilePct(Math.round((filled / totalFields) * 100));
         }
       })
       .catch(console.error);
