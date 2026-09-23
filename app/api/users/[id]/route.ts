@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   // Seul un ADMIN peut modifier le rôle d'un autre utilisateur
@@ -20,7 +21,7 @@ export async function PUT(
   const body = await req.json();
 
   const updatedUser = await prisma.user.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       roleId: body.roleId,
       name: body.name,

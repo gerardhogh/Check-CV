@@ -6,8 +6,9 @@ import { prisma } from "@/lib/prisma";
 // DELETE : Supprimer une offre (Créateur de l'offre ou ADMIN uniquement)
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -19,7 +20,7 @@ export async function DELETE(
 
   try {
     const job = await prisma.jobOffer.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { recruiter: true },
     });
 
@@ -42,7 +43,7 @@ export async function DELETE(
     }
 
     await prisma.jobOffer.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Offre supprimée avec succès." });
