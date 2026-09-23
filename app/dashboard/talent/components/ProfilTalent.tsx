@@ -40,6 +40,7 @@ function ProfilTalentContent() {
   const [cvBlobUrl, setCvBlobUrl] = useState<string>("/Docs/Check CV.pdf");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [completionPercent, setCompletionPercent] = useState(0);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -68,6 +69,27 @@ function ProfilTalentContent() {
     } catch (e) {
       console.error(e);
     }
+    
+    // Fetch profile to calculate completion
+    fetch("/api/talents/me")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+           let filled = 0;
+           const total = 9;
+           if (data.name) filled++;
+           if (data.avatar) filled++;
+           if (data.talentProfile?.degree) filled++;
+           if (data.talentProfile?.phone) filled++;
+           if (data.talentProfile?.city) filled++;
+           if (data.talentProfile?.bio) filled++;
+           if (data.talentProfile?.skills) filled++;
+           if (data.talentProfile?.cvUrl || localStorage.getItem("check_cv_has_pdf") === "true") filled++;
+           if (data.talentProfile?.videoUrl) filled++;
+           setCompletionPercent(Math.round((filled / total) * 100));
+        }
+      })
+      .catch(console.error);
   }, [searchParams]);
 
   // Handle Avatar Change
@@ -203,11 +225,11 @@ function ProfilTalentContent() {
           </h3>
           <div className="w-full bg-[#e2e8f0] rounded-full h-[14px] mb-2 overflow-hidden">
             <div
-              className="bg-[#007cc0] h-full rounded-full"
-              style={{ width: "60%" }}
+              className="bg-[#007cc0] h-full rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${completionPercent}%` }}
             />
           </div>
-          <p className="text-sm text-[#007cc0] font-medium">60% complété</p>
+          <p className="text-sm text-[#007cc0] font-medium">{completionPercent}% complété</p>
         </div>
 
         <div className="bg-white rounded-lg p-6 border border-slate-100 shadow-sm flex flex-col justify-center">
@@ -537,6 +559,7 @@ function InformationsTab() {
       });
       if (res.ok) {
         alert("Informations mises à jour avec succès");
+        window.location.reload();
       } else {
         alert("Erreur lors de la mise à jour");
       }
@@ -746,6 +769,7 @@ function ReseauxTab() {
       });
       if (res.ok) {
         alert("Réseaux sociaux mis à jour avec succès");
+        window.location.reload();
       } else {
         alert("Erreur lors de la mise à jour");
       }

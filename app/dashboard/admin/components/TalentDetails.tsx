@@ -106,7 +106,7 @@ export function TalentDetails({ talent, onBack }: { talent: any, onBack: () => v
                 <input readOnly type="text" value={talent.domaine} className="w-full bg-slate-50 border-none rounded-lg p-3 text-sm text-slate-600 focus:ring-0" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Nom d'utilisateur</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Nom d&apos;utilisateur</label>
                 <input readOnly type="text" value={talent.username} className="w-full bg-slate-50 border-none rounded-lg p-3 text-sm text-slate-600 focus:ring-0" />
               </div>
 
@@ -115,7 +115,7 @@ export function TalentDetails({ talent, onBack }: { talent: any, onBack: () => v
                 <input readOnly type="text" value={talent.gender} className="w-full bg-slate-50 border-none rounded-lg p-3 text-sm text-slate-600 focus:ring-0" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Types d'opportunités recherchées</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Types d&apos;opportunités recherchées</label>
                 <input readOnly type="text" value={talent.opportunity} className="w-full bg-slate-50 border-none rounded-lg p-3 text-sm text-slate-600 focus:ring-0" />
               </div>
 
@@ -157,7 +157,7 @@ export function TalentDetails({ talent, onBack }: { talent: any, onBack: () => v
           
           {activeTab === "Vidéo Entretien" && (
             <div className="text-center text-slate-500 py-20">
-              Contenu de la vidéo d'entretien
+              Contenu de la vidéo d&apos;entretien
             </div>
           )}
         </div>

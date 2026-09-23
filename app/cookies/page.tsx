@@ -20,7 +20,7 @@ export default function CookiesPage() {
       <main className="flex-1 max-w-4xl mx-auto w-full py-16 px-6">
         
         <section className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 mb-10">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">1. Qu'est-ce qu'un cookie ?</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">1. Qu&apos;est-ce qu&apos;un cookie ?</h2>
           <p className="text-slate-600 leading-relaxed">
             Un cookie est un petit fichier texte déposé sur votre terminal lors de la visite de notre plateforme pour garantir le bon fonctionnement du site et améliorer votre expérience.
           </p>
