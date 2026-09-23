@@ -128,8 +128,8 @@ export default function TalentDashboard() {
           }
           setHasValidVideo(hasVid);
 
-          // Social links: at least one filled
-          const hasSocial = !!(data.talentProfile?.facebook || data.talentProfile?.linkedin || data.talentProfile?.twitter || data.talentProfile?.pinterest || data.talentProfile?.behance);
+          // Social links: ALL 5 networks must be filled
+          const hasSocial = !!(data.talentProfile?.facebook && data.talentProfile?.linkedin && data.talentProfile?.twitter && data.talentProfile?.pinterest && data.talentProfile?.behance);
           setHasSocialLinks(hasSocial);
 
           // Calculate profile percentage — 5 steps matching the visual list
@@ -571,7 +571,7 @@ export default function TalentDashboard() {
                         { label: "Informations personnelles", done: !!userName, pct: 20, tab: "profil" },
                         { label: "Photo de profil", done: !!userAvatar, pct: 10, tab: "profil" },
                         { label: "CV uploadé", done: cvFileName !== "Aucun CV ajouté", pct: 20, tab: "profil" },
-                        { label: "Réseaux sociaux", done: hasSocialLinks, pct: 10, tab: "profil" },
+                        { label: "Réseaux sociaux (5 liens requis)", done: hasSocialLinks, pct: 10, tab: "profil" },
                         { label: "Entretien vidéo validé", done: hasValidVideo, pct: 40, tab: "video" },
                       ].map((item) => (
                         <div key={item.label} className="flex items-center justify-between gap-3">

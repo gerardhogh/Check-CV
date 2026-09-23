@@ -86,7 +86,7 @@ function ProfilTalentContent() {
           if (data.avatar) pct += 10;
           if (data.talentProfile?.cvUrl) pct += 20;
 
-          const hasSocial = !!(data.talentProfile?.facebook || data.talentProfile?.linkedin || data.talentProfile?.twitter || data.talentProfile?.pinterest || data.talentProfile?.behance);
+          const hasSocial = !!(data.talentProfile?.facebook && data.talentProfile?.linkedin && data.talentProfile?.twitter && data.talentProfile?.pinterest && data.talentProfile?.behance);
           if (hasSocial) pct += 10;
 
           const hasVid = !!(data.talentProfile?.videoUrl) || localStorage.getItem("interview_recorded") === "true";
