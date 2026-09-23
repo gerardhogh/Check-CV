@@ -20,6 +20,7 @@ export default function ConnexionPage() {
   const [remember, setRemember] = useState(true);
   const [tab, setTab] = useState<UserRole>("talent");
   const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -35,9 +36,10 @@ export default function ConnexionPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFormError("");
 
     if (!email.trim() || !password.trim()) {
-      setError("Veuillez renseigner votre email et mot de passe.");
+      setFormError("Veuillez renseigner votre email et mot de passe.");
       return;
     }
 
@@ -50,7 +52,7 @@ export default function ConnexionPage() {
       });
 
       if (result?.error) {
-        setError(result.error);
+        setFormError(result.error);
       } else {
         // Redirection dynamique gérée après le login, par exemple via le callback,
         // Mais ici, on va rediriger vers le dashboard par défaut (ou on pourrait vérifier la session).
@@ -65,7 +67,7 @@ export default function ConnexionPage() {
         }
       }
     } catch (err) {
-      setError("Erreur de connexion. Veuillez réessayer.");
+      setFormError("Erreur de connexion. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }
@@ -172,6 +174,13 @@ export default function ConnexionPage() {
                   J'ai compris
                 </button>
               </div>
+            </div>
+          )}
+
+          {formError && (
+            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2 text-xs text-red-600">
+              <AlertCircle size={16} className="flex-shrink-0" />
+              <span>{formError}</span>
             </div>
           )}
 
