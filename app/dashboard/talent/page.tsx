@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
+import LogoutButton from "../../components/LogoutButton";
 import {
   Menu,
   Bell,
@@ -404,12 +405,11 @@ export default function TalentDashboard() {
                   >
                     <Settings size={14} /> Paramètres
                   </button>
-                  <button
-                    onClick={logout}
+                  <LogoutButton
                     className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100 mt-1 flex items-center gap-2"
                   >
                     <LogOut size={14} /> Déconnexion
-                  </button>
+                  </LogoutButton>
                 </div>
               )}
             </div>

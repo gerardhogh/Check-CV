@@ -6,8 +6,34 @@ import { revalidatePath } from "next/cache";
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const mine = searchParams.get('mine');
+
+    if (mine === 'true') {
+      const session = await getServerSession(authOptions);
+      if (!session || !session.user) {
+        return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+      }
+      
+      const userId = (session.user as any).id;
+      const recruiterProfile = await prisma.recruiterProfile.findUnique({
+        where: { userId }
+      });
+
+      if (!recruiterProfile) {
+        return NextResponse.json([]);
+      }
+
+      const myJobs = await prisma.jobOffer.findMany({
+        where: { recruiterId: recruiterProfile.id },
+        include: { recruiter: true },
+        orderBy: { createdAt: "desc" }
+      });
+      return NextResponse.json(myJobs);
+    }
+
     const jobs = await prisma.jobOffer.findMany({
       where: {
         status: "PUBLISHED"

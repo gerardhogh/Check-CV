@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   ArrowLeft,
@@ -30,6 +30,31 @@ export interface CandidatData {
   status?: "Accepté" | "En attente" | "Rejeté";
 }
 
+interface FullCandidatProfile {
+  id: string | number;
+  name: string;
+  email: string;
+  contact: string;
+  date: string;
+  status: string;
+  videoUrl?: string;
+  domaine: string;
+  location: string;
+  profession: string;
+  bio: string;
+  imageUrl: string;
+  isVerified: boolean;
+  skills: string[];
+  gender: string;
+  interviewSession?: {
+    id: string;
+    status: string;
+    videoRecordings?: string;
+    aiScore?: number;
+    aiFeedback?: string;
+  } | null;
+}
+
 interface CandidatProfilDetailProps {
   candidat?: CandidatData;
   onBack: () => void;
@@ -45,12 +70,34 @@ export default function CandidatProfilDetail({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [fullProfile, setFullProfile] = useState<FullCandidatProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const name = candidat?.name || "Alicia PARKER";
-  const profession = candidat?.profession || "Développeur Frontend";
-  const email = candidat?.email || "jean.dossou@mail.com";
-  const phone = candidat?.phone || "+229 01 91 49 61 67";
-  const imageUrl = candidat?.imageUrl || "/assets/candidate-alicia-parker.jpg";
+  // Fetch full data if candidat.id is provided
+  useEffect(() => {
+    if (candidat?.id) {
+      setIsLoading(true);
+      fetch(`/api/talents/${candidat.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.error) {
+            setFullProfile(data);
+          }
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setIsLoading(false);
+        });
+    }
+  }, [candidat?.id]);
+
+  const name = fullProfile?.name || candidat?.name || "Alicia PARKER";
+  const profession = fullProfile?.profession || candidat?.profession || "Développeur Frontend";
+  const email = fullProfile?.email || candidat?.email || "jean.dossou@mail.com";
+  const phone = fullProfile?.contact || candidat?.phone || "+229 01 91 49 61 67";
+  const imageUrl = fullProfile?.imageUrl || candidat?.imageUrl || "/assets/candidate-alicia-parker.jpg";
+  const finalVideoUrl = fullProfile?.interviewSession?.videoRecordings || fullProfile?.videoUrl;
 
   const showNotification = (msg: string) => {
     setToastMsg(msg);
@@ -439,64 +486,44 @@ export default function CandidatProfilDetail({
               </div>
 
               {/* Lecteur Vidéo interactif avec la vidéo enregistrée par le talent */}
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-slate-200">
-                <Image
-                  src="/assets/candidate-alicia-parker.jpg"
-                  alt={`Vidéo entretien de ${name}`}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 800px"
-                  className="object-cover opacity-90"
-                />
-
-                {/* Overlay sombre */}
-                <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsPlaying(!isPlaying);
-                      showNotification(isPlaying ? "Vidéo en pause" : "Lecture de l'entretien vidéo...");
-                    }}
-                    className="w-16 h-16 rounded-full bg-white/90 hover:bg-white text-[#32A8D7] shadow-2xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
-                    aria-label={isPlaying ? "Pause" : "Play"}
-                  >
-                    {isPlaying ? <Pause size={28} className="fill-current" /> : <Play size={28} className="fill-current translate-x-0.5" />}
-                  </button>
+              {finalVideoUrl ? (
+                <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-slate-200 flex flex-col">
+                  <video
+                    src={finalVideoUrl}
+                    controls
+                    className="w-full h-full object-contain"
+                  />
                 </div>
+              ) : (
+                <div className="relative w-full aspect-video rounded-2xl bg-slate-100 border border-slate-200 flex flex-col items-center justify-center text-slate-400">
+                  <Video size={48} className="mb-4 opacity-50" />
+                  <p className="text-sm font-medium">Aucune vidéo d'entretien disponible</p>
+                </div>
+              )}
 
-                {/* Barre de contrôle inférieure */}
-                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 flex items-center gap-4 text-white">
-                  <button
-                    type="button"
-                    onClick={() => setIsPlaying(!isPlaying)}
-                    className="p-1 hover:text-[#32A8D7] transition-colors"
-                  >
-                    {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-                  </button>
-
-                  <span className="text-xs font-mono font-medium">18:00</span>
-
-                  {/* Timeline Bar */}
-                  <div className="flex-1 h-1.5 bg-white/30 rounded-full overflow-hidden cursor-pointer">
-                    <div className="h-full bg-[#32A8D7] w-2/5 rounded-full" />
+              {/* AI Score and Feedback (if available) */}
+              {fullProfile?.interviewSession?.aiScore !== undefined && fullProfile?.interviewSession?.aiScore !== null && (
+                <div className="mt-6 p-5 rounded-xl bg-indigo-50/60 border border-indigo-100">
+                  <h4 className="text-sm font-bold text-indigo-900 flex items-center gap-2 mb-3">
+                    <CheckCircle size={18} className="text-indigo-500" />
+                    Évaluation de l'IA Check CV
+                  </h4>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex-shrink-0 w-16 h-16 rounded-full bg-white border-2 border-indigo-200 flex items-center justify-center shadow-sm">
+                      <span className="text-lg font-black text-indigo-600">{fullProfile.interviewSession.aiScore}%</span>
+                    </div>
+                    <div className="text-xs text-slate-700 leading-relaxed">
+                      Ce score est calculé par notre intelligence artificielle en analysant la pertinence des réponses, le langage corporel, et la clarté de l'expression.
+                    </div>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsMuted(!isMuted)}
-                    className="p-1 hover:text-[#32A8D7] transition-colors"
-                  >
-                    {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => showNotification("Plein écran activé")}
-                    className="p-1 hover:text-[#32A8D7] transition-colors"
-                  >
-                    <Maximize2 size={18} />
-                  </button>
+                  {fullProfile.interviewSession.aiFeedback && (
+                    <div className="bg-white rounded-lg p-4 border border-indigo-50 text-xs text-slate-700 leading-relaxed shadow-sm">
+                      <strong className="text-indigo-800 block mb-1">Résumé de l'analyse :</strong>
+                      {fullProfile.interviewSession.aiFeedback}
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
           )}
 

@@ -114,13 +114,23 @@ function ProfilTalentContent() {
     });
 
     try {
-      await saveCvToDB(selectedCvFile, selectedCvFile.name);
-      const url = URL.createObjectURL(selectedCvFile);
-      setCvBlobUrl(url);
-      setCvName(selectedCvFile.name);
+      const formData = new FormData();
+      formData.append("cv", selectedCvFile);
+
+      const res = await fetch("/api/talents/cv", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Erreur lors de l'upload");
+
+      setCvBlobUrl(data.cvUrl);
+      setCvName(data.fileName);
       setCvDate(formattedDate);
 
-      localStorage.setItem("check_cv_name", selectedCvFile.name);
+      localStorage.setItem("check_cv_name", data.fileName);
       localStorage.setItem("check_cv_date", formattedDate);
       localStorage.setItem("check_cv_has_pdf", "true");
 
@@ -129,16 +139,7 @@ function ProfilTalentContent() {
       showToast("CV mis à jour avec succès !");
     } catch (err) {
       console.error("Erreur sauvegarde CV", err);
-      // Fallback local URL
-      const url = URL.createObjectURL(selectedCvFile);
-      setCvBlobUrl(url);
-      setCvName(selectedCvFile.name);
-      setCvDate(formattedDate);
-      localStorage.setItem("check_cv_name", selectedCvFile.name);
-      localStorage.setItem("check_cv_date", formattedDate);
-      setSelectedCvFile(null);
-      setSelectedCvName("");
-      showToast("CV mis à jour avec succès !");
+      showToast("Une erreur s'est produite lors de la sauvegarde du CV.");
     }
   };
 
@@ -470,22 +471,95 @@ export default function ProfilTalent() {
 
 /* ─── Onglet: Informations ─── */
 function InformationsTab() {
+  const [formData, setFormData] = useState({
+    name: "",
+    bio: "",
+    degree: "",
+    username: "",
+    gender: "",
+    country: "",
+    city: "",
+    phone: "",
+    email: "",
+    skills: "",
+    searchType: "Emploi"
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/talents/me")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          setFormData({
+            name: data.name || "",
+            email: data.email || "",
+            bio: data.talentProfile?.bio || "",
+            degree: data.talentProfile?.degree || "",
+            username: data.email?.split("@")[0] || "",
+            gender: data.talentProfile?.gender || "",
+            country: data.talentProfile?.country || "",
+            city: data.talentProfile?.city || "",
+            phone: data.talentProfile?.phone || "",
+            skills: data.talentProfile?.skills ? JSON.parse(data.talentProfile.skills).join(", ") : "",
+            searchType: "Emploi"
+          });
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const payload = {
+        name: formData.name,
+        bio: formData.bio,
+        phone: formData.phone,
+        city: formData.city,
+        country: formData.country,
+        degree: formData.degree,
+        gender: formData.gender,
+        skills: formData.skills ? JSON.stringify(formData.skills.split(",").map(s => s.trim())) : undefined
+      };
+      
+      const res = await fetch("/api/talents/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        alert("Informations mises à jour avec succès");
+      } else {
+        alert("Erreur lors de la mise à jour");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Erreur lors de la mise à jour");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) return <div className="p-4 text-center text-slate-500">Chargement...</div>;
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-1.5">
-          <label className="text-[13px] text-[#475569] font-semibold">Prénom</label>
+          <label className="text-[13px] text-[#475569] font-semibold">Nom Complet</label>
           <input
             type="text"
-            defaultValue="Jean"
-            className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[13px] text-[#475569] font-semibold">Nom</label>
-          <input
-            type="text"
-            defaultValue="DOSSOU"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
             className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
           />
         </div>
@@ -495,7 +569,10 @@ function InformationsTab() {
           </label>
           <input
             type="text"
-            defaultValue="Développeur Frontend"
+            name="degree"
+            value={formData.degree}
+            onChange={handleChange}
+            placeholder="ex: Développeur Frontend"
             className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
           />
         </div>
@@ -505,8 +582,10 @@ function InformationsTab() {
           </label>
           <input
             type="text"
-            defaultValue="jeandossou2345"
-            className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
+            name="username"
+            value={formData.username}
+            disabled
+            className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-500 outline-none opacity-70"
           />
         </div>
         <div className="space-y-1.5">
@@ -515,7 +594,10 @@ function InformationsTab() {
           </label>
           <input
             type="text"
-            defaultValue="Homme"
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            placeholder="ex: Homme"
             className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
           />
         </div>
@@ -525,7 +607,9 @@ function InformationsTab() {
           </label>
           <input
             type="text"
-            defaultValue="Emploi"
+            name="searchType"
+            value={formData.searchType}
+            onChange={handleChange}
             className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
           />
         </div>
@@ -535,7 +619,10 @@ function InformationsTab() {
           </label>
           <input
             type="text"
-            defaultValue="Benin"
+            name="country"
+            value={formData.country}
+            onChange={handleChange}
+            placeholder="ex: Bénin"
             className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
           />
         </div>
@@ -543,7 +630,10 @@ function InformationsTab() {
           <label className="text-[13px] text-[#475569] font-semibold">Ville</label>
           <input
             type="text"
-            defaultValue="Cotonou"
+            name="city"
+            value={formData.city}
+            onChange={handleChange}
+            placeholder="ex: Cotonou"
             className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
           />
         </div>
@@ -553,7 +643,10 @@ function InformationsTab() {
           </label>
           <input
             type="text"
-            defaultValue="+229 01 91 49 61 67"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="ex: +229 01 02 03 04"
             className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
           />
         </div>
@@ -561,8 +654,10 @@ function InformationsTab() {
           <label className="text-[13px] text-[#475569] font-semibold">Email</label>
           <input
             type="email"
-            defaultValue="jean.dossou@mail.com"
-            className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
+            name="email"
+            value={formData.email}
+            disabled
+            className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-500 outline-none opacity-70"
           />
         </div>
       </div>
@@ -573,7 +668,10 @@ function InformationsTab() {
         </label>
         <textarea
           rows={3}
-          defaultValue="Développeur passionné avec 3 ans d'expérience dans la création d'applications web réactives."
+          name="bio"
+          value={formData.bio}
+          onChange={handleChange}
+          placeholder="Parlez-nous de vous..."
           className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100 resize-none"
         />
       </div>
@@ -584,13 +682,20 @@ function InformationsTab() {
         </label>
         <input
           type="text"
-          placeholder="Ajoutez vos compétences séparé par des virgules"
+          name="skills"
+          value={formData.skills}
+          onChange={handleChange}
+          placeholder="Ajoutez vos compétences séparées par des virgules (ex: React, Node, SQL)"
           className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
         />
       </div>
 
-      <button className="w-full bg-[#008de4] hover:bg-blue-600 text-white font-bold py-3 rounded-md text-[14px] transition-colors mt-2">
-        Modifier les informations
+      <button 
+        onClick={handleSave}
+        disabled={isSaving}
+        className="w-full bg-[#008de4] hover:bg-blue-600 disabled:opacity-50 text-white font-bold py-3 rounded-md text-[14px] transition-colors mt-2"
+      >
+        {isSaving ? "Enregistrement..." : "Modifier les informations"}
       </button>
     </div>
   );
@@ -598,9 +703,66 @@ function InformationsTab() {
 
 /* ─── Onglet: Réseaux ─── */
 function ReseauxTab() {
+  const [formData, setFormData] = useState({
+    facebook: "",
+    linkedin: "",
+    twitter: "",
+    pinterest: "",
+    behance: ""
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/talents/me")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          setFormData({
+            facebook: data.talentProfile?.facebook || "",
+            linkedin: data.talentProfile?.linkedin || "",
+            twitter: data.talentProfile?.twitter || "",
+            pinterest: data.talentProfile?.pinterest || "",
+            behance: data.talentProfile?.behance || ""
+          });
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const res = await fetch("/api/talents/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      if (res.ok) {
+        alert("Réseaux sociaux mis à jour avec succès");
+      } else {
+        alert("Erreur lors de la mise à jour");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Erreur lors de la mise à jour");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) return <div className="p-4 text-center text-slate-500">Chargement...</div>;
+
   const networks = [
     {
-      name: "Facebook",
+      name: "facebook",
+      label: "Facebook",
       icon: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px] text-blue-600">
           <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -608,7 +770,8 @@ function ReseauxTab() {
       ),
     },
     {
-      name: "LinkedIn",
+      name: "linkedin",
+      label: "LinkedIn",
       icon: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px] text-sky-600">
           <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
@@ -616,7 +779,8 @@ function ReseauxTab() {
       ),
     },
     {
-      name: "Twitter",
+      name: "twitter",
+      label: "Twitter",
       icon: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px]">
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -624,7 +788,8 @@ function ReseauxTab() {
       ),
     },
     {
-      name: "Pinterest",
+      name: "pinterest",
+      label: "Pinterest",
       icon: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px] text-red-600">
           <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345l-.288 1.17c-.038.156-.128.188-.291.111-1.092-.516-1.776-2.13-1.776-3.432 0-2.796 2.032-5.364 5.864-5.364 3.084 0 5.482 2.196 5.482 5.132 0 3.067-1.933 5.535-4.618 5.535-1.127 0-2.188-.585-2.55-1.275l-.693 2.645c-.25.952-.924 2.142-1.378 2.871 1.098.341 2.261.523 3.46.523 6.621 0 11.988-5.367 11.988-11.987C24.005 5.367 18.638 0 12.017 0z" />
@@ -632,7 +797,8 @@ function ReseauxTab() {
       ),
     },
     {
-      name: "Behance",
+      name: "behance",
+      label: "Behance",
       icon: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px]">
           <path d="M22 7h-7v-2h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14h-8.027c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988H0V3.98h7.366c3.121 0 5.028 1.074 5.028 3.411 0 1.76-1.073 2.537-2.074 2.924 1.343.344 2.457 1.332 2.457 3.344 0 2.92-2.348 3.329-5.11 3.329zm-1.898-10.999H2.82v4h1.748c1.375 0 2.234-.355 2.234-1.921 0-1.493-.848-2.079-2.234-2.079zm.344 6h-2.091v4.394h2.091c1.554 0 2.65-.453 2.65-2.221 0-1.767-1.157-2.173-2.65-2.173z" />
@@ -648,19 +814,26 @@ function ReseauxTab() {
           <div className="flex items-center gap-2 w-32 shrink-0">
             {net.icon}
             <span className="text-[13px] text-slate-700 font-semibold">
-              {net.name} <span className="text-slate-400 font-normal">:</span>
+              {net.label} <span className="text-slate-400 font-normal">:</span>
             </span>
           </div>
           <input
             type="url"
-            defaultValue="https://web.facebook.com/gerardhounnou.gh"
+            name={net.name}
+            value={(formData as any)[net.name]}
+            onChange={handleChange}
+            placeholder={`Lien vers votre profil ${net.label}`}
             className="flex-1 bg-white border border-slate-300 rounded-md px-4 py-2 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
           />
         </div>
       ))}
       <div className="pt-2">
-        <button className="w-full bg-[#008de4] hover:bg-blue-600 text-white font-bold py-3 rounded-md text-[14px] transition-colors">
-          Enregistrer les informations
+        <button 
+          onClick={handleSave}
+          disabled={isSaving}
+          className="w-full bg-[#008de4] hover:bg-blue-600 disabled:opacity-50 text-white font-bold py-3 rounded-md text-[14px] transition-colors"
+        >
+          {isSaving ? "Enregistrement..." : "Enregistrer les informations"}
         </button>
       </div>
     </div>

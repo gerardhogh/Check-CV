@@ -1,23 +1,16 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Search } from "lucide-react";
 import { TalentDetails } from "../components/TalentDetails";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function AdminTalents() {
   const [search, setSearch] = useState("");
   const [selectedTalent, setSelectedTalent] = useState<any>(null);
 
-  const [talents, setTalents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/talents')
-      .then(res => res.json())
-      .then(data => {
-        setTalents(data);
-        setLoading(false);
-      });
-  }, []);
+  const { data: talents = [], isLoading: loading } = useSWR("/api/talents", fetcher);
 
   const filtered = talents.filter(t =>
     t.name.toLowerCase().includes(search.toLowerCase()) ||

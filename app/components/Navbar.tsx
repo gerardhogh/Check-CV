@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import LogoutButton from "./LogoutButton";
 import {
   Menu,
   X,
@@ -185,16 +186,13 @@ export default function Navbar({
                 >
                   Mon Espace ({user.role})
                 </Link>
-                <button
-                  onClick={() => {
-                    logout();
-                    setMobileOpen(false);
-                  }}
+                <LogoutButton
+                  onClick={() => setMobileOpen(false)}
                   className="p-2.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50"
                   title="Déconnexion"
                 >
                   <LogOut size={18} />
-                </button>
+                </LogoutButton>
               </div>
             ) : (
               <>

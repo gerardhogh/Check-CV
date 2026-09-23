@@ -1,42 +1,31 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Search, PlusCircle, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function AdminEmplois() {
   const [activeTab, setActiveTab] = useState("Toutes les offres");
   const [search, setSearch] = useState("");
-  const [offres, setOffres] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch('/api/jobs')
-      .then(res => res.json())
-      .then(data => {
-        if (!Array.isArray(data)) {
-          setOffres([]);
-          setLoading(false);
-          return;
-        }
-        const formatted = data.map((j: any) => ({
-          id: j.id.substring(0, 8),
-          rawId: j.id,
-          titre: j.title,
-          entreprise: j.recruiter?.companyName || "Entreprise Inconnue",
-          date: new Date(j.createdAt).toLocaleDateString("fr-FR"),
-          contrat: j.contractType || "Non spécifié",
-          localisation: j.location || "Non spécifié",
-          candidatures: 0,
-          status: j.status === "PUBLISHED" ? "Actif" : (j.status === "CLOSED" ? "Suspendu" : "En attente"),
-          isAdminCreated: false,
-          candidats: 0
-        }));
-        setOffres(formatted);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  const { data: data = [], isLoading: loading } = useSWR("/api/admin/jobs", fetcher);
+
+  const offres = Array.isArray(data) ? data.map((j: any) => ({
+    id: j.id.substring(0, 8),
+    rawId: j.id,
+    titre: j.title,
+    entreprise: j.recruiter?.companyName || "Entreprise Inconnue",
+    date: new Date(j.createdAt).toLocaleDateString("fr-FR"),
+    contrat: j.contractType || "Non spécifié",
+    localisation: j.location || "Non spécifié",
+    candidatures: j.applications?.length || 0,
+    status: j.status === "PUBLISHED" ? "Actif" : (j.status === "CLOSED" ? "Suspendu" : "En attente"),
+    isAdminCreated: false,
+    candidats: j.applications?.length || 0
+  })) : [];
 
   const filteredToutesOffres = offres.filter(o => 
     o.titre.toLowerCase().includes(search.toLowerCase()) || 

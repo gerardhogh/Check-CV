@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Camera, Save } from "lucide-react";
 
@@ -53,27 +53,98 @@ export default function ProfilTab() {
   const [activeTab, setActiveTab] = useState<ProfileTab>("informations");
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // Informations state
-  const [nomEntreprise, setNomEntreprise] = useState("Lorem ipsum");
+  const [nomEntreprise, setNomEntreprise] = useState("");
   const [secteur, setSecteur] = useState("");
-  const [email, setEmail] = useState("contact@enterprise.com");
-  const [telephone, setTelephone] = useState("+229 01 00 00 00 00");
-  const [siteWeb, setSiteWeb] = useState("https:www.votreentreprise.com");
+  const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [siteWeb, setSiteWeb] = useState("");
   const [adresse, setAdresse] = useState("");
   const [description, setDescription] = useState("");
   const [competences, setCompetences] = useState("");
 
   // Réseaux state
-  const [facebook, setFacebook] = useState("https://web.facebook.com/gerardhounnou.gh");
-  const [linkedin, setLinkedin] = useState("https://web.facebook.com/gerardhounnou.gh");
-  const [twitter, setTwitter] = useState("https://web.facebook.com/gerardhounnou.gh");
-  const [pinterest, setPinterest] = useState("https://web.facebook.com/gerardhounnou.gh");
-  const [behance, setBehance] = useState("https://web.facebook.com/gerardhounnou.gh");
+  const [facebook, setFacebook] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+  const [twitter, setTwitter] = useState("");
+  const [pinterest, setPinterest] = useState("");
+  const [behance, setBehance] = useState("");
 
   // Toast
-  const [toast, setToast] = useState<string | null>(null);
-  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
+  const [toast, setToast] = useState<{msg: string; type: "success" | "error"} | null>(null);
+  const showToast = (msg: string, type: "success" | "error" = "success") => { setToast({msg, type}); setTimeout(() => setToast(null), 3000); };
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await fetch("/api/recruiters/me");
+        if (res.ok) {
+          const data = await res.json();
+          setEmail(data.email || "");
+          setAvatarSrc(data.avatar || null);
+          
+          if (data.recruiterProfile) {
+            setNomEntreprise(data.recruiterProfile.companyName || "");
+            setSecteur(data.recruiterProfile.industry || "");
+            setSiteWeb(data.recruiterProfile.website || "");
+            setTelephone(data.recruiterProfile.phone || "");
+            setAdresse(data.recruiterProfile.address || "");
+            setDescription(data.recruiterProfile.description || "");
+            setCompetences(data.recruiterProfile.skills || "");
+
+            setFacebook(data.recruiterProfile.facebook || "");
+            setLinkedin(data.recruiterProfile.linkedin || "");
+            setTwitter(data.recruiterProfile.twitter || "");
+            setPinterest(data.recruiterProfile.pinterest || "");
+            setBehance(data.recruiterProfile.behance || "");
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching profile", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProfile();
+  }, []);
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/recruiters/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: nomEntreprise,
+          industry: secteur,
+          website: siteWeb,
+          phone: telephone,
+          address: adresse,
+          description,
+          skills: competences,
+          facebook,
+          linkedin,
+          twitter,
+          pinterest,
+          behance,
+        }),
+      });
+
+      if (res.ok) {
+        showToast("Profil mis à jour avec succès !", "success");
+      } else {
+        showToast("Erreur lors de la mise à jour", "error");
+      }
+    } catch (error) {
+      console.error(error);
+      showToast("Erreur lors de la mise à jour", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -85,13 +156,17 @@ export default function ProfilTab() {
 
   const inputClass = "w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 outline-none focus:border-[#32A8D7] transition-colors placeholder:text-slate-300";
 
+  if (loading) {
+    return <div className="flex justify-center py-10"><div className="w-6 h-6 border-2 border-[#32A8D7] border-t-transparent rounded-full animate-spin"></div></div>;
+  }
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm border border-slate-700">
-          <span className="w-2 h-2 rounded-full bg-green-400" />
-          {toast}
+        <div className={`fixed top-6 right-6 z-50 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm border ${toast.type === "success" ? "bg-slate-900 border-slate-700" : "bg-red-500 border-red-600"}`}>
+          <span className={`w-2 h-2 rounded-full ${toast.type === "success" ? "bg-green-400" : "bg-white"}`} />
+          {toast.msg}
         </div>
       )}
 
@@ -151,7 +226,7 @@ export default function ProfilTab() {
               {/* Nom entreprise */}
               <div>
                 <label className="block text-sm text-slate-600 mb-1.5">Nom de l&apos;entreprise</label>
-                <input type="text" value={nomEntreprise} onChange={(e) => setNomEntreprise(e.target.value)} className={inputClass} placeholder="Lorem ipsum" />
+                <input type="text" value={nomEntreprise} onChange={(e) => setNomEntreprise(e.target.value)} className={inputClass} placeholder="Nom de l'entreprise" />
               </div>
 
               {/* Secteur */}
@@ -182,7 +257,7 @@ export default function ProfilTab() {
               {/* Email */}
               <div>
                 <label className="block text-sm text-slate-600 mb-1.5">Email de contact</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} placeholder="contact@enterprise.com" />
+                <input type="email" value={email} disabled className={`${inputClass} bg-slate-50 cursor-not-allowed text-slate-500`} placeholder="contact@enterprise.com" />
               </div>
 
               {/* Téléphone */}
@@ -194,7 +269,7 @@ export default function ProfilTab() {
               {/* Site web */}
               <div>
                 <label className="block text-sm text-slate-600 mb-1.5">Site web</label>
-                <input type="url" value={siteWeb} onChange={(e) => setSiteWeb(e.target.value)} className={inputClass} placeholder="https:www.votreentreprise.com" />
+                <input type="url" value={siteWeb} onChange={(e) => setSiteWeb(e.target.value)} className={inputClass} placeholder="https://www.votreentreprise.com" />
               </div>
 
               {/* Adresse */}
@@ -216,10 +291,11 @@ export default function ProfilTab() {
               </div>
 
               <button
-                onClick={() => showToast("Profil mis à jour avec succès !")}
-                className="w-full py-3 rounded-xl bg-[#32A8D7] hover:bg-[#2896c2] text-white text-sm font-semibold shadow-sm transition-colors flex items-center justify-center gap-2 mt-2"
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className="w-full py-3 rounded-xl bg-[#32A8D7] hover:bg-[#2896c2] text-white text-sm font-semibold shadow-sm transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
               >
-                <Save size={15} /> Mettre à jour le profil
+                <Save size={15} /> {saving ? "Enregistrement..." : "Mettre à jour le profil"}
               </button>
             </div>
           )}
@@ -248,10 +324,11 @@ export default function ProfilTab() {
               ))}
 
               <button
-                onClick={() => showToast("Réseaux enregistrés avec succès !")}
-                className="w-full py-3 rounded-xl bg-[#32A8D7] hover:bg-[#2896c2] text-white text-sm font-semibold shadow-sm transition-colors flex items-center justify-center gap-2 mt-2"
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className="w-full py-3 rounded-xl bg-[#32A8D7] hover:bg-[#2896c2] text-white text-sm font-semibold shadow-sm transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
               >
-                <Save size={15} /> Enregistrer les informations
+                <Save size={15} /> {saving ? "Enregistrement..." : "Enregistrer les informations"}
               </button>
             </div>
           )}

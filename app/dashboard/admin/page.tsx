@@ -19,12 +19,12 @@ import { LogoutModal } from "../recruteur/components/Modals";
 
 // ── Data ───────────────────────────────────────────────────────────────────
 
-const globalStats = [
-  { label: "Talents inscrits", value: "0", icon: Users, color: "text-blue-600", bg: "bg-blue-50/50 hover:bg-blue-50", border: "border-blue-100", href: "/dashboard/admin/talents" },
-  { label: "Recruteurs inscrits", value: "0", icon: Briefcase, color: "text-emerald-600", bg: "bg-emerald-50/50 hover:bg-emerald-50", border: "border-emerald-100", href: "/dashboard/admin/recruteurs" },
-  { label: "Offres publiées", value: "0", icon: CheckCircle, color: "text-pink-600", bg: "bg-pink-50/50 hover:bg-pink-50", border: "border-pink-100", href: "/dashboard/admin/emplois" },
-  { label: "Vidéos soumises", value: "0", icon: Eye, color: "text-amber-600", bg: "bg-amber-50/50 hover:bg-amber-50", border: "border-amber-100", href: "/dashboard/admin/talents" },
-  { label: "Candidatures", value: "0", icon: TrendingUp, color: "text-indigo-600", bg: "bg-indigo-50/50 hover:bg-indigo-50", border: "border-indigo-100", href: "/dashboard/admin/emplois" },
+const globalStatsTemplate = [
+  { label: "Talents inscrits", key: "talentsCount", icon: Users, color: "text-blue-600", bg: "bg-blue-50/50 hover:bg-blue-50", border: "border-blue-100", href: "/dashboard/admin/talents" },
+  { label: "Recruteurs inscrits", key: "recruteursCount", icon: Briefcase, color: "text-emerald-600", bg: "bg-emerald-50/50 hover:bg-emerald-50", border: "border-emerald-100", href: "/dashboard/admin/recruteurs" },
+  { label: "Offres publiées", key: "jobsCount", icon: CheckCircle, color: "text-pink-600", bg: "bg-pink-50/50 hover:bg-pink-50", border: "border-pink-100", href: "/dashboard/admin/emplois" },
+  { label: "Vidéos soumises", key: "videosCount", icon: Eye, color: "text-amber-600", bg: "bg-amber-50/50 hover:bg-amber-50", border: "border-amber-100", href: "/dashboard/admin/talents" },
+  { label: "Candidatures", key: "applicationsCount", icon: TrendingUp, color: "text-indigo-600", bg: "bg-indigo-50/50 hover:bg-indigo-50", border: "border-indigo-100", href: "/dashboard/admin/emplois" },
 ];
 
 const jobsData: any[] = [];
@@ -33,14 +33,44 @@ const pieData: any[] = [];
 const barData: any[] = [];
 const popularOffers: any[] = [];
 
-export default function AdminDashboard() {
-  const [jobs, setJobs] = useState(jobsData);
+import useSWR from "swr";
 
-  const toggleStatus = (i: number) => {
-    setJobs(prev => prev.map((j, idx) => idx === i ? { ...j, status: j.status === "Actif" ? "Inactif" : "Actif" } : j));
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
+export default function AdminDashboard() {
+  const { data: jobsFetched = [], mutate } = useSWR("/api/admin/jobs", fetcher);
+  const { data: stats = {} } = useSWR("/api/admin/stats", fetcher);
+
+  const globalStats = globalStatsTemplate.map(stat => ({
+    ...stat,
+    value: stats[stat.key] || 0
+  }));
+
+  const jobs = jobsFetched.map((j: any) => ({
+    id: j.id,
+    title: j.title,
+    company: j.recruiter?.companyName || "Entreprise",
+    location: j.location,
+    category: j.contractType,
+    candidatures: j.applications?.length || 0,
+    date: new Date(j.createdAt).toLocaleDateString("fr-FR"),
+    status: j.status === "PUBLISHED" ? "Actif" : "Inactif",
+    rawStatus: j.status
+  }));
+
+  const toggleStatus = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === "PUBLISHED" ? "CLOSED" : "PUBLISHED";
+    await fetch(`/api/jobs/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus })
+    });
+    mutate();
   };
-  const deleteJob = (i: number) => {
-    setJobs(prev => prev.filter((_, idx) => idx !== i));
+  
+  const deleteJob = async (id: string) => {
+    await fetch(`/api/jobs/${id}`, { method: "DELETE" });
+    mutate();
   };
 
   return (
@@ -55,7 +85,7 @@ export default function AdminDashboard() {
                 return (
                   <Link href={stat.href} key={i} className={`rounded-2xl border ${stat.border} ${stat.bg} p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group`}>
                     <div className="flex justify-between items-start mb-4">
-                      <div className={`p-3 rounded-xl bg-white shadow-sm ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
+                       <div className={`p-3 rounded-xl bg-white shadow-sm ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
                         <Icon size={22} strokeWidth={2.5} />
                       </div>
                     </div>
@@ -72,7 +102,7 @@ export default function AdminDashboard() {
           {/* Jobs table */}
           <div className="card p-5 overflow-x-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-slate-800">Offres d'emploi récentes</h2>
+              <h2 className="font-bold text-slate-800">Offres d&apos;emploi récentes</h2>
               <Link href="/dashboard/admin/emplois" className="btn-primary text-sm px-4 py-2" id="btn-tout-voir-emplois">Tout voir</Link>
             </div>
             {jobs.length > 0 ? (
@@ -90,8 +120,8 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {jobs.map((job, i) => (
-                    <tr key={i}>
+                  {jobs.map((job: any) => (
+                    <tr key={job.id}>
                       <td className="font-medium">{job.title}</td>
                       <td>{job.company}</td>
                       <td>{job.location}</td>
@@ -110,13 +140,13 @@ export default function AdminDashboard() {
                         <div className="flex flex-col gap-0.5">
                           {job.status === "Actif" ? (
                             <>
-                              <button onClick={() => toggleStatus(i)} className="text-xs text-left text-orange-500 hover:underline">Suspendre</button>
-                              <button onClick={() => deleteJob(i)} className="text-xs text-left text-red-500 hover:underline">Supprimer</button>
+                              <button onClick={() => toggleStatus(job.id, job.rawStatus)} className="text-xs text-left text-orange-500 hover:underline">Suspendre</button>
+                              <button onClick={() => deleteJob(job.id)} className="text-xs text-left text-red-500 hover:underline">Supprimer</button>
                             </>
                           ) : (
                             <>
-                              <button onClick={() => toggleStatus(i)} className="text-xs text-left text-blue-600 hover:underline">Activer</button>
-                              <button onClick={() => deleteJob(i)} className="text-xs text-left text-red-500 hover:underline">Supprimer</button>
+                              <button onClick={() => toggleStatus(job.id, job.rawStatus)} className="text-xs text-left text-blue-600 hover:underline">Activer</button>
+                              <button onClick={() => deleteJob(job.id)} className="text-xs text-left text-red-500 hover:underline">Supprimer</button>
                             </>
                           )}
                         </div>
@@ -159,7 +189,7 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex items-center justify-center h-[200px] text-sm text-slate-400 border-2 border-dashed border-slate-100 rounded-xl">
-                  Pas de données d'inscription
+                  Pas de données d&apos;inscription
                 </div>
               )}
             </div>
@@ -200,7 +230,7 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {/* Bar chart */}
             <div className="card p-5">
-              <h3 className="font-bold text-slate-800 mb-4">Taux d'activité mensuelle</h3>
+              <h3 className="font-bold text-slate-800 mb-4">Taux d&apos;activité mensuelle</h3>
               {barData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={barData}>
@@ -213,7 +243,7 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex items-center justify-center h-[180px] text-sm text-slate-400 border-2 border-dashed border-slate-100 rounded-xl">
-                  Pas de données d'activité
+                  Pas de données d&apos;activité
                 </div>
               )}
             </div>
@@ -238,7 +268,7 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-[180px] text-sm text-slate-400 border-2 border-dashed border-slate-100 rounded-xl">
-                  Pas d'offres populaires
+                  Pas d&apos;offres populaires
                 </div>
               )}
             </div>

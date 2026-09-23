@@ -9,7 +9,7 @@ import {
   Menu, Bell, ChevronDown, X, LogOut,
   Home, Users, Briefcase, Settings, History, Shield
 } from "lucide-react";
-import { LogoutModal } from "../../recruteur/components/Modals";
+import LogoutButton from "../../../components/LogoutButton";
 
 const sidebarItems = [
   { href: "/dashboard/admin", icon: Home, label: "Tableau de bord", matchExact: true },
@@ -25,7 +25,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
@@ -133,9 +132,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Link href="/dashboard/admin/parametres" className="block px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 font-medium">
                     Paramètres
                   </Link>
-                  <button onClick={() => { setProfileMenuOpen(false); setIsLogoutModalOpen(true); }} className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100 mt-1">
+                  <LogoutButton 
+                    onClick={() => setProfileMenuOpen(false)} 
+                    className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100 mt-1 block"
+                  >
                     Déconnexion
-                  </button>
+                  </LogoutButton>
                 </div>
               )}
             </div>
@@ -146,14 +148,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {children}
         </main>
       </div>
-
-      {/* Logout Modal */}
-      {isLogoutModalOpen && (
-        <LogoutModal
-          onCancel={() => setIsLogoutModalOpen(false)}
-          onConfirm={() => { setIsLogoutModalOpen(false); logout(); }}
-        />
-      )}
     </div>
   );
 }

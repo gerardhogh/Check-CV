@@ -5,7 +5,10 @@ export async function GET() {
   try {
     const users = await prisma.user.findMany({
       include: {
-        role: true
+        role: true,
+        recruiterProfile: {
+          include: { jobOffers: true }
+        }
       },
       orderBy: { createdAt: 'desc' }
     });

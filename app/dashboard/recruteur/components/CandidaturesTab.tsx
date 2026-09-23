@@ -19,6 +19,7 @@ import {
 import CandidatProfilDetail, { CandidatData } from "./CandidatProfilDetail";
 import DetailOffreView, { JobDetailData } from "./DetailOffreView";
 import ModifierOffreView from "./ModifierOffreView";
+import useSWR from "swr";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 const MOCK_CANDIDATURES: any[] = [];
@@ -63,7 +64,20 @@ export default function CandidaturesTab() {
   const [view, setView] = useState<ViewState>({ type: "list" });
   const [currentPage, setCurrentPage] = useState(1);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [candidatures, setCandidatures] = useState(MOCK_CANDIDATURES);
+
+  const fetcher = (url: string) => fetch(url).then(res => res.json());
+  const { data: candidaturesFetched = [], mutate } = useSWR("/api/applications?role=recruiter", fetcher);
+  
+  const candidatures = candidaturesFetched.map((app: any) => ({
+    id: app.id,
+    talent: app.talent?.user?.name || "Talent sans nom",
+    role: app.jobOffer?.title || "Offre",
+    offreId: app.jobOfferId,
+    statut: app.status === "PENDING" ? "En attente" : app.status === "ACCEPTED" ? "Accepté" : "Rejeté",
+    date: new Date(app.createdAt).toLocaleDateString("fr-FR"),
+    score: Math.floor(Math.random() * 20) + 70, // Mock score for now
+    imageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(app.talent?.user?.name || "T")}&background=random`
+  }));
 
   const perPage = 8;
   const totalPages = Math.ceil(candidatures.length / perPage);
@@ -74,9 +88,18 @@ export default function CandidaturesTab() {
     setTimeout(() => setToastMsg(null), 3000);
   };
 
-  const deleteCandidature = (id: number) => {
-    setCandidatures((prev) => prev.filter((c) => c.id !== id));
-    showToast("Candidature supprimée.");
+  const deleteCandidature = async (id: string | number) => {
+    try {
+      const res = await fetch(`/api/applications/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        mutate();
+        showToast("Candidature supprimée.");
+      } else {
+        showToast("Erreur lors de la suppression.");
+      }
+    } catch (e) {
+      showToast("Erreur lors de la suppression.");
+    }
   };
 
   // Selected candidate for profile view
@@ -280,8 +303,42 @@ export default function CandidaturesTab() {
                           onClick={() => setView({ type: "profil-candidat", candidatId: c.id })}
                           className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#32A8D7] hover:bg-[#2896c2] text-white text-[10px] font-semibold rounded-lg transition-colors whitespace-nowrap"
                         >
-                          <Eye size={10} /> Voir profil
+                          <Eye size={10} /> Voir
                         </button>
+                        {c.statut === "En attente" && (
+                          <>
+                            <button
+                              onClick={async () => {
+                                await fetch(`/api/applications/${c.id}`, {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ status: "ACCEPTED" })
+                                });
+                                mutate();
+                                showToast("Candidature acceptée.");
+                              }}
+                              className="p-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                              title="Accepter"
+                            >
+                              <CheckCircle size={13} />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                await fetch(`/api/applications/${c.id}`, {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ status: "REJECTED" })
+                                });
+                                mutate();
+                                showToast("Candidature rejetée.");
+                              }}
+                              className="p-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                              title="Rejeter"
+                            >
+                              <XCircle size={13} />
+                            </button>
+                          </>
+                        )}
                         <button
                           onClick={() => deleteCandidature(c.id)}
                           className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-colors"

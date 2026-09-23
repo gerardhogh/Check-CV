@@ -122,12 +122,19 @@ function PublierModal({ onClose, onPublish }: PublierModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch("/api/jobs", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ titre, entreprise, pays, ville, typeEmploi, modeTravail, description, lieu: `${ville}, ${pays}` })
-    });
-    onPublish({ titre, entreprise, pays, ville, typeEmploi, modeTravail, description, lieu: `${ville}, ${pays}` });
+    try {
+      const res = await fetch("/api/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ titre, entreprise, pays, ville, typeEmploi, modeTravail, description, lieu: `${ville}, ${pays}` })
+      });
+      if (res.ok) {
+        const newJob = await res.json();
+        onPublish(newJob);
+      }
+    } catch (error) {
+      console.error(error);
+    }
     onClose();
   };
 
@@ -452,7 +459,7 @@ function ModifierOffreView({ emploi, onBack, onSave }: ModifierOffreViewProps) {
 type EmploisView = "grid" | "detail" | "modifier";
 
 export default function EmploisTab() {
-  const { data: emploisFetched = [], error, mutate } = useSWR("/api/jobs", fetcher);
+  const { data: emploisFetched = [], error, mutate } = useSWR("/api/jobs?mine=true", fetcher);
   const emplois = emploisFetched; // Assure la compatibilité avec le reste du code
   const [view, setView] = useState<EmploisView>("grid");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -477,45 +484,94 @@ export default function EmploisTab() {
     // La route POST a déjà été appelée dans PublierModal
     // On refetch simplement la liste des offres
     mutate();
-    setJustPublishedId(Date.now()); // Fallback since we don't have the new ID without returning it properly yet
+    setJustPublishedId((data as any).id || Date.now()); 
+
     setShowPublishedSuccess(true);
   };
 
   // Confirmed delete
-  const confirmDelete = (id: number) => {
-    // Ici appeler DELETE /api/jobs/:id plus tard
-    mutate();
-    setConfirmDeleteId(null);
-    showToast("Offre supprimée.");
-    if (view === "detail" || view === "modifier") {
-      setView("grid");
-      setSelectedId(null);
+  const confirmDelete = async (id: number) => {
+    try {
+      const res = await fetch(`/api/jobs/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        mutate();
+        setConfirmDeleteId(null);
+        showToast("Offre supprimée.");
+        if (view === "detail" || view === "modifier") {
+          setView("grid");
+          setSelectedId(null);
+        }
+      } else {
+        showToast("Erreur lors de la suppression.");
+      }
+    } catch (error) {
+      console.error(error);
+      showToast("Erreur lors de la suppression.");
     }
   };
 
   // Confirmed cloture
-  const confirmCloturer = (id: number) => {
-    // Ici appeler PATCH /api/jobs/:id plus tard
-    mutate();
-    setConfirmCloturerId(null);
-    showToast("Offre clôturée.");
+  const confirmCloturer = async (id: number) => {
+    try {
+      const res = await fetch(`/api/jobs/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CLOSED" })
+      });
+      if (res.ok) {
+        mutate();
+        setConfirmCloturerId(null);
+        showToast("Offre clôturée.");
+      } else {
+        showToast("Erreur lors de la clôture.");
+      }
+    } catch (error) {
+      console.error(error);
+      showToast("Erreur lors de la clôture.");
+    }
   };
 
-  const handleSaveModification = (updated: Emploi) => {
-    // Ici appeler PUT /api/jobs/:id plus tard
-    mutate();
-    showToast("Offre mise à jour !");
-    setView("detail");
+  const handleSaveModification = async (updated: Emploi) => {
+    try {
+      const res = await fetch(`/api/jobs/${updated.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated)
+      });
+      if (res.ok) {
+        mutate();
+        showToast("Offre mise à jour !");
+        setView("detail");
+      } else {
+        showToast("Erreur lors de la mise à jour.");
+      }
+    } catch (error) {
+      console.error(error);
+      showToast("Erreur lors de la mise à jour.");
+    }
   };
 
-  const toggleStatus = (id: number) => {
+  const toggleStatus = async (id: number) => {
     const emp = emplois.find((e: any) => e.id === id);
     if (emp?.status === "PUBLISHED" || emp?.status === "Active") {
       setConfirmCloturerId(id);
     } else {
-      // Toggle
-      mutate();
-      showToast("Offre réactivée.");
+      try {
+        const res = await fetch(`/api/jobs/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "PUBLISHED" })
+        });
+        if (res.ok) {
+          mutate();
+          showToast("Offre réactivée.");
+        } else {
+          showToast("Erreur lors de la réactivation.");
+        }
+      } catch (error) {
+        console.error(error);
+        showToast("Erreur lors de la réactivation.");
+      }
     }
     setOpenMenuId(null);
   };

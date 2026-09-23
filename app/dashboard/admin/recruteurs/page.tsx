@@ -1,47 +1,31 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Search, Mail, Eye, Edit, Trash2 } from "lucide-react";
 import { RecruteurDetails } from "../components/RecruteurDetails";
+import useSWR from "swr";
 
-const mockRecruteurs: any[] = [];
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function AdminRecruteurs() {
   const [search, setSearch] = useState("");
-  const [recruteurs, setRecruteurs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedRecruteur, setSelectedRecruteur] = useState<any>(null);
 
-  useEffect(() => {
-    fetch('/api/users')
-      .then(res => res.json())
-      .then(data => {
-        if (!Array.isArray(data)) {
-          setRecruteurs([]);
-          setLoading(false);
-          return;
-        }
-        
-        // Filter those with recruiterProfile or role name "Recruteur"
-        const recs = data.filter((u: any) => u.recruiterProfile || u.role?.name === "Recruteur");
-        
-        const formatted = recs.map((r: any, index: number) => ({
-          id: r.id,
-          no: (index + 1).toString().padStart(2, '0'),
-          name: r.recruiterProfile?.companyName || r.name || "Entreprise",
-          offresPubliees: r.recruiterProfile?.jobOffers?.length || 0,
-          email: r.email || "",
-          contact: r.recruiterProfile?.phone || r.phone || "Non spécifié",
-          candidats: r.recruiterProfile?.jobOffers?.reduce((acc: number, job: any) => acc + (job.applications?.length || 0), 0) || 0,
-          abonnement: "Standard",
-          date: new Date(r.createdAt).toLocaleDateString("fr-FR"),
-          status: r.active ? "Actif" : "Suspendu"
-        }));
-        
-        setRecruteurs(formatted);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  const { data: users = [], isLoading: loading } = useSWR("/api/users", fetcher);
+
+  const recruteurs = Array.isArray(users) ? users
+    .filter((u: any) => u.recruiterProfile || u.role?.name === "Recruteur")
+    .map((r: any, index: number) => ({
+      id: r.id,
+      no: (index + 1).toString().padStart(2, '0'),
+      name: r.recruiterProfile?.companyName || r.name || "Entreprise",
+      offresPubliees: r.recruiterProfile?.jobOffers?.length || 0,
+      email: r.email || "",
+      contact: r.recruiterProfile?.phone || r.phone || "Non spécifié",
+      candidats: r.recruiterProfile?.jobOffers?.reduce((acc: number, job: any) => acc + (job.applications?.length || 0), 0) || 0,
+      abonnement: "Standard",
+      date: new Date(r.createdAt).toLocaleDateString("fr-FR"),
+      status: r.active ? "Actif" : "Suspendu"
+    })) : [];
 
   const filtered = recruteurs.filter(r => 
     r.name.toLowerCase().includes(search.toLowerCase()) || 

@@ -38,7 +38,7 @@ import AffiliationTab from "./components/AffiliationTab";
 import ParametresTab from "./components/ParametresTab";
 import ProfilTab from "./components/ProfilTab";
 import TransactionsTab from "./components/TransactionsTab";
-import { LogoutModal } from "./components/Modals";
+import LogoutButton from "../../components/LogoutButton";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -67,7 +67,6 @@ export default function RecruteurDashboard() {
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -204,13 +203,13 @@ export default function RecruteurDashboard() {
 
         {/* Logout */}
         <div className="p-4 border-t border-slate-100 shrink-0">
-          <button
-            onClick={() => { setSidebarOpen(false); setIsLogoutModalOpen(true); }}
+          <LogoutButton
+            onClick={() => setSidebarOpen(false)}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
           >
             <LogOut size={18} />
             <span>{t("nav", "logout")}</span>
-          </button>
+          </LogoutButton>
         </div>
       </aside>
 
@@ -378,12 +377,12 @@ export default function RecruteurDashboard() {
                   >
                     <Settings size={14} /> {t("nav", "settings")}
                   </button>
-                  <button
-                    onClick={() => { setProfileMenuOpen(false); setIsLogoutModalOpen(true); }}
+                  <LogoutButton
+                    onClick={() => setProfileMenuOpen(false)}
                     className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100 mt-1 flex items-center gap-2"
                   >
                     <LogOut size={14} /> {t("nav", "logout")}
-                  </button>
+                  </LogoutButton>
                 </div>
               )}
             </div>
@@ -657,14 +656,6 @@ export default function RecruteurDashboard() {
         </main>
       </div>
     </div>
-
-    {/* ── LOGOUT MODAL ─────────────────────────────────────────────────────── */}
-    {isLogoutModalOpen && (
-      <LogoutModal
-        onCancel={() => setIsLogoutModalOpen(false)}
-        onConfirm={() => { setIsLogoutModalOpen(false); logout(); }}
-      />
-    )}
     </>
   );
 }

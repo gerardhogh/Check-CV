@@ -54,6 +54,8 @@ export default function OffresEmplois() {
   const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const [companyTab, setCompanyTab] = useState<"info" | "reseaux">("info");
   const [search, setSearch] = useState("");
+  const [applying, setApplying] = useState(false);
+  const [applySuccess, setApplySuccess] = useState(false);
 
   const { data: jobs = [], error, isLoading } = useSWR("/api/jobs", fetcher);
 
@@ -314,14 +316,35 @@ export default function OffresEmplois() {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
               </button>
               <button 
-                disabled={selectedJob.status === "CLOSED"}
+                disabled={selectedJob.status === "CLOSED" || applying}
+                onClick={async () => {
+                  setApplying(true);
+                  try {
+                    const res = await fetch('/api/applications', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ jobOfferId: selectedJob.id })
+                    });
+                    if (res.ok) {
+                      setApplySuccess(true);
+                      setTimeout(() => setApplySuccess(false), 3000);
+                    } else {
+                      const err = await res.json();
+                      alert(err.error || "Erreur lors de la candidature");
+                    }
+                  } catch (e) {
+                    alert("Erreur lors de la candidature");
+                  } finally {
+                    setApplying(false);
+                  }
+                }}
                 className={`px-8 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-lg flex items-center gap-2 ${
-                  selectedJob.status === "CLOSED" 
+                  selectedJob.status === "CLOSED" || applySuccess 
                   ? "bg-slate-300 cursor-not-allowed shadow-none" 
                   : "bg-blue-600 hover:bg-blue-700 shadow-blue-500/25 hover:scale-105"
                 }`}
               >
-                {selectedJob.status === "CLOSED" ? "Offre non disponible" : "Postuler maintenant"} <ArrowRight size={16} />
+                {selectedJob.status === "CLOSED" ? "Offre non disponible" : applySuccess ? "Candidature envoyée" : applying ? "Envoi..." : "Postuler maintenant"} <ArrowRight size={16} />
               </button>
             </div>
           </div>

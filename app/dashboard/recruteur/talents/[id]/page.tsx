@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
+import LogoutButton from "@/app/components/LogoutButton";
 import {
   Menu,
   Bell,
@@ -35,49 +36,7 @@ import {
 } from "lucide-react";
 
 
-// ─── Mock talent data ──────────────────────────────────────────────────────────
-const MOCK_TALENTS: Record<string, TalentProfile> = {
-  default: {
-    id: "default",
-    name: "Alicia PARKER",
-    username: "jeandossou2345",
-    profession: "Développeur Frontend",
-    firstName: "Jean",
-    lastName: "DOSSOU",
-    sex: "Femme",
-    opportunites: "Emploi",
-    pays: "Benin",
-    ville: "Cotonou",
-    phone: "+229 01 91 49 61 67",
-    email: "jean.dossou@mail.com",
-    bio: "Développeur passionné avec 3 ans d'expérience dans la création d'applications web réactives.",
-    competences: "Javascript, Node js, Laravel, Web design",
-    isActive: true,
-    isVerified: true,
-    imageUrl: "/assets/candidate-alicia-parker.jpg",
-    cvUpdated: "21 avril 2025",
-    socials: {
-      facebook: "https://web.facebook.com/gerardhounnou.gh",
-      linkedin: "https://web.facebook.com/gerardhounnou.gh",
-      twitter: "https://web.facebook.com/gerardhounnou.gh",
-      pinterest: "https://web.facebook.com/gerardhounnou.gh",
-      behance: "https://web.facebook.com/gerardhounnou.gh",
-    },
-  },
-};
-
-function getTalent(id: string): TalentProfile {
-  return (
-    MOCK_TALENTS[id] || {
-      ...MOCK_TALENTS["default"],
-      id,
-      name: `Talent #${id}`,
-      firstName: `Talent`,
-      lastName: `#${id}`,
-    }
-  );
-}
-
+// ─── API Data Fetching ────────────────────────────────────────────────────────
 interface TalentProfile {
   id: string;
   name: string;
@@ -97,12 +56,53 @@ interface TalentProfile {
   isVerified: boolean;
   imageUrl: string;
   cvUpdated: string;
+  videoUrl?: string;
+  interviewSession?: {
+    id: string;
+    status: string;
+    videoRecordings?: string;
+    aiScore?: number;
+    aiFeedback?: string;
+  } | null;
   socials: {
     facebook?: string;
     linkedin?: string;
     twitter?: string;
     pinterest?: string;
     behance?: string;
+  };
+}
+
+// Helper to map DB response to TalentProfile
+function mapToTalentProfile(dbData: any): TalentProfile {
+  return {
+    id: dbData.id.toString(),
+    name: dbData.name,
+    username: dbData.email?.split("@")[0] || "",
+    profession: dbData.profession,
+    firstName: dbData.name?.split(" ")[0] || "",
+    lastName: dbData.name?.split(" ").slice(1).join(" ") || "",
+    sex: dbData.gender,
+    opportunites: "Emploi", // DB doesn't have this, default
+    pays: dbData.location?.split(",")[1]?.trim() || "Benin",
+    ville: dbData.location?.split(",")[0]?.trim() || "Cotonou",
+    phone: dbData.contact,
+    email: dbData.email,
+    bio: dbData.bio,
+    competences: dbData.skills?.join(", ") || "",
+    isActive: true, // Assuming active if listed
+    isVerified: dbData.isVerified,
+    imageUrl: dbData.imageUrl || "/assets/candidate-alicia-parker.jpg",
+    cvUpdated: "Récemment", // placeholder
+    videoUrl: dbData.videoUrl,
+    interviewSession: dbData.interviewSession,
+    socials: {
+      facebook: "https://web.facebook.com/",
+      linkedin: "https://linkedin.com/",
+      twitter: "https://twitter.com/",
+      pinterest: "https://pinterest.com/",
+      behance: "https://behance.net/",
+    },
   };
 }
 
@@ -266,29 +266,7 @@ function TabReseaux({ talent }: { talent: TalentProfile }) {
 
 // ─── Tab: Vidéo Entretien ─────────────────────────────────────────────────────
 function TabVideoEntretien({ talent }: { talent: TalentProfile }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  const togglePlay = () => {
-    if (!videoRef.current) {
-      setIsPlaying((p) => !p);
-      return;
-    }
-    if (isPlaying) {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      videoRef.current.play().catch(() => setIsPlaying(true));
-      setIsPlaying(true);
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) videoRef.current.muted = !isMuted;
-    setIsMuted((m) => !m);
-  };
+  const finalVideoUrl = talent.interviewSession?.videoRecordings || talent.videoUrl;
 
   return (
     <div className="space-y-5">
@@ -317,67 +295,44 @@ function TabVideoEntretien({ talent }: { talent: TalentProfile }) {
       </div>
 
       {/* Video player */}
-      <div className="relative rounded-2xl overflow-hidden bg-slate-900 shadow-xl group">
-        {/* Video element (poster / mock — no real src) */}
-        <div className="relative w-full aspect-video bg-slate-800 flex items-center justify-center overflow-hidden">
-          <Image
-            src="/assets/candidate-alicia-parker.jpg"
-            alt="Entretien vidéo"
-            fill
-            className="object-cover opacity-70"
-            onError={() => {}}
+      {finalVideoUrl ? (
+        <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-slate-200 flex flex-col">
+          <video
+            src={finalVideoUrl}
+            controls
+            className="w-full h-full object-contain"
           />
-          {/* Play overlay */}
-          {!isPlaying && (
-            <button
-              onClick={togglePlay}
-              className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors"
-              aria-label="Lire la vidéo"
-            >
-              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/50 hover:scale-110 transition-transform">
-                <Play size={26} className="text-white ml-1" fill="white" />
-              </div>
-            </button>
+        </div>
+      ) : (
+        <div className="relative w-full aspect-video rounded-2xl bg-slate-100 border border-slate-200 flex flex-col items-center justify-center text-slate-400">
+          <Video size={48} className="mb-4 opacity-50" />
+          <p className="text-sm font-medium">Aucune vidéo d'entretien disponible</p>
+        </div>
+      )}
+
+      {/* AI Score and Feedback (if available) */}
+      {talent.interviewSession?.aiScore !== undefined && talent.interviewSession?.aiScore !== null && (
+        <div className="mt-6 p-5 rounded-xl bg-indigo-50/60 border border-indigo-100">
+          <h4 className="text-sm font-bold text-indigo-900 flex items-center gap-2 mb-3">
+            <CheckCircle size={18} className="text-indigo-500" />
+            Évaluation de l'IA Check CV
+          </h4>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex-shrink-0 w-16 h-16 rounded-full bg-white border-2 border-indigo-200 flex items-center justify-center shadow-sm">
+              <span className="text-lg font-black text-indigo-600">{talent.interviewSession.aiScore}%</span>
+            </div>
+            <div className="text-xs text-slate-700 leading-relaxed">
+              Ce score est calculé par notre intelligence artificielle en analysant la pertinence des réponses, le langage corporel, et la clarté de l'expression.
+            </div>
+          </div>
+          {talent.interviewSession.aiFeedback && (
+            <div className="bg-white rounded-lg p-4 border border-indigo-50 text-xs text-slate-700 leading-relaxed shadow-sm">
+              <strong className="text-indigo-800 block mb-1">Résumé de l'analyse :</strong>
+              {talent.interviewSession.aiFeedback}
+            </div>
           )}
         </div>
-
-        {/* Controls bar */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3">
-          {/* Progress */}
-          <div className="w-full h-1 bg-white/30 rounded-full mb-3 cursor-pointer">
-            <div
-              className="h-full bg-[#32A8D7] rounded-full transition-all"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={togglePlay}
-                className="text-white hover:text-sky-300 transition-colors"
-                aria-label={isPlaying ? "Pause" : "Lecture"}
-              >
-                {isPlaying ? <Pause size={18} fill="white" /> : <Play size={18} fill="white" />}
-              </button>
-              <button
-                onClick={toggleMute}
-                className="text-white hover:text-sky-300 transition-colors"
-                aria-label={isMuted ? "Activer le son" : "Couper le son"}
-              >
-                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-              </button>
-              <span className="text-white text-xs font-mono font-medium">18:00</span>
-            </div>
-            <button
-              className="text-white hover:text-sky-300 transition-colors"
-              aria-label="Plein écran"
-            >
-              <Maximize2 size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -399,8 +354,27 @@ export default function TalentDetailPage() {
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  const id = Array.isArray(params?.id) ? params.id[0] : params?.id ?? "default";
-  const talent = getTalent(id);
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const [talent, setTalent] = useState<TalentProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      setIsLoading(true);
+      fetch(`/api/talents/${id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.error) {
+            setTalent(mapToTalentProfile(data));
+          }
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setIsLoading(false);
+        });
+    }
+  }, [id]);
 
   const [activeTab, setActiveTab] = useState<"informations" | "reseaux" | "video">("informations");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -492,13 +466,12 @@ export default function TalentDetailPage() {
 
         {/* Logout */}
         <div className="p-4 border-t border-slate-100 shrink-0">
-          <button
-            onClick={logout}
+          <LogoutButton
             className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
           >
             <LogOut size={18} />
             <span>Déconnexion</span>
-          </button>
+          </LogoutButton>
         </div>
       </aside>
 
@@ -582,9 +555,9 @@ export default function TalentDetailPage() {
                   <Link href="/dashboard/recruteur?tab=parametres" className="block w-full text-left px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 font-medium">
                     <Settings size={14} className="inline mr-2" />Paramètres
                   </Link>
-                  <button onClick={logout} className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100 mt-1">
+                  <LogoutButton className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100 mt-1 block">
                     <LogOut size={14} className="inline mr-2" />Déconnexion
-                  </button>
+                  </LogoutButton>
                 </div>
               )}
             </div>
@@ -616,25 +589,34 @@ export default function TalentDetailPage() {
             Retour
           </button>
 
-          {/* Two-column layout */}
-          <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 items-start">
-
-            {/* ── LEFT COLUMN ──────────────────────────────────────────────── */}
-            <div className="space-y-5">
-              {/* Profile card */}
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col items-center text-center">
-                {/* Avatar */}
-                <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-slate-100 shadow-md mb-4">
-                  <Image
-                    src={talent.imageUrl}
-                    alt={talent.name}
-                    fill
-                    className="object-cover object-top"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(talent.name)}&background=32A8D7&color=fff&size=256`;
-                    }}
-                  />
-                </div>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+              <div className="w-10 h-10 border-4 border-[#32A8D7]/30 border-t-[#32A8D7] rounded-full animate-spin mb-4" />
+              <p className="font-medium">Chargement du profil...</p>
+            </div>
+          ) : !talent ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+              <Users size={48} className="mb-4 opacity-30" />
+              <p className="font-medium text-lg">Profil non trouvé</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 items-start">
+              {/* ── LEFT COLUMN ──────────────────────────────────────────────── */}
+              <div className="space-y-5">
+                {/* Profile card */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col items-center text-center">
+                  {/* Avatar */}
+                  <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-slate-100 shadow-md mb-4">
+                    <Image
+                      src={talent.imageUrl}
+                      alt={talent.name}
+                      fill
+                      className="object-cover object-top"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(talent.name)}&background=32A8D7&color=fff&size=256`;
+                      }}
+                    />
+                  </div>
 
                 <h2 className="font-bold text-slate-900 text-lg leading-tight">{talent.name}</h2>
                 <p className="text-sm text-slate-500 mt-0.5 font-medium">{talent.profession}</p>
@@ -754,7 +736,8 @@ export default function TalentDetailPage() {
                 {activeTab === "video" && <TabVideoEntretien talent={talent} />}
               </div>
             </div>
-          </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

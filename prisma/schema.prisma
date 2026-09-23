@@ -109,6 +109,7 @@ model TalentProfile {
   bio         String?
   phone       String?
   videoUrl    String?  // Vidéo de présentation (le même rendu pour Admin/Recruteur)
+  cvUrl       String?  // URL of the uploaded CV (PDF/DOC)
   skills      String?  // JSON ou string
   experience  String?  // JSON
   education   String?  // JSON
@@ -117,6 +118,12 @@ model TalentProfile {
   country     String?
   city        String?
   degree      String?
+  
+  facebook    String?
+  linkedin    String?
+  twitter     String?
+  pinterest   String?
+  behance     String?
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -134,6 +141,17 @@ model RecruiterProfile {
   companyLogo String?
   industry    String?
   website     String?
+  
+  phone       String?
+  address     String?
+  description String?  @db.Text
+  skills      String?
+  
+  facebook    String?
+  linkedin    String?
+  twitter     String?
+  pinterest   String?
+  behance     String?
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
