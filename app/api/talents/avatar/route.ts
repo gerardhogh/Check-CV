@@ -23,8 +23,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Aucun fichier valide fourni" }, { status: 400 });
     }
 
-    // Nom de fichier unique pour éviter les collisions
-    const fileName = `avatars/${userId}-${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+    // Nom de fichier unique pour éviter les collisions (sans sous-dossier au cas où les règles Supabase le bloqueraient)
+    const fileExt = file.name.split('.').pop() || 'png';
+    const fileName = `avatar-${userId}-${Date.now()}.${fileExt}`;
     
     let fileUrl = "";
 
