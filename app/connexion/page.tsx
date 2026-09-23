@@ -70,7 +70,7 @@ export default function ConnexionPage() {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?role=${tab}`,
+          redirectTo: `${window.location.origin}/auth/google-session?role=${tab}`,
           queryParams: {
             access_type: "offline",
             prompt: "consent",

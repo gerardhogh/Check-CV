@@ -124,7 +124,7 @@ function InscriptionForm() {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?role=${role}`,
+          redirectTo: `${window.location.origin}/auth/google-session?role=${role}`,
           queryParams: {
             access_type: "offline",
             prompt: "consent",

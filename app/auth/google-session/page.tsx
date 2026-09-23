@@ -3,51 +3,92 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { supabase } from "@/lib/supabase";
 
-/**
- * Logique de création de session NextAuth après Supabase OAuth.
- */
 function GoogleSessionHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState("Connexion en cours...");
+  const role = searchParams.get("role") || "talent";
+
+  const [status, setStatus] = useState("Authentification Google en cours...");
 
   useEffect(() => {
-    const email = searchParams.get("email");
-    const token = searchParams.get("token");
-    const redirect = searchParams.get("redirect") || "/dashboard/talent";
+    let mounted = true;
 
-    if (!email || !token) {
-      setStatus("Erreur: paramètres de session manquants");
-      setTimeout(() => router.push("/connexion?error=MissingParams"), 2000);
-      return;
-    }
-
-    const createSession = async () => {
+    const setupSession = async () => {
       try {
+        // 1. Attendre que le client Supabase récupère/échange la session depuis l'URL
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError || !session) {
+          console.error("Supabase session error:", sessionError);
+          if (mounted) {
+            setStatus("Erreur: Impossible de récupérer la session Google.");
+            setTimeout(() => router.push("/connexion?error=SessionError"), 2000);
+          }
+          return;
+        }
+
+        if (mounted) setStatus("Synchronisation avec votre profil Check CV...");
+
+        // 2. Envoyer le token au backend pour le sync (Prisma) et récupérer le HMAC
+        const res = await fetch("/api/auth/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_token: session.access_token,
+            roleParam: role,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Erreur lors de la synchronisation backend");
+        }
+
+        const data = await res.json();
+
+        if (mounted) setStatus("Connexion au tableau de bord...");
+
+        // 3. Connecter NextAuth avec le token HMAC sécurisé
         const result = await signIn("google-oauth", {
-          email,
-          token,
+          email: data.email,
+          token: data.token,
           redirect: false,
         });
 
         if (result?.error) {
-          console.error("NextAuth sign-in error:", result.error);
-          setStatus("Erreur de session. Redirection...");
-          setTimeout(() => router.push("/connexion?error=SessionError"), 2000);
+          console.error("NextAuth error:", result.error);
+          if (mounted) {
+            setStatus("Erreur lors de la création de la session finale.");
+            setTimeout(() => router.push("/connexion?error=NextAuthError"), 2000);
+          }
         } else {
-          setStatus("Connexion réussie ! Redirection...");
-          router.push(redirect);
+          // Succès ! On redirige vers le dashboard
+          if (mounted) {
+            setStatus("Connexion réussie ! Redirection...");
+            router.push(data.redirect || "/dashboard/talent");
+          }
         }
       } catch (error) {
-        console.error("Session creation error:", error);
-        setStatus("Erreur inattendue");
-        setTimeout(() => router.push("/connexion?error=UnexpectedError"), 2000);
+        console.error("Session setup error:", error);
+        if (mounted) {
+          setStatus("Une erreur inattendue est survenue.");
+          setTimeout(() => router.push("/connexion?error=ServerError"), 2000);
+        }
       }
     };
 
-    createSession();
-  }, [searchParams, router]);
+    // On utilise un petit délai pour s'assurer que le hash fragment de l'URL
+    // a été intercepté par Supabase
+    const timer = setTimeout(() => {
+      setupSession();
+    }, 1000);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timer);
+    };
+  }, [router, role]);
 
   return (
     <div className="text-center">
@@ -57,10 +98,6 @@ function GoogleSessionHandler() {
   );
 }
 
-/**
- * Page intermédiaire après le callback OAuth Supabase.
- * Enveloppée dans Suspense pour respecter les conventions Next.js App Router.
- */
 export default function GoogleSessionPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -77,4 +114,3 @@ export default function GoogleSessionPage() {
     </div>
   );
 }
-
