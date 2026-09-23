@@ -63,9 +63,11 @@ export default function TalentDashboard() {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
 
   // Dynamic Dashboard States
-  const [profilePct, setProfilePct] = useState(60);
+  const [profilePct, setProfilePct] = useState(0);
   const [stars, setStars] = useState(3);
   const [hasValidVideo, setHasValidVideo] = useState(false);
+  const [hasSocialLinks, setHasSocialLinks] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [cvFileName, setCvFileName] = useState("CV_Candidat_2025.pdf");
   const [cvUploadedAt, setCvUploadedAt] = useState("Mis à jour il y a 2 jours");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -126,17 +128,24 @@ export default function TalentDashboard() {
           }
           setHasValidVideo(hasVid);
 
-          // Calculate profile percentage dynamically
-          let filled = 0;
-          const totalFields = 6;
-          if (data.name) filled++;
-          if (data.talentProfile?.bio) filled++;
-          if (data.talentProfile?.phone) filled++;
-          if (data.avatar) filled++;
-          if (data.talentProfile?.cvUrl) filled++;
-          if (hasVid) filled++;
+          // Social links: at least one filled
+          const hasSocial = !!(data.talentProfile?.facebook || data.talentProfile?.linkedin || data.talentProfile?.twitter || data.talentProfile?.pinterest || data.talentProfile?.behance);
+          setHasSocialLinks(hasSocial);
 
-          setProfilePct(Math.round((filled / totalFields) * 100));
+          // Calculate profile percentage — 5 steps matching the visual list
+          // Step weights: info=20, avatar=10, cv=20, social=10, video=40
+          let pct = 0;
+          if (data.name) pct += 20;
+          if (data.avatar) pct += 10;
+          if (data.talentProfile?.cvUrl) pct += 20;
+          if (hasSocial) pct += 10;
+          if (hasVid) pct += 40;
+
+          setProfilePct(pct);
+          if (pct === 100) {
+            setShowConfetti(true);
+            setTimeout(() => setShowConfetti(false), 4000);
+          }
         }
       })
       .catch(console.error);
@@ -477,13 +486,42 @@ export default function TalentDashboard() {
               {/* Row 1 – Profile & certification */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Profile completion */}
-                <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
+                <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/50 relative overflow-hidden">
+                  {/* Confetti celebration overlay */}
+                  {showConfetti && (
+                    <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 via-emerald-300/10 to-teal-400/10 animate-pulse" />
+                      {[...Array(20)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute w-2 h-2 rounded-full animate-bounce"
+                          style={{
+                            backgroundColor: ["#22c55e", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"][i % 6],
+                            left: `${(i * 5.2 + 2) % 95}%`,
+                            top: `${(i * 7.3 + 5) % 80}%`,
+                            animationDelay: `${(i * 0.12)}s`,
+                            animationDuration: `${0.5 + (i % 3) * 0.2}s`,
+                          }}
+                        />
+                      ))}
+                      <div className="relative z-20 text-center bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-xl border border-green-200">
+                        <div className="text-2xl mb-1">🎉</div>
+                        <p className="text-sm font-bold text-green-700">Profil complété à 100% !</p>
+                        <p className="text-xs text-green-600">Certification 5 étoiles décrochée !</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-bold text-slate-800 text-sm">
                       Complétion du profil
                     </h3>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                        profilePct === 100 ? "text-green-700 bg-green-50" :
+                        profilePct === 0 ? "text-red-600 bg-red-50" :
+                        "text-blue-600 bg-blue-50"
+                      }`}>
                         {profilePct}% complété
                       </span>
                       <button
@@ -496,14 +534,26 @@ export default function TalentDashboard() {
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden mb-3">
                     <div
-                      className="bg-blue-600 h-full rounded-full transition-all duration-700"
+                      className={`h-full rounded-full transition-all duration-700 ${
+                        profilePct === 100
+                          ? "bg-gradient-to-r from-green-400 to-emerald-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+                          : profilePct === 0
+                          ? "bg-red-500"
+                          : "bg-blue-600"
+                      }`}
                       style={{ width: `${profilePct}%` }}
                     />
                   </div>
-                  <p className="text-xs text-slate-400">
-                    {profilePct < 100
-                      ? "Complétez les étapes ci-dessous pour atteindre 100% et décrocher la certification 5 étoiles !"
-                      : "Profil complété à 100% ! Vous avez le score de visibilité optimal."}
+                  <p className={`text-xs ${
+                    profilePct === 100 ? "text-green-600 font-medium" :
+                    profilePct === 0 ? "text-red-400" :
+                    "text-slate-400"
+                  }`}>
+                    {profilePct === 100
+                      ? "🌟 Félicitations ! Profil 100% — Certification 5 étoiles obtenue !"
+                      : profilePct === 0
+                      ? "Aucune étape complétée. Commencez par renseigner vos informations."
+                      : "Complétez les étapes ci-dessous pour atteindre 100% et décrocher la certification 5 étoiles !"}
                   </p>
                   {/* Profile completion guide */}
                   {profileGuideOpen && (
@@ -512,7 +562,7 @@ export default function TalentDashboard() {
                         { label: "Informations personnelles", done: !!userName, pct: 20, tab: "profil" },
                         { label: "Photo de profil", done: !!userAvatar, pct: 10, tab: "profil" },
                         { label: "CV uploadé", done: cvFileName !== "Aucun CV ajouté", pct: 20, tab: "profil" },
-                        { label: "Réseaux sociaux", done: false, pct: 10, tab: "profil" },
+                        { label: "Réseaux sociaux", done: hasSocialLinks, pct: 10, tab: "profil" },
                         { label: "Entretien vidéo validé", done: hasValidVideo, pct: 40, tab: "video" },
                       ].map((item) => (
                         <div key={item.label} className="flex items-center justify-between gap-3">
@@ -531,7 +581,7 @@ export default function TalentDashboard() {
                                 Compléter →
                               </button>
                             )}
-                            <span className="text-xs font-bold text-blue-600">+{item.pct}%</span>
+                            <span className={`text-xs font-bold ${item.done ? "text-green-600" : "text-blue-600"}`}>+{item.pct}%</span>
                           </div>
                         </div>
                       ))}
