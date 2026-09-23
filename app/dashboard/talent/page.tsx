@@ -509,20 +509,30 @@ export default function TalentDashboard() {
                   {profileGuideOpen && (
                     <div className="mt-4 pt-4 border-t border-slate-100 space-y-2 animate-fade-in">
                       {[
-                        { label: "Informations personnelles", done: true, pct: 20 },
-                        { label: "Photo de profil", done: true, pct: 10 },
-                        { label: "CV uploadé", done: true, pct: 20 },
-                        { label: "Réseaux sociaux", done: false, pct: 10 },
-                        { label: "Entretien vidéo validé", done: hasValidVideo, pct: 40 },
+                        { label: "Informations personnelles", done: !!userName, pct: 20, tab: "profil" },
+                        { label: "Photo de profil", done: !!userAvatar, pct: 10, tab: "profil" },
+                        { label: "CV uploadé", done: cvFileName !== "Aucun CV ajouté", pct: 20, tab: "profil" },
+                        { label: "Réseaux sociaux", done: false, pct: 10, tab: "profil" },
+                        { label: "Entretien vidéo validé", done: hasValidVideo, pct: 40, tab: "video" },
                       ].map((item) => (
                         <div key={item.label} className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px] font-bold ${item.done ? "bg-green-500" : "bg-slate-200"}`}>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className={`w-4 h-4 flex-shrink-0 rounded-full flex items-center justify-center text-white text-[10px] font-bold ${item.done ? "bg-green-500" : "bg-slate-200"}`}>
                               {item.done ? "✓" : ""}
                             </span>
-                            <span className={`text-xs ${item.done ? "text-slate-700 line-through" : "text-slate-600"}`}>{item.label}</span>
+                            <span className={`text-xs ${item.done ? "text-slate-400 line-through" : "text-slate-700 font-medium"}`}>{item.label}</span>
                           </div>
-                          <span className="text-xs font-bold text-blue-600">+{item.pct}%</span>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {!item.done && (
+                              <button
+                                onClick={() => setActiveTab(item.tab as TalentTab)}
+                                className="text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-full transition-colors whitespace-nowrap"
+                              >
+                                Compléter →
+                              </button>
+                            )}
+                            <span className="text-xs font-bold text-blue-600">+{item.pct}%</span>
+                          </div>
                         </div>
                       ))}
                     </div>
