@@ -209,7 +209,7 @@ export default function ConnexionPage() {
                 id="remember-me"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
-                className="w-4 h-4 rounded text-[#32A8D7] border-slate-300 focus:ring-[#32A8D7] accent-[#32A8D7] cursor-pointer"
+                className="w-[20px] h-[20px] rounded-[6px] text-[#1E8AE9] border-slate-300 focus:ring-[#1E8AE9] accent-[#1E8AE9] cursor-pointer"
               />
               <label
                 htmlFor="remember-me"
