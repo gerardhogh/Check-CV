@@ -97,6 +97,29 @@ export default function TalentDashboard() {
         if (data && !data.error) {
           if (data.name) setUserName(data.name);
           if (data.avatar) setUserAvatar(data.avatar);
+          if (data.talentProfile?.cvUrl) {
+            const url = data.talentProfile.cvUrl;
+            // Decode URI component to remove %20 etc, then extract filename
+            const rawFileName = url.split('/').pop()?.split('?')[0] || "CV.pdf";
+            const decodedName = decodeURIComponent(rawFileName);
+            // Remove the timestamp part (e.g. 172948274-file.pdf -> file.pdf) if possible, or just keep it
+            // We know the pattern is usually: userId-timestamp-filename
+            const nameParts = decodedName.split('-');
+            if (nameParts.length > 2) {
+              setCvFileName(nameParts.slice(2).join('-').replace(/_/g, ' '));
+            } else {
+              setCvFileName(decodedName.replace(/_/g, ' '));
+            }
+            setCvUploadedAt("Mis à jour récemment");
+          } else {
+            setCvFileName("Aucun CV ajouté");
+            setCvUploadedAt("Pas de CV");
+          }
+          if (data.talentProfile?.videoUrl) {
+            setHasValidVideo(true);
+          } else {
+            setHasValidVideo(false);
+          }
         }
       })
       .catch(console.error);
@@ -525,7 +548,7 @@ export default function TalentDashboard() {
                     <p className="text-[11px] text-slate-400 mb-5">{cvUploadedAt}</p>
                   </div>
                   <button
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => setActiveTab("profil")}
                     className="w-full py-3 rounded-2xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2"
                     id="btn-upload-cv"
                   >
@@ -559,7 +582,7 @@ export default function TalentDashboard() {
                     id="btn-launch-video"
                   >
                     <Video size={15} />{" "}
-                    {hasValidVideo ? "Refaire le test (2 restants)" : "Lancer l'entretien vidéo"}
+                    {hasValidVideo ? "Voir l'entretien vidéo" : "Lancer l'entretien vidéo"}
                   </button>
                 </div>
 
