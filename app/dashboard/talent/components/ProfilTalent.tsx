@@ -79,15 +79,12 @@ function ProfilTalentContent() {
         if (!data.error) {
           if (data.avatar) setUserAvatar(data.avatar);
 
-          // Same 5-step weighted formula as the main dashboard
-          // info=20, avatar=10, cv=20, social=10, video=40
+          // 4-step weighted formula (social links optional, not counted)
+          // info=25, avatar=10, cv=25, video=40
           let pct = 0;
-          if (data.name) pct += 20;
+          if (data.name) pct += 25;
           if (data.avatar) pct += 10;
-          if (data.talentProfile?.cvUrl) pct += 20;
-
-          const hasSocial = !!(data.talentProfile?.facebook && data.talentProfile?.linkedin && data.talentProfile?.twitter && data.talentProfile?.pinterest && data.talentProfile?.behance);
-          if (hasSocial) pct += 10;
+          if (data.talentProfile?.cvUrl) pct += 25;
 
           const hasVid = !!(data.talentProfile?.videoUrl) || localStorage.getItem("interview_recorded") === "true";
           if (hasVid) pct += 40;

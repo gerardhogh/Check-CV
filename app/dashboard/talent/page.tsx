@@ -132,13 +132,12 @@ export default function TalentDashboard() {
           const hasSocial = !!(data.talentProfile?.facebook && data.talentProfile?.linkedin && data.talentProfile?.twitter && data.talentProfile?.pinterest && data.talentProfile?.behance);
           setHasSocialLinks(hasSocial);
 
-          // Calculate profile percentage — 5 steps matching the visual list
-          // Step weights: info=20, avatar=10, cv=20, social=10, video=40
+          // Calculate profile percentage — 4 steps (social links are optional, not counted)
+          // Weights: info=25, avatar=10, cv=25, video=40
           let pct = 0;
-          if (data.name) pct += 20;
+          if (data.name) pct += 25;
           if (data.avatar) pct += 10;
-          if (data.talentProfile?.cvUrl) pct += 20;
-          if (hasSocial) pct += 10;
+          if (data.talentProfile?.cvUrl) pct += 25;
           if (hasVid) pct += 40;
 
           setProfilePct(pct);
@@ -568,10 +567,9 @@ export default function TalentDashboard() {
                   {profileGuideOpen && (
                     <div className="mt-4 pt-4 border-t border-slate-100 space-y-2 animate-fade-in">
                       {[
-                        { label: "Informations personnelles", done: !!userName, pct: 20, tab: "profil" },
+                        { label: "Informations personnelles", done: !!userName, pct: 25, tab: "profil" },
                         { label: "Photo de profil", done: !!userAvatar, pct: 10, tab: "profil" },
-                        { label: "CV uploadé", done: cvFileName !== "Aucun CV ajouté", pct: 20, tab: "profil" },
-                        { label: "Réseaux sociaux (5 liens requis)", done: hasSocialLinks, pct: 10, tab: "profil" },
+                        { label: "CV uploadé", done: cvFileName !== "Aucun CV ajouté", pct: 25, tab: "profil" },
                         { label: "Entretien vidéo validé", done: hasValidVideo, pct: 40, tab: "video" },
                       ].map((item) => (
                         <div key={item.label} className="flex items-center justify-between gap-3">
