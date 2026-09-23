@@ -241,7 +241,7 @@ function ProfilTalentContent() {
                   src={user?.avatar || "/assets/avatar_africain.jpg"}
                   alt="Avatar"
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="object-cover object-center w-full h-full group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
 
@@ -258,7 +258,7 @@ function ProfilTalentContent() {
             </div>
 
             <h2 className="text-xl font-bold text-slate-800">
-              {user?.name || "Jules Kofi"}
+              {user?.name || "Candidat"}
             </h2>
             <p className="text-sm text-slate-600 font-medium mb-4">
               Développeur Frontend
@@ -367,7 +367,7 @@ function ProfilTalentContent() {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-800">
-                    Prévisualisation du CV - {user?.name || "Jules Kofi"}
+                    Prévisualisation du CV - {user?.name || "Candidat"}
                   </h3>
                   <p className="text-xs text-slate-400">
                     {cvName} • Actualisé le {cvDate}

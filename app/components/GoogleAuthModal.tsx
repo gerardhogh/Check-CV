@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth, UserRole } from "../context/AuthContext";
 import { X, CheckCircle, ArrowRight } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 interface GoogleAuthModalProps {
   isOpen: boolean;
@@ -31,8 +32,21 @@ export default function GoogleAuthModal({
 
   const handleSelectAccount = async (name: string, email: string) => {
     setIsLoading(true);
-    const ok = await loginWithGoogle(role, { name, email });
-    if (ok) {
+    
+    // Simuler un token signé pour notre custom provider
+    const timestamp = Date.now();
+    // En dev/demo, on laisse le backend accepter ce token "simulé" si nécessaire
+    // Normalement ce token viendrait de l'API Google OAuth.
+    
+    const res = await signIn("google-oauth", {
+      email,
+      name,
+      role,
+      token: `${timestamp}:simulate`,
+      redirect: false,
+    });
+
+    if (res?.ok) {
       setSuccess(true);
       setTimeout(() => {
         setIsLoading(false);
@@ -47,6 +61,7 @@ export default function GoogleAuthModal({
       }, 700);
     } else {
       setIsLoading(false);
+      alert("Erreur de connexion : " + res?.error);
     }
   };
 
@@ -154,7 +169,7 @@ export default function GoogleAuthModal({
                   {/* Primary Google account card */}
                   <button
                     onClick={() =>
-                      handleSelectAccount("Jules Kofi", "jules.kofi@gmail.com")
+                      handleSelectAccount("Candidat", "candidat@email.com")
                     }
                     disabled={isLoading}
                     className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 transition-all text-left group"
@@ -162,18 +177,18 @@ export default function GoogleAuthModal({
                     <div className="w-11 h-11 rounded-full overflow-hidden relative border border-slate-200 flex-shrink-0">
                       <Image
                         src="/assets/avatar_africain.jpg"
-                        alt="Jules Kofi"
+                        alt="Candidat"
                         width={44}
                         height={44}
-                        className="object-cover"
+                        className="object-cover w-full h-full object-center"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate">
-                        Jules Kofi
+                        Candidat
                       </p>
                       <p className="text-xs text-slate-500 truncate">
-                        jules.kofi@gmail.com
+                        candidat@gmail.com
                       </p>
                     </div>
                     <ArrowRight

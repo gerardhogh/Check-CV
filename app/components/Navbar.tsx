@@ -99,7 +99,7 @@ export default function Navbar({
                     alt={user.name}
                     width={32}
                     height={32}
-                    className="object-cover"
+                    className="object-cover w-full h-full object-center"
                   />
                 </div>
                 <div className="text-left pr-1">

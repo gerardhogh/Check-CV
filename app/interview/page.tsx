@@ -591,7 +591,7 @@ export default function InterviewPage() {
             className="flex items-center gap-2 cursor-pointer group"
           >
             <div className="w-10 h-10 rounded-full overflow-hidden bg-blue-100 relative border-2 border-transparent group-hover:border-[#008de4] transition-colors">
-              <Image src={user?.avatar || "/assets/avatar_africain.jpg"} alt="Avatar" fill className="object-cover" />
+              <Image src={user?.avatar || "/assets/avatar_africain.jpg"} alt="Avatar" fill className="object-cover object-center w-full h-full" />
             </div>
             <ChevronDown className="text-white opacity-80 group-hover:opacity-100" size={16} />
           </div>
@@ -946,15 +946,15 @@ export default function InterviewPage() {
                     alt="Avatar"
                     width={40}
                     height={40}
-                    className="object-cover"
+                    className="object-cover w-full h-full object-center"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-white truncate">
-                    {user?.name || "Jules Kofi"}
+                    {user?.name || "Candidat"}
                   </p>
                   <p className="text-[11px] text-white/50 truncate">
-                    {user?.email || "jules.kofi@gmail.com"}
+                    {user?.email || "candidat@email.com"}
                   </p>
                 </div>
                 <button

@@ -66,7 +66,7 @@ export default function TalentDashboard() {
   const [profilePct, setProfilePct] = useState(60);
   const [stars, setStars] = useState(3);
   const [hasValidVideo, setHasValidVideo] = useState(false);
-  const [cvFileName, setCvFileName] = useState("CV_Jules_Kofi_2025.pdf");
+  const [cvFileName, setCvFileName] = useState("CV_Candidat_2025.pdf");
   const [cvUploadedAt, setCvUploadedAt] = useState("Mis à jour il y a 2 jours");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -87,7 +87,20 @@ export default function TalentDashboard() {
   const [profileGuideOpen, setProfileGuideOpen] = useState(false);
 
   // Profile editable state
-  const [userName, setUserName] = useState(user?.name || "Jules Kofi");
+  const [userName, setUserName] = useState(user?.name || "Candidat");
+  const [userAvatar, setUserAvatar] = useState(user?.avatar || "/assets/avatar_africain.jpg");
+
+  useEffect(() => {
+    fetch("/api/talents/me")
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          if (data.name) setUserName(data.name);
+          if (data.avatar) setUserAvatar(data.avatar);
+        }
+      })
+      .catch(console.error);
+  }, []);
   const [userTitle, setUserTitle] = useState("Développeur Full-Stack & UI");
   const [userPhone, setUserPhone] = useState((user as any)?.phone || "+229 97 00 00 00");
   const [userBio, setUserBio] = useState(
@@ -136,7 +149,7 @@ export default function TalentDashboard() {
   };
 
   const handleCopyAffiliation = () => {
-    const link = `https://checkcv.com/inscription?ref=${(user?.name || "JULES").toUpperCase().replace(/\s+/g, "")}-750`;
+    const link = `https://checkcv.com/inscription?ref=${(user?.name || "CANDIDAT").toUpperCase().replace(/\s+/g, "")}-750`;
     navigator.clipboard.writeText(link);
     setCopiedLink(true);
     showToast("Lien de parrainage copié dans le presse-papier !");
@@ -367,11 +380,11 @@ export default function TalentDashboard() {
               >
                 <div className="w-9 h-9 rounded-full overflow-hidden relative border border-slate-200">
                   <Image
-                    src={user?.avatar || "/assets/avatar_africain.jpg"}
+                    src={userAvatar}
                     alt="Avatar"
                     width={36}
                     height={36}
-                    className="object-cover"
+                    className="object-cover w-full h-full object-center"
                   />
                 </div>
                 <ChevronDown size={14} className="text-slate-400" />
@@ -384,7 +397,7 @@ export default function TalentDashboard() {
                       {userName}
                     </p>
                     <p className="text-[11px] text-slate-400 truncate">
-                      {user?.email || "jules.kofi@gmail.com"}
+                      {user?.email || "candidat@email.com"}
                     </p>
                   </div>
                   <button

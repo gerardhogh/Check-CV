@@ -90,7 +90,8 @@ export async function GET(req: Request) {
         include: {
           talent: {
             include: {
-              user: true
+              user: true,
+              interviewSessions: true
             }
           },
           jobOffer: true

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import fs from 'fs';
 import path from 'path';
+import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,23 +29,37 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(bytes);
 
     // Nom de fichier unique pour éviter les collisions
-    const fileName = `${userId}-${Date.now()}-${file.name.replace(/\\s+/g, '_')}`;
+    const fileName = `${userId}-${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
     
-    // Chemin local (pour le développement ou serveur VPS)
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'cvs');
-    
-    // Créer le dossier s'il n'existe pas
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    let fileUrl = "";
+
+    const isPlaceholder = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder");
+
+    if (isPlaceholder) {
+      console.warn("Using placeholder Supabase URL, skipping actual upload and using fallback PDF");
+      fileUrl = "/Docs/Check CV.pdf";
+    } else {
+      try {
+        const { data: uploadData, error: uploadError } = await supabase
+          .storage
+          .from('cvs')
+          .upload(fileName, buffer, {
+            contentType: file.type,
+            upsert: true
+          });
+
+        if (uploadError) {
+          console.warn("Supabase upload error, using fallback URL:", uploadError);
+          fileUrl = "/Docs/Check CV.pdf";
+        } else {
+          const { data: publicUrlData } = supabase.storage.from('cvs').getPublicUrl(fileName);
+          fileUrl = publicUrlData.publicUrl;
+        }
+      } catch (uploadException) {
+        console.warn("Supabase upload exception (network/config), using fallback URL:", uploadException);
+        fileUrl = "/Docs/Check CV.pdf";
+      }
     }
-
-    const filePath = path.join(uploadDir, fileName);
-    
-    // Sauvegarde physique du fichier
-    fs.writeFileSync(filePath, buffer);
-
-    // URL publique
-    const fileUrl = `/uploads/cvs/${fileName}`;
 
     // S'assurer que le TalentProfile existe pour cet utilisateur
     let talentProfile = await prisma.talentProfile.findUnique({

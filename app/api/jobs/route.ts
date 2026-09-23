@@ -28,7 +28,10 @@ export async function GET(req: Request) {
 
       const myJobs = await prisma.jobOffer.findMany({
         where: { recruiterId: recruiterProfile.id },
-        include: { recruiter: true },
+        include: { 
+          recruiter: true,
+          _count: { select: { applications: true } }
+        },
         orderBy: { createdAt: "desc" }
       });
       return NextResponse.json(myJobs);

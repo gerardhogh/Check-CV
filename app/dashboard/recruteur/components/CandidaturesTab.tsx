@@ -57,13 +57,14 @@ function StatutBadge({ statut }: { statut: "Accepté" | "En attente" | "Rejeté"
 interface ApplicationData {
   id: string | number;
   talent: string;
+  talentUserId?: string;
   role: string;
   offreId: string;
-  offre?: string; // added to match properties
-  dateCandidat?: string; // added to match properties
-  typeEmploi?: string; // added to match properties
-  videoTest?: boolean; // added to match properties
-  cvJoint?: boolean; // added to match properties
+  offre?: string;
+  dateCandidat?: string;
+  typeEmploi?: string;
+  videoTest?: boolean;
+  cvJoint?: boolean;
   statut: "Accepté" | "En attente" | "Rejeté";
   date: string;
   score: number;
@@ -72,7 +73,7 @@ interface ApplicationData {
 
 interface ApiApplication {
   id: string | number;
-  talent?: { user?: { name?: string } };
+  talent?: { userId?: string, user?: { name?: string } };
   jobOffer?: { title?: string };
   jobOfferId: string;
   status: string;
@@ -85,7 +86,7 @@ export default function CandidaturesTab() {
     | { type: "list" }
     | { type: "detail-offre" }
     | { type: "edit-offre" }
-    | { type: "profil-candidat"; candidatId: number };
+    | { type: "profil-candidat"; candidatId: string | number };
 
   const [view, setView] = useState<ViewState>({ type: "list" });
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,20 +95,21 @@ export default function CandidaturesTab() {
   const fetcher = (url: string) => fetch(url).then(res => res.json());
   const { data: candidaturesFetched = [], mutate } = useSWR("/api/applications?role=recruiter", fetcher);
   
-  const candidatures: ApplicationData[] = candidaturesFetched.map((app: ApiApplication) => ({
+  const candidatures: ApplicationData[] = candidaturesFetched.map((app: any) => ({
     id: app.id,
     talent: app.talent?.user?.name || "Talent sans nom",
+    talentUserId: app.talent?.userId,
     role: app.jobOffer?.title || "Offre",
     offreId: app.jobOfferId,
     offre: app.jobOffer?.title || "Offre",
     statut: app.status === "PENDING" ? "En attente" : app.status === "ACCEPTED" ? "Accepté" : "Rejeté",
     date: new Date(app.createdAt).toLocaleDateString("fr-FR"),
     dateCandidat: new Date(app.createdAt).toLocaleDateString("fr-FR"),
-    typeEmploi: "CDI",
-    videoTest: false,
-    cvJoint: false,
+    typeEmploi: app.jobOffer?.type || "CDI",
+    videoTest: !!(app.talent?.videoUrl || (app.talent?.interviewSessions && app.talent.interviewSessions.length > 0 && app.talent.interviewSessions[0].videoRecordings)),
+    cvJoint: !!app.talent?.cvUrl,
     score: Math.floor(Math.random() * 20) + 70, // Mock score for now
-    imageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(app.talent?.user?.name || "T")}&background=random`
+    imageUrl: app.talent?.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.talent?.user?.name || "T")}&background=random`
   }));
 
   const perPage = 8;
@@ -138,12 +140,12 @@ export default function CandidaturesTab() {
   const selectedCandidatData = candidatures.find((c) => c.id === selectedCandidatId);
   const candidatForDetail: CandidatData | undefined = selectedCandidatData
     ? {
-        id: selectedCandidatData.id as number,
+        id: selectedCandidatData.talentUserId || selectedCandidatData.id,
         name: selectedCandidatData.talent,
-        profession: "Développeur Front-end",
-        location: "Cotonou, Bénin",
-        email: "alicia.parker@email.com",
-        phone: "+229 97 00 00 00",
+        profession: "Développeur",
+        location: "Non spécifié",
+        email: "",
+        phone: "",
         imageUrl: selectedCandidatData.imageUrl,
         status: selectedCandidatData.statut,
       }
@@ -157,7 +159,7 @@ export default function CandidaturesTab() {
         onBack={() => setView({ type: "list" })}
         onEdit={() => setView({ type: "edit-offre" })}
         onDelete={() => { setView({ type: "list" }); showToast("Offre supprimée."); }}
-        onViewCandidate={(id) => { const n = parseInt(id); if (!isNaN(n)) setView({ type: "profil-candidat", candidatId: n }); }}
+        onViewCandidate={(id) => setView({ type: "profil-candidat", candidatId: id })}
       />
     );
   }
@@ -304,7 +306,7 @@ export default function CandidaturesTab() {
                     <td className="px-4 py-3.5">
                       {c.videoTest ? (
                         <button
-                          onClick={() => setView({ type: "profil-candidat", candidatId: typeof c.id === 'string' ? parseInt(c.id) : c.id })}
+                          onClick={() => setView({ type: "profil-candidat", candidatId: c.id })}
                           className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#32A8D7] hover:underline"
                         >
                           <Video size={10} /> Oui · Voir
@@ -331,7 +333,7 @@ export default function CandidaturesTab() {
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() => setView({ type: "profil-candidat", candidatId: typeof c.id === 'string' ? parseInt(c.id) : c.id })}
+                          onClick={() => setView({ type: "profil-candidat", candidatId: c.id })}
                           className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#32A8D7] hover:bg-[#2896c2] text-white text-[10px] font-semibold rounded-lg transition-colors whitespace-nowrap"
                         >
                           <Eye size={10} /> Voir

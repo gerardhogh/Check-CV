@@ -232,7 +232,7 @@ function InscriptionForm() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={
-                    role === "recruteur" ? "Ex: Grand-G Corp" : "Ex: Jules Kofi"
+                    role === "recruteur" ? "Ex: Grand-G Corp" : "Ex: Candidat"
                   }
                   className="w-full pl-10 pr-4 py-3 bg-[#F9FAFB] border-0 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#32A8D7] transition-all"
                   id="nom-complet"

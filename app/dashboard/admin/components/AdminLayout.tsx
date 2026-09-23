@@ -118,7 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     alt="Avatar"
                     width={36}
                     height={36}
-                    className="object-cover"
+                    className="object-cover w-full h-full object-center"
                   />
                 </div>
                 <ChevronDown size={14} className="text-slate-400" />

@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 // ─── Generic Confirmation Modal ───────────────────────────────────────────────
 interface ConfirmModalProps {
@@ -24,10 +25,15 @@ export function ConfirmModal({
   onCancel,
   children,
 }: ConfirmModalProps) {
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-sm p-7 flex flex-col gap-5">
-        <div className="text-center">
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-sm p-7 flex flex-col gap-5 text-center mx-auto relative">
+        <div>
           <h2 className="text-lg font-extrabold text-slate-900 mb-2">{title}</h2>
           <p className="text-sm text-slate-500 leading-relaxed">{message}</p>
         </div>
@@ -51,7 +57,8 @@ export function ConfirmModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -73,9 +80,14 @@ export function SuccessModal({
   onPrimary,
   onSecondary,
 }: SuccessModalProps) {
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-sm p-7 flex flex-col gap-5 items-center text-center">
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-sm p-7 flex flex-col gap-5 items-center text-center mx-auto relative">
         {/* Green check circle */}
         <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center">
           <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3} className="w-8 h-8">
@@ -103,7 +115,8 @@ export function SuccessModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -114,13 +127,18 @@ interface DeactivateModalProps {
 }
 
 export function DeactivateModal({ onCancel, onConfirm }: DeactivateModalProps) {
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-sm p-7 flex flex-col gap-5">
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-sm p-7 flex flex-col gap-5 text-center mx-auto relative">
         <div>
           <h2 className="text-lg font-extrabold text-slate-900 mb-2">Confirmer la désactivation</h2>
           <p className="text-sm text-slate-500 mb-4">Veuillez sélectionner la raison de votre désactivation :</p>
-          <div className="relative">
+          <div className="relative text-left">
             <select className="w-full appearance-none px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500 outline-none focus:border-[#32A8D7] focus:bg-white transition-colors cursor-pointer">
               <option value="">Choisis la raison</option>
               <option>Je n&apos;ai plus besoin du service</option>
@@ -149,26 +167,14 @@ export function DeactivateModal({ onCancel, onConfirm }: DeactivateModalProps) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
 // ─── Logout Modal ─────────────────────────────────────────────────────────────
-interface LogoutModalProps {
-  onCancel: () => void;
-  onConfirm: () => void;
-}
+import SharedLogoutModal from "@/app/components/LogoutModal";
 
-export function LogoutModal({ onCancel, onConfirm }: LogoutModalProps) {
-  return (
-    <ConfirmModal
-      title="Déconnexion"
-      message="Vous êtes sur le point de vous déconnecter"
-      confirmLabel="Se déconnecter"
-      cancelLabel="Annuler"
-      isDanger={true}
-      onConfirm={onConfirm}
-      onCancel={onCancel}
-    />
-  );
+export function LogoutModal({ onCancel, onConfirm }: { onCancel: () => void, onConfirm: () => void }) {
+  return <SharedLogoutModal onCancel={onCancel} onConfirm={onConfirm} />;
 }

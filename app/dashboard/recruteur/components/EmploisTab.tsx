@@ -25,7 +25,7 @@ import {
 import { ConfirmModal, SuccessModal } from "./Modals";
 import useSWR from "swr";
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = (url: string) => fetch(url, { headers: { 'Cache-Control': 'no-cache' } }).then(res => res.json());
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -255,7 +255,7 @@ function DetailOffreView({ emploi, onBack, onModifier, onSupprimer, onCloturer }
             <p className="text-xs text-slate-400 mb-1">
               Publié le : <span className="font-semibold">{emploi.datePublication || (emploi as any).createdAt ? new Date((emploi as any).createdAt).toLocaleDateString("fr-FR") : "Récent"}</span>
               &nbsp;·&nbsp;
-              <span className="font-bold text-slate-700">{emploi.candidatures || 0} candidats</span>
+              <span className="font-bold text-slate-700">{emploi._count?.applications || emploi.candidatures || 0} candidats</span>
             </p>
             <h2 className="text-2xl font-extrabold text-[#32A8D7]">{emploi.titre || (emploi as any).title}</h2>
             <p className="text-sm text-slate-700 mt-0.5">
@@ -310,7 +310,7 @@ function DetailOffreView({ emploi, onBack, onModifier, onSupprimer, onCloturer }
       {/* Candidats postulés */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
         <h3 className="text-base font-bold text-[#32A8D7] mb-1">Candidats postulés</h3>
-        <p className="text-sm text-slate-500 mb-5">{emploi.candidatures} candidatures reçues</p>
+        <p className="text-sm text-slate-500 mb-5">{emploi._count?.applications || emploi.candidatures || 0} candidatures reçues</p>
         {MOCK_CANDIDATES.length === 0 ? (
           <div className="text-center py-8">
             <Users size={32} className="text-slate-300 mx-auto mb-3" />
@@ -460,7 +460,7 @@ type EmploisView = "grid" | "detail" | "modifier";
 
 export default function EmploisTab() {
   const { data: emploisFetched = [], error, mutate } = useSWR("/api/jobs?mine=true", fetcher);
-  const emplois = emploisFetched; // Assure la compatibilité avec le reste du code
+  const emplois = Array.isArray(emploisFetched) ? emploisFetched : []; // Assure la compatibilité avec le reste du code
   const [view, setView] = useState<EmploisView>("grid");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -746,8 +746,8 @@ export default function EmploisTab() {
                       {openMenuId === emploi.id && (
                         <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-20">
                           <button onClick={() => toggleStatus(emploi.id)} className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2">
-                            {emploi.status === "Active" ? <Clock size={13} /> : <CheckCircle2 size={13} />}
-                            {emploi.status === "Active" ? "Clôturer l'offre" : "Réactiver l'offre"}
+                            {(emploi.status === "Active" || emploi.status === "PUBLISHED") ? <Clock size={13} /> : <CheckCircle2 size={13} />}
+                            {(emploi.status === "Active" || emploi.status === "PUBLISHED") ? "Clôturer l'offre" : "Réactiver l'offre"}
                           </button>
                           <button onClick={() => openDetail(emploi.id)} className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2">
                             <Eye size={13} /> Voir détail
@@ -772,7 +772,7 @@ export default function EmploisTab() {
                         <Briefcase size={11} className="shrink-0" /><span>{emploi.typeEmploi || (emploi as any).contractType}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                        <Users size={11} className="shrink-0" /><span>{emploi.candidatures || 0} candidature{emploi.candidatures !== 1 ? "s" : ""}</span>
+                        <Users size={11} className="shrink-0" /><span>{emploi._count?.applications || emploi.candidatures || 0} candidature{(emploi._count?.applications || emploi.candidatures) !== 1 ? "s" : ""}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
                         <Calendar size={11} className="shrink-0" /><span>{emploi.datePublication || new Date((emploi as any).createdAt).toLocaleDateString("fr-FR")}</span>

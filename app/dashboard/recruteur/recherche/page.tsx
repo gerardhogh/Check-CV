@@ -13,6 +13,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import TalentCard from "@/app/components/TalentCard";
+import { useAuth } from "@/app/context/AuthContext";
 
 // No MOCK_TALENTS anymore
 
@@ -22,6 +23,8 @@ export default function RechercheProfil() {
   const [filterGender, setFilterGender] = useState("");
   const [filterCountry, setFilterCountry] = useState("");
   const [filterCity, setFilterCity] = useState("");
+  
+  const { user } = useAuth();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -136,13 +139,13 @@ export default function RechercheProfil() {
           </button>
           <div className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 pr-2 rounded-full transition-colors border border-transparent hover:border-slate-200">
             <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 relative">
-              <Image
-                src="/assets/avatar_africain.jpg"
-                alt="Profile"
-                width={32}
-                height={32}
-                className="object-cover"
-              />
+                <Image
+                  src={user?.avatar || "/assets/avatar_africain.jpg"}
+                  alt="Profile"
+                  width={32}
+                  height={32}
+                  className="object-cover w-full h-full object-center"
+                />
             </div>
             <ChevronDown className="w-4 h-4 text-slate-500" />
           </div>

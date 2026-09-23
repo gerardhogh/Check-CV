@@ -39,11 +39,11 @@ export default function TalentCard({
       {/* Image container */}
       <div className="relative w-full aspect-[4/3] bg-pink-100 overflow-hidden">
         <Image
-          src={imageUrl || "/assets/candidate-alicia-parker.jpg"}
+          src={imageUrl || "/assets/avatar_africain.jpg"}
           alt={name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className="object-cover group-hover:scale-102 transition-transform duration-300"
+          className="object-cover object-center w-full h-full group-hover:scale-102 transition-transform duration-300"
         />
         {/* Verification badge */}
         {isVerified && (

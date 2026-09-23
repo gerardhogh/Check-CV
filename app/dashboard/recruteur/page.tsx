@@ -353,7 +353,7 @@ export default function RecruteurDashboard() {
                     alt="Avatar"
                     width={32}
                     height={32}
-                    className="object-cover"
+                    className="object-cover w-full h-full object-center"
                   />
                 </div>
                 <ChevronDown size={14} className="text-slate-500" />

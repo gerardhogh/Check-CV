@@ -50,7 +50,7 @@ export async function GET(request: Request) {
         ? `${t.talentProfile.city}, ${t.talentProfile.country}` 
         : (t.talentProfile?.city || t.talentProfile?.country || "Non spécifié"),
       profession: t.talentProfile?.bio?.substring(0, 30) || "Talent", 
-      imageUrl: t.image || "/assets/candidate-alicia-parker.jpg",
+      imageUrl: t.image || "/assets/avatar_africain.jpg",
       isVerified: true,
       skills: t.talentProfile?.skills ? JSON.parse(t.talentProfile.skills) : [],
     }));

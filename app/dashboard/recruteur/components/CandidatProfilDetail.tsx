@@ -97,7 +97,20 @@ export default function CandidatProfilDetail({
   const email = fullProfile?.email || candidat?.email || "jean.dossou@mail.com";
   const phone = fullProfile?.contact || candidat?.phone || "+229 01 91 49 61 67";
   const imageUrl = fullProfile?.imageUrl || candidat?.imageUrl || "/assets/candidate-alicia-parker.jpg";
-  const finalVideoUrl = fullProfile?.interviewSession?.videoRecordings || fullProfile?.videoUrl;
+  
+  let finalVideoUrl = fullProfile?.videoUrl;
+  if (fullProfile?.interviewSession?.videoRecordings) {
+    try {
+      const parsed = JSON.parse(fullProfile.interviewSession.videoRecordings);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        finalVideoUrl = parsed[0];
+      } else if (typeof parsed === 'string') {
+        finalVideoUrl = parsed;
+      }
+    } catch (e) {
+      finalVideoUrl = fullProfile.interviewSession.videoRecordings;
+    }
+  }
 
   const showNotification = (msg: string) => {
     setToastMsg(msg);
@@ -105,11 +118,23 @@ export default function CandidatProfilDetail({
   };
 
   const handleDownloadCv = () => {
-    showNotification("Téléchargement du CV au format PDF en cours...");
+    const url = fullProfile?.cvUrl || candidat?.cvUrl;
+    if (url) {
+      window.open(url, "_blank");
+      showNotification("Téléchargement du CV au format PDF en cours...");
+    } else {
+      showNotification("Aucun CV disponible pour ce candidat.");
+    }
   };
 
   const handlePreviewCv = () => {
-    showNotification("Ouverture de l'aperçu du document CV...");
+    const url = fullProfile?.cvUrl || candidat?.cvUrl;
+    if (url) {
+      window.open(url, "_blank");
+      showNotification("Ouverture de l'aperçu du document CV...");
+    } else {
+      showNotification("Aucun CV disponible pour ce candidat.");
+    }
   };
 
   return (
@@ -301,7 +326,7 @@ export default function CandidatProfilDetail({
                   <input
                     type="text"
                     readOnly
-                    value="Jean"
+                    value={name?.split(" ")[0] || "Non spécifié"}
                     className="w-full bg-slate-100 border border-slate-200/80 rounded-md py-2.5 px-3.5 text-xs text-slate-800 font-medium outline-none cursor-default"
                   />
                 </div>
@@ -312,7 +337,7 @@ export default function CandidatProfilDetail({
                   <input
                     type="text"
                     readOnly
-                    value="DOSSOU"
+                    value={name?.split(" ").slice(1).join(" ") || "Non spécifié"}
                     className="w-full bg-slate-100 border border-slate-200/80 rounded-md py-2.5 px-3.5 text-xs text-slate-800 font-medium outline-none cursor-default"
                   />
                 </div>
@@ -324,7 +349,7 @@ export default function CandidatProfilDetail({
                   <input
                     type="text"
                     readOnly
-                    value="Développeur Frontend"
+                    value={profession}
                     className="w-full bg-slate-100 border border-slate-200/80 rounded-md py-2.5 px-3.5 text-xs text-slate-800 font-medium outline-none cursor-default"
                   />
                 </div>
@@ -335,7 +360,7 @@ export default function CandidatProfilDetail({
                   <input
                     type="text"
                     readOnly
-                    value="jeandossou2345"
+                    value={name?.toLowerCase().replace(/\s+/g, '') || "user"}
                     className="w-full bg-slate-100 border border-slate-200/80 rounded-md py-2.5 px-3.5 text-xs text-slate-800 font-medium outline-none cursor-default"
                   />
                 </div>
@@ -347,45 +372,33 @@ export default function CandidatProfilDetail({
                   <input
                     type="text"
                     readOnly
-                    value="Femme"
+                    value={fullProfile?.gender || "Non précisé"}
                     className="w-full bg-slate-100 border border-slate-200/80 rounded-md py-2.5 px-3.5 text-xs text-slate-800 font-medium outline-none cursor-default"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Types d'opportunités recherchées
+                    Profession / Domaine
                   </label>
                   <input
                     type="text"
                     readOnly
-                    value="Emploi"
+                    value={fullProfile?.domaine || profession}
                     className="w-full bg-slate-100 border border-slate-200/80 rounded-md py-2.5 px-3.5 text-xs text-slate-800 font-medium outline-none cursor-default"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Pays/Nationalité
+                    Localisation
                   </label>
                   <input
                     type="text"
                     readOnly
-                    value="Benin"
+                    value={fullProfile?.location || candidat?.location || "Non spécifié"}
                     className="w-full bg-slate-100 border border-slate-200/80 rounded-md py-2.5 px-3.5 text-xs text-slate-800 font-medium outline-none cursor-default"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Ville
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    value="Cotonou"
-                    className="w-full bg-slate-100 border border-slate-200/80 rounded-md py-2.5 px-3.5 text-xs text-slate-800 font-medium outline-none cursor-default"
-                  />
-                </div>
-
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Numéro de téléphone
@@ -417,7 +430,7 @@ export default function CandidatProfilDetail({
                 <textarea
                   readOnly
                   rows={3}
-                  value="Développeur passionné avec 3 ans d'expérience dans la création d'applications web réactives."
+                  value={fullProfile?.bio || "Aucune biographie disponible."}
                   className="w-full bg-slate-100 border border-slate-200/80 rounded-md p-3.5 text-xs text-slate-800 font-medium outline-none cursor-default resize-none"
                 />
               </div>
@@ -429,7 +442,7 @@ export default function CandidatProfilDetail({
                 <input
                   type="text"
                   readOnly
-                  value="Javascript, Node js, Laravel, Web design"
+                  value={fullProfile?.skills?.join(", ") || "Non spécifié"}
                   className="w-full bg-slate-100 border border-slate-200/80 rounded-md py-2.5 px-3.5 text-xs text-slate-800 font-medium outline-none cursor-default"
                 />
               </div>
