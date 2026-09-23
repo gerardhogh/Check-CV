@@ -116,7 +116,7 @@ export default function UpdatePasswordPage() {
         <Link href="/" className="relative h-12 w-48 transition-opacity hover:opacity-90">
           <Image
             src="/assets/CC blue png horiz 1.png"
-            alt="Check CV Logo"
+            alt="Netacuv Logo"
             fill
             sizes="(max-width: 768px) 150px, 192px"
             className="object-contain"

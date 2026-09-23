@@ -203,7 +203,7 @@ export default function AdminEmplois() {
           <div className="flex items-center text-sm text-slate-500">
             <Link href="/dashboard/admin" className="hover:text-slate-800">Accueil</Link>
             <span className="mx-2">›</span>
-            <span>Offres créées par Check-CV</span>
+            <span>Offres créées par Netacuv</span>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
@@ -226,7 +226,7 @@ export default function AdminEmplois() {
                   <div key={o.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-4">
                       <div className="w-10 h-10 flex items-center justify-center bg-orange-50 rounded-lg">
-                        {/* Placeholder for Check-CV logo in orange style */}
+                        {/* Placeholder for Netacuv logo in orange style */}
                         <div className="w-6 h-6 border-2 border-orange-500 rotate-45 flex items-center justify-center relative">
                            <span className="-rotate-45 text-[10px] font-bold text-orange-500">G</span>
                         </div>

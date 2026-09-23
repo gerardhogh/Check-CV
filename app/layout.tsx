@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Check CV – Plateforme intelligente de recrutement",
+  title: "Netacuv – Plateforme intelligente de recrutement",
   description:
-    "Check CV vous connecte aux meilleurs talents vérifiés par IA. Déposez votre CV, passez un test vidéo et boostez votre profil avec des étoiles.",
+    "Netacuv vous connecte aux meilleurs talents vérifiés par IA. Déposez votre CV, passez un test vidéo et boostez votre profil avec des étoiles.",
   keywords: ["recrutement", "CV", "talents", "Afrique", "emploi", "IA"],
   openGraph: {
-    title: "Check CV",
+    title: "Netacuv",
     description: "Plateforme intelligente de mise en relation talents & recruteurs",
-    siteName: "Check CV",
+    siteName: "Netacuv",
   },
 };
 

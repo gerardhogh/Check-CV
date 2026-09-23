@@ -1,4 +1,4 @@
-// IndexedDB helper for Check CV (video interviews and documents)
+// IndexedDB helper for Netacuv (video interviews and documents)
 
 const DB_NAME = "InterviewDB";
 const DB_VERSION = 3;

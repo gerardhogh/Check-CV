@@ -59,7 +59,7 @@ export default function HomePage() {
     },
     {
       q: "10. Est-ce qu&apos;il y a un coût pour les recruteurs ?",
-      a: "Check CV propose une version gratuite pour démarrer, et un plan mensuel à 1 000 FCFA/mois pour des recherches et téléchargements illimités.",
+      a: "Netacuv propose une version gratuite pour démarrer, et un plan mensuel à 1 000 FCFA/mois pour des recherches et téléchargements illimités.",
     },
   ];
 
@@ -131,7 +131,7 @@ export default function HomePage() {
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl transition-transform hover:scale-[1.01]">
                   <Image
                     src="/assets/image 1.png"
-                    alt="Dépose ton CV - Check CV"
+                    alt="Dépose ton CV - Netacuv"
                     width={460}
                     height={590}
                     priority
@@ -145,7 +145,7 @@ export default function HomePage() {
 
       </section>
 
-      {/* ── POURQUOI CHOISIR CHECK-CV ── */}
+      {/* ── POURQUOI CHOISIR NETACUV ── */}
       <section id="pourquoi" className="py-24 bg-white relative">
         <motion.div 
           className="max-w-7xl mx-auto px-6"
@@ -156,7 +156,7 @@ export default function HomePage() {
         >
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
-              Pourquoi choisir <span className="text-blue-600">CHECK-CV</span>
+              Pourquoi choisir <span className="text-blue-600">NETACUV</span>
             </h2>
             <p className="text-slate-500 text-base sm:text-lg leading-relaxed">
               Débloquez votre plein potentiel et accédez à des opportunités
@@ -632,7 +632,7 @@ export default function HomePage() {
             </h2>
             <p className="text-slate-600 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
               Que vous soyez à la recherche d&apos;un emploi ou d&apos;un profil qualifié,
-              Check CV est la solution.
+              Netacuv est la solution.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

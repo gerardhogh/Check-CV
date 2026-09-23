@@ -45,14 +45,14 @@ export default function TermsPage() {
           <section id="mentions-legales" className="mb-10 scroll-mt-24">
             <h2 className="text-2xl font-bold border-b border-slate-100 pb-3 mb-4">Article 1 : Mentions Légales</h2>
             <p className="text-slate-600 leading-relaxed">
-              La plateforme Check CV est éditée et exploitée par la société <strong>Check CV SAS</strong>. Hébergement assuré par Vercel Inc. et infrastructures de données sécurisées.
+              La plateforme Netacuv est éditée et exploitée par la société <strong>Netacuv SAS</strong>. Hébergement assuré par Vercel Inc. et infrastructures de données sécurisées.
             </p>
           </section>
 
           <section id="description-service" className="mb-10 scroll-mt-24">
             <h2 className="text-2xl font-bold border-b border-slate-100 pb-3 mb-4">Article 2 : Description du Service</h2>
             <p className="text-slate-600 leading-relaxed">
-              Check CV est une plateforme numérique d&apos;évaluation, de valorisation et de mise en relation professionnelle. Elle permet aux chercheurs d&apos;emploi (&quot;Talents&quot;) de structurer leur profil, de téléverser un CV et d&apos;effectuer des tests vidéo analysés par Intelligence Artificielle. Elle permet aux &quot;Recruteurs&quot; d&apos;accéder à une CVthèque qualifiée.
+              Netacuv est une plateforme numérique d&apos;évaluation, de valorisation et de mise en relation professionnelle. Elle permet aux chercheurs d&apos;emploi (&quot;Talents&quot;) de structurer leur profil, de téléverser un CV et d&apos;effectuer des tests vidéo analysés par Intelligence Artificielle. Elle permet aux &quot;Recruteurs&quot; d&apos;accéder à une CVthèque qualifiée.
             </p>
           </section>
 
@@ -77,14 +77,14 @@ export default function TermsPage() {
           <section id="propriete-intellectuelle" className="mb-10 scroll-mt-24">
             <h2 className="text-2xl font-bold border-b border-slate-100 pb-3 mb-4">Article 5 : Propriété Intellectuelle</h2>
             <p className="text-slate-600 leading-relaxed">
-              L&apos;ensemble de la marque, du design, des algorithmes d&apos;analyse IA, des textes et logos de Check CV sont la propriété exclusive de Check CV SAS. L&apos;utilisateur conserve la propriété intellectuelle de son CV et de ses enregistrements vidéo, mais concède à Check CV une licence d&apos;utilisation pour l&apos;affichage auprès des recruteurs.
+              L&apos;ensemble de la marque, du design, des algorithmes d&apos;analyse IA, des textes et logos de Netacuv sont la propriété exclusive de Netacuv SAS. L&apos;utilisateur conserve la propriété intellectuelle de son CV et de ses enregistrements vidéo, mais concède à Netacuv une licence d&apos;utilisation pour l&apos;affichage auprès des recruteurs.
             </p>
           </section>
 
           <section id="limitation-responsabilite" className="mb-10 scroll-mt-24">
             <h2 className="text-2xl font-bold border-b border-slate-100 pb-3 mb-4">Article 6 : Limitation de Responsabilité</h2>
             <p className="text-slate-600 leading-relaxed">
-              Check CV est une plateforme d&apos;intermédiation et d&apos;évaluation. Check CV ne garantit pas l&apos;obtention d&apos;un emploi pour les Talents, ni le recrutement effectif pour les Recruteurs.
+              Netacuv est une plateforme d&apos;intermédiation et d&apos;évaluation. Netacuv ne garantit pas l&apos;obtention d&apos;un emploi pour les Talents, ni le recrutement effectif pour les Recruteurs.
             </p>
           </section>
 

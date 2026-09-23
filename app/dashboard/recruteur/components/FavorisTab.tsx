@@ -43,7 +43,7 @@ export default function FavorisTab({ onViewProfile, onSendEmail }: FavorisTabPro
   };
 
   const handleShare = (name: string) => {
-    navigator.clipboard?.writeText(`https://check-cv.com/profils/${name.toLowerCase().replace(" ", "-")}`).catch(() => {});
+    navigator.clipboard?.writeText(`https://netacuv.com/profils/${name.toLowerCase().replace(" ", "-")}`).catch(() => {});
     showToast(`Lien du profil de ${name} copié !`);
   };
 

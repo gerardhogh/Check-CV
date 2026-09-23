@@ -35,9 +35,9 @@ function ProfilTalentContent() {
   const cvInputRef = useRef<HTMLInputElement>(null);
   const [selectedCvFile, setSelectedCvFile] = useState<File | null>(null);
   const [selectedCvName, setSelectedCvName] = useState<string>("");
-  const [cvName, setCvName] = useState<string>("Check CV.pdf");
+  const [cvName, setCvName] = useState<string>("Netacuv.pdf");
   const [cvDate, setCvDate] = useState<string>("21 avril 2025");
-  const [cvBlobUrl, setCvBlobUrl] = useState<string>("/Docs/Check CV.pdf");
+  const [cvBlobUrl, setCvBlobUrl] = useState<string>("/Docs/Netacuv.pdf");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [completionPercent, setCompletionPercent] = useState(0);
@@ -47,6 +47,34 @@ function ProfilTalentContent() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const fetchProfile = () => {
+    fetch("/api/talents/me")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          if (data.avatar) setUserAvatar(data.avatar);
+
+          let pct = 0;
+          if (data.name) pct += 25;
+          if (data.avatar) pct += 10;
+          if (data.talentProfile?.cvUrl) pct += 25;
+
+          const hasVid = !!(data.talentProfile?.videoUrl) || localStorage.getItem("interview_recorded") === "true";
+          if (hasVid) pct += 40;
+
+          setCompletionPercent(pct);
+
+          if (pct === 100) setStars(5);
+          else if (pct >= 80) setStars(4);
+          else if (pct >= 60) setStars(3);
+          else if (pct >= 40) setStars(2);
+          else if (pct >= 1) setStars(1);
+          else setStars(0);
+        }
+      })
+      .catch(console.error);
   };
 
   useEffect(() => {
@@ -72,35 +100,9 @@ function ProfilTalentContent() {
       console.error(e);
     }
     
-    // Fetch profile to calculate completion
-    fetch("/api/talents/me")
-      .then(res => res.json())
-      .then(data => {
-        if (!data.error) {
-          if (data.avatar) setUserAvatar(data.avatar);
 
-          // 4-step weighted formula (social links optional, not counted)
-          // info=25, avatar=10, cv=25, video=40
-          let pct = 0;
-          if (data.name) pct += 25;
-          if (data.avatar) pct += 10;
-          if (data.talentProfile?.cvUrl) pct += 25;
 
-          const hasVid = !!(data.talentProfile?.videoUrl) || localStorage.getItem("interview_recorded") === "true";
-          if (hasVid) pct += 40;
-
-          setCompletionPercent(pct);
-
-          // Stars: 0% → 0⭐, 1-39% → 1⭐, 40-59% → 2⭐, 60-79% → 3⭐, 80-99% → 4⭐, 100% → 5⭐
-          if (pct === 100) setStars(5);
-          else if (pct >= 80) setStars(4);
-          else if (pct >= 60) setStars(3);
-          else if (pct >= 40) setStars(2);
-          else if (pct >= 1) setStars(1);
-          else setStars(0);
-        }
-      })
-      .catch(console.error);
+    fetchProfile();
   }, [searchParams]);
 
   // Handle Avatar Change
@@ -128,9 +130,7 @@ function ProfilTalentContent() {
       if (!res.ok) throw new Error(data.error || "Erreur lors de l'upload");
 
       showToast("Photo de profil mise à jour avec succès !");
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      fetchProfile();
     } catch (err: any) {
       console.error("Erreur sauvegarde avatar", err);
       showToast(err.message || "Une erreur s'est produite lors de la sauvegarde de la photo.");
@@ -183,6 +183,7 @@ function ProfilTalentContent() {
       setSelectedCvFile(null);
       setSelectedCvName("");
       showToast("CV mis à jour avec succès !");
+      fetchProfile();
     } catch (err: any) {
       console.error("Erreur sauvegarde CV", err);
       showToast(err.message || "Une erreur s'est produite lors de la sauvegarde du CV.");
@@ -509,7 +510,7 @@ function ProfilTalentContent() {
 
           {/* Tab Content */}
           <div className="p-8">
-            {activeTab === "informations" && <InformationsTab />}
+            {activeTab === "informations" && <InformationsTab onUpdate={fetchProfile} />}
             {activeTab === "reseaux" && <ReseauxTab />}
             {activeTab === "video" && <VideoTab />}
           </div>
@@ -528,7 +529,7 @@ export default function ProfilTalent() {
 }
 
 /* ─── Onglet: Informations ─── */
-function InformationsTab() {
+function InformationsTab({ onUpdate }: { onUpdate: () => void }) {
   const [formData, setFormData] = useState({
     name: "",
     bio: "",
@@ -601,6 +602,7 @@ function InformationsTab() {
       });
       if (res.ok) {
         showTabToast("Informations mises à jour avec succès ✓", "success");
+        if (onUpdate) onUpdate();
       } else {
         showTabToast("Erreur lors de la mise à jour", "error");
       }
@@ -981,7 +983,7 @@ function VideoTab() {
     const ext = videoBlob?.type?.includes("mp4") ? "mp4" : "webm";
     const a = document.createElement("a");
     a.href = videoUrl;
-    a.download = `entretien-video-checkcv.${ext}`;
+    a.download = `entretien-video-netacuv.${ext}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1019,7 +1021,7 @@ function VideoTab() {
         <li>Se préparer en 20 secondes maximum.</li>
         <li>Enregistrer une réponse vidéo de 1 min ou plus maximum.</li>
         <li>Choisir entre continuer ou recommencer (max 3 tentatives).</li>
-        <li>Envoyer la réponse finale pour validation Check-CV.</li>
+        <li>Envoyer la réponse finale pour validation Netacuv.</li>
         <li>Une fois validée, la vidéo apparaîtra ici sous forme de vignette.</li>
       </ol>
 

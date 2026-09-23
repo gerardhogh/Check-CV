@@ -252,7 +252,7 @@ export default function CandidatProfilDetail({
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-3">
                 <span className="text-[11px] text-white font-medium bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded">
-                  Document certifié Check CV
+                  Document certifié Netacuv
                 </span>
               </div>
             </div>
@@ -524,7 +524,7 @@ export default function CandidatProfilDetail({
                 <div className="mt-6 p-5 rounded-xl bg-indigo-50/60 border border-indigo-100">
                   <h4 className="text-sm font-bold text-indigo-900 flex items-center gap-2 mb-3">
                     <CheckCircle size={18} className="text-indigo-500" />
-                    Évaluation de l'IA Check CV
+                    Évaluation de l'IA Netacuv
                   </h4>
                   <div className="flex items-center gap-4 mb-4">
                     <div className="flex-shrink-0 w-16 h-16 rounded-full bg-white border-2 border-indigo-200 flex items-center justify-center shadow-sm">

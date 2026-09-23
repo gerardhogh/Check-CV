@@ -75,7 +75,7 @@ export default function AProposPage() {
             <div className="relative w-full md:w-[340px] lg:w-[420px] flex-shrink-0 overflow-hidden min-h-[320px] md:min-h-0">
               <Image
                 src="/Images/a15d48bd-47a1-428a-9544-56640d4dbe14.jpg"
-                alt="À propos de Check CV"
+                alt="À propos de Netacuv"
                 fill
                 className="object-cover object-left-top"
                 priority
@@ -177,7 +177,7 @@ export default function AProposPage() {
                 Nos Valeurs
               </span>
               <h2 className="text-3xl md:text-4xl font-black text-slate-900">
-                Les 4 Piliers de Check CV
+                Les 4 Piliers de Netacuv
               </h2>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -246,7 +246,7 @@ export default function AProposPage() {
               Prêt à transformer votre carrière<br className="hidden md:block" /> ou vos recrutements ?
             </h2>
             <p className="text-slate-500 text-lg mb-10 max-w-xl mx-auto">
-              Rejoignez des milliers de talents et recruteurs qui font confiance à Check CV pour des échanges certifiés et efficaces.
+              Rejoignez des milliers de talents et recruteurs qui font confiance à Netacuv pour des échanges certifiés et efficaces.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

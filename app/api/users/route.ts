@@ -1,20 +1,30 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  try {
-    const users = await prisma.user.findMany({
-      include: {
-        role: true,
-        recruiterProfile: {
-          include: { jobOffers: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-    return NextResponse.json(users);
-  } catch (error) {
-    console.error("Erreur GET /api/users:", error);
-    return NextResponse.json({ error: "Erreur lors de la récupération des utilisateurs" }, { status: 500 });
+  const session = await getServerSession(authOptions);
+
+  // Vérification : Seul un ADMIN peut voir la liste des utilisateurs
+  if (!session || session.user?.role !== "ADMIN") {
+    return NextResponse.json(
+      { error: "Accès refusé. Droits d'administrateur requis." },
+      { status: 403 }
+    );
   }
+
+  // Récupération sécurisée (exclusion explicite du champ passwordHash)
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return NextResponse.json(users);
 }

@@ -171,7 +171,7 @@ function InscriptionForm() {
             Créer un compte
           </h1>
           <p className="text-center text-sm mb-6 text-slate-500">
-            Rejoignez la plateforme Check CV dès aujourd'hui
+            Rejoignez la plateforme Netacuv dès aujourd'hui
           </p>
 
           {/* Role selector */}

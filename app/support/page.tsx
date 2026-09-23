@@ -121,7 +121,7 @@ export default function SupportPage() {
           <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-xl relative h-64 md:h-80 border border-slate-100 group">
             <img 
               src="/Images/african-american-woman-experiencing-vr-simulation.jpg" 
-              alt="Support et Assistance Check CV"
+              alt="Support et Assistance Netacuv"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
             />
           </div>

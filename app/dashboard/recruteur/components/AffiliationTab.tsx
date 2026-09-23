@@ -120,7 +120,7 @@ function RetraitModal({ cagnotte, onClose, onConfirm }: RetraitModalProps) {
 export default function AffiliationTab() {
   const cagnotte = 7500;
   const referralCode = "REC-GG-2024-X9K1";
-  const referralLink = `https://check-cv.com/inscription?ref=${referralCode}`;
+  const referralLink = `https://netacuv.com/inscription?ref=${referralCode}`;
 
   const [copied, setCopied] = useState(false);
   const [showRetraitModal, setShowRetraitModal] = useState(false);

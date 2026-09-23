@@ -201,7 +201,7 @@ export default function RechercheProfil() {
               className="w-full appearance-none bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 rounded-md py-2.5 pl-4 pr-9 text-sm font-medium text-slate-700 outline-hidden hover:border-slate-300 focus:border-[#32A8D7] focus:bg-white cursor-pointer transition-colors"
             >
               <option value="">Toutes les licenses</option>
-              {["Licence Pro", "Master / Ingénieur", "Doctorat", "Certifié Check CV"].map(opt => (
+              {["Licence Pro", "Master / Ingénieur", "Doctorat", "Certifié Netacuv"].map(opt => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>

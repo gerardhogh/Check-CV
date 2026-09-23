@@ -163,7 +163,7 @@ export default function GoogleAuthModal({
                 <div className="space-y-3">
                   <p className="text-sm text-slate-600 font-medium">
                     Choisissez un compte Google pour continuer sur{" "}
-                    <span className="text-blue-600 font-bold">Check CV</span>
+                    <span className="text-blue-600 font-bold">Netacuv</span>
                   </p>
 
                   {/* Primary Google account card */}

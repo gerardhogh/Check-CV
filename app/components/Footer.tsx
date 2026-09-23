@@ -21,7 +21,7 @@ export default function Footer() {
               <div className="relative h-10 w-44">
                 <Image
                   src="/assets/CC white png horiz.png"
-                  alt="Check CV Logo"
+                  alt="Netacuv Logo"
                   fill
                   className="object-contain object-left"
                 />
@@ -88,7 +88,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {[
                 { href: "/", label: "Accueil" },
-                { href: "/#pourquoi", label: "Pourquoi Check-CV ?" },
+                { href: "/#pourquoi", label: "Pourquoi Netacuv ?" },
                 { href: "/#comment", label: "Comment ça marche ?" },
                 { href: "/talents", label: "Pour les Talents" },
                 { href: "/recruteurs", label: "Pour les Recruteurs" },
@@ -112,7 +112,7 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3">
               {[
-                { href: "/a-propos", label: "À Propos de Check-CV" },
+                { href: "/a-propos", label: "À Propos de Netacuv" },
                 { href: "/faq", label: "FAQ" },
                 { href: "/support", label: "Support" },
                 { href: "/contact", label: "Contacts" },
@@ -170,7 +170,7 @@ export default function Footer() {
             </Link>
           </div>
           <p>
-            • © 2025 <span className="text-white font-semibold">Check-CV</span>. Tous droits réservés.
+            • © 2025 <span className="text-white font-semibold">Netacuv</span>. Tous droits réservés.
           </p>
         </div>
       </div>

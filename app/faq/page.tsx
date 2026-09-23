@@ -56,7 +56,7 @@ export default function FAQPage() {
     },
     {
       q: "10. Est-ce qu'il y a un coût pour les recruteurs ?",
-      a: "Check CV propose une version gratuite pour démarrer, et un plan mensuel à 1 000 FCFA/mois pour des recherches et téléchargements illimités.",
+      a: "Netacuv propose une version gratuite pour démarrer, et un plan mensuel à 1 000 FCFA/mois pour des recherches et téléchargements illimités.",
     },
   ];
 

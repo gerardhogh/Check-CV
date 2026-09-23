@@ -1,104 +1,75 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
 
-export const dynamic = 'force-dynamic';
-
-export async function GET(req: Request) {
+// GET : Récupérer toutes les offres d'emploi
+export async function GET() {
   try {
-    const { searchParams } = new URL(req.url);
-    const mine = searchParams.get('mine');
-
-    if (mine === 'true') {
-      const session = await getServerSession(authOptions);
-      if (!session || !session.user) {
-        return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-      }
-      
-      const userId = (session.user as any).id;
-      const recruiterProfile = await prisma.recruiterProfile.findUnique({
-        where: { userId }
-      });
-
-      if (!recruiterProfile) {
-        return NextResponse.json([]);
-      }
-
-      const myJobs = await prisma.jobOffer.findMany({
-        where: { recruiterId: recruiterProfile.id },
-        include: { 
-          recruiter: true,
-          _count: { select: { applications: true } }
-        },
-        orderBy: { createdAt: "desc" }
-      });
-      return NextResponse.json(myJobs);
-    }
-
     const jobs = await prisma.jobOffer.findMany({
-      where: {
-        status: "PUBLISHED"
-      },
-      include: {
-        recruiter: true
-      },
-      orderBy: {
-        createdAt: "desc"
-      }
+      orderBy: { createdAt: "desc" },
     });
-
     return NextResponse.json(jobs);
   } catch (error) {
-    console.error("Erreur lors de la récupération des offres:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération des offres." },
+      { status: 500 }
+    );
   }
 }
 
+// POST : Créer une nouvelle offre (RECRUITER ou ADMIN uniquement)
 export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+
+  // Vérification stricte des droits
+  if (!session || !["RECRUITER", "ADMIN"].includes(session.user?.role || "")) {
+    return NextResponse.json(
+      { error: "Accès refusé. Seuls les recruteurs et administrateurs peuvent publier une offre." },
+      { status: 403 }
+    );
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    const body = await req.json();
+    const { title, description, location, salary, contractType } = body;
+
+    if (!title || !description) {
+      return NextResponse.json(
+        { error: "Le titre et la description sont obligatoires." },
+        { status: 400 }
+      );
     }
 
-    const userId = (session.user as any).id;
-    const body = await req.json();
-
-    // S'assurer que le RecruiterProfile existe pour cet utilisateur
-    let recruiterProfile = await prisma.recruiterProfile.findUnique({
-      where: { userId }
+    // Récupérer le profil recruteur lié à l'utilisateur connecté
+    const recruiterProfile = await prisma.recruiterProfile.findFirst({
+      where: { userId: session.user.id },
     });
 
     if (!recruiterProfile) {
-      // Auto-create for demo purposes if it doesn't exist
-      recruiterProfile = await prisma.recruiterProfile.create({
-        data: {
-          userId,
-          companyName: body.entreprise || "Entreprise",
-        }
-      });
+      return NextResponse.json(
+        { error: "Profil recruteur introuvable." },
+        { status: 404 }
+      );
     }
 
     const newJob = await prisma.jobOffer.create({
       data: {
-        title: body.titre,
-        description: body.description,
-        location: body.lieu,
-        contractType: body.typeEmploi,
-        status: "PUBLISHED", // Visible immédiatement par les Talents
+        title,
+        description,
+        location,
+        salary,
+        contractType,
+        status: "PUBLISHED",
         recruiterId: recruiterProfile.id,
-      }
+      },
     });
-
-    // Invalider le cache de la page talent pour forcer le rechargement
-    revalidatePath("/dashboard/talent");
 
     return NextResponse.json(newJob, { status: 201 });
   } catch (error) {
-    console.error("Erreur lors de la création de l'offre:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erreur lors de la création de l'offre." },
+      { status: 500 }
+    );
   }
 }

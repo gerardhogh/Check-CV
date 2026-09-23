@@ -1,33 +1,58 @@
-import { NextAuthOptions, DefaultSession } from "next-auth";
+import { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import crypto from "crypto";
 
+// Extension des types TypeScript de NextAuth pour inclure 'id' et 'role'
 declare module "next-auth" {
-  interface User {
-    id: string;
-    role: string;
-  }
   interface Session {
-    user: User & DefaultSession["user"];
+    user: {
+      id?: string;
+      role?: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
+  }
+  interface User {
+    id?: string;
+    role?: string;
   }
 }
 
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string;
+    role?: string;
+  }
+}
+
+// Sécurité : Bloquer le démarrage si le secret est absent
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error("⚠️ La variable d'environnement NEXTAUTH_SECRET est manquante dans .env");
+}
+
 export const authOptions: NextAuthOptions = {
-  adapter: undefined, 
+  adapter: PrismaAdapter(prisma),
+  secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
   },
-  pages: {
-    signIn: "/connexion",
-  },
   providers: [
+    // Authentification Google
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
+
+    // Authentification classique (Email + Mot de passe)
     CredentialsProvider({
-      name: "Credentials",
+      name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Mot de passe", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -36,20 +61,16 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
-          include: { role: true }
+          include: { role: true },
         });
 
         if (!user || !user.passwordHash) {
-          throw new Error("Utilisateur introuvable");
+          throw new Error("Utilisateur non trouvé ou compte incorrect");
         }
 
-        if (!user.active) {
-          throw new Error("Ce compte est désactivé");
-        }
+        const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
-
-        if (!isPasswordValid) {
+        if (!isValid) {
           throw new Error("Mot de passe incorrect");
         }
 
@@ -57,91 +78,10 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role?.name || "GUEST",
-        };
-      }
-    }),
-    // Provider pour les utilisateurs authentifiés via Google/Supabase OAuth
-    CredentialsProvider({
-      id: "google-oauth",
-      name: "Google OAuth",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        token: { label: "Token", type: "text" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.token) {
-          throw new Error("Paramètres manquants");
-        }
-
-        const [timestampStr, signature] = credentials.token.split(":");
-        if (!timestampStr || !signature) {
-          throw new Error("Token malformé");
-        }
-
-        const timestamp = Number(timestampStr);
-        if (isNaN(timestamp) || Date.now() - timestamp > 5 * 60 * 1000) {
-          throw new Error("Session expirée, veuillez vous reconnecter");
-        }
-
-        const secret = process.env.NEXTAUTH_SECRET || "fallback-secret";
-        const expectedSignature = crypto
-          .createHmac("sha256", secret)
-          .update(`${credentials.email}:${timestampStr}`)
-          .digest("hex");
-
-        if (signature !== expectedSignature && signature !== "simulate") {
-          throw new Error("Signature invalide");
-        }
-
-        let user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          include: { role: true },
-        });
-
-        if (!user && signature === "simulate") {
-          // Find or create role
-          let targetRole = await prisma.role.findUnique({
-            where: { name: (credentials as any).role?.toUpperCase() || "TALENT" }
-          });
-          if (!targetRole) {
-            targetRole = await prisma.role.create({
-              data: {
-                name: (credentials as any).role?.toUpperCase() || "TALENT",
-                permissions: "[]"
-              }
-            });
-          }
-
-          user = await prisma.user.create({
-            data: {
-              email: credentials.email,
-              name: (credentials as any).name || "Candidat",
-              roleId: targetRole.id,
-              active: true,
-            },
-            include: { role: true },
-          });
-        }
-
-        if (!user) {
-          throw new Error("Utilisateur introuvable");
-        }
-
-        if (!user.active) {
-          throw new Error("Ce compte est désactivé");
-        }
-
-        // Pas de vérification de mot de passe : l'identité a été validée par Supabase OAuth + jeton HMAC signé
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role?.name || "GUEST",
+          role: user.role?.name || "TALENT",
         };
       },
     }),
-
   ],
   callbacks: {
     async jwt({ token, user }) {
@@ -152,11 +92,14 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
       }
       return session;
-    }
+    },
+  },
+  pages: {
+    signIn: "/connexion",
   },
 };

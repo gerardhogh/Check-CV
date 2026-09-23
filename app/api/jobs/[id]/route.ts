@@ -1,122 +1,55 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getServerSession } from "next-auth/next";
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-export const dynamic = 'force-dynamic';
+// DELETE : Supprimer une offre (Créateur de l'offre ou ADMIN uniquement)
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions);
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!session) {
+    return NextResponse.json(
+      { error: "Vous devez être connecté pour effectuer cette action." },
+      { status: 401 }
+    );
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
-    const { id } = await params;
-
     const job = await prisma.jobOffer.findUnique({
-      where: { id },
-      include: { recruiter: true }
+      where: { id: params.id },
+      include: { recruiter: true },
     });
 
     if (!job) {
-      return NextResponse.json({ error: "Offre non trouvée" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Offre d'emploi introuvable." },
+        { status: 404 }
+      );
     }
 
-    // Verify ownership
-    const userId = (session.user as any).id;
-    if (job.recruiter.userId !== userId) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+    // Vérification : L'utilisateur doit être le créateur de l'offre ou un ADMIN
+    const isOwner = job.recruiter?.userId === session.user.id;
+    const isAdmin = session.user.role === "ADMIN";
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json(
+        { error: "Vous n'avez pas la permission de supprimer cette offre." },
+        { status: 403 }
+      );
     }
 
     await prisma.jobOffer.delete({
-      where: { id }
+      where: { id: params.id },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: "Offre supprimée avec succès." });
   } catch (error) {
-    console.error("Erreur DELETE /api/jobs/[id]:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-  }
-}
-
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
-    const { id } = await params;
-    const body = await req.json();
-    
-    const job = await prisma.jobOffer.findUnique({
-      where: { id },
-      include: { recruiter: true }
-    });
-
-    if (!job) {
-      return NextResponse.json({ error: "Offre non trouvée" }, { status: 404 });
-    }
-
-    // Verify ownership
-    const userId = (session.user as any).id;
-    if (job.recruiter.userId !== userId) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
-    }
-
-    const updatedJob = await prisma.jobOffer.update({
-      where: { id },
-      data: {
-        status: body.status
-      }
-    });
-
-    return NextResponse.json(updatedJob);
-  } catch (error) {
-    console.error("Erreur PATCH /api/jobs/[id]:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-  }
-}
-
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
-    const { id } = await params;
-    const body = await req.json();
-    
-    const job = await prisma.jobOffer.findUnique({
-      where: { id },
-      include: { recruiter: true }
-    });
-
-    if (!job) {
-      return NextResponse.json({ error: "Offre non trouvée" }, { status: 404 });
-    }
-
-    // Verify ownership
-    const userId = (session.user as any).id;
-    if (job.recruiter.userId !== userId) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
-    }
-
-    const updatedJob = await prisma.jobOffer.update({
-      where: { id },
-      data: {
-        title: body.titre || body.title,
-        description: body.description,
-        location: body.lieu || body.location,
-        contractType: body.typeEmploi || body.contractType,
-      }
-    });
-
-    return NextResponse.json(updatedJob);
-  } catch (error) {
-    console.error("Erreur PUT /api/jobs/[id]:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erreur lors de la suppression de l'offre." },
+      { status: 500 }
+    );
   }
 }

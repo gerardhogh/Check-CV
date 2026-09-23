@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     //   body: JSON.stringify({
     //     amount,
     //     currency: "XOF",
-    //     description: "Abonnement Talent Premium Check-CV",
+    //     description: "Abonnement Talent Premium Netacuv",
     //     callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/webhook`,
     //     customer: { phone_number: { number: phone, prefix: method === "wave" ? "+221" : "+229" } },
     //     reference,

@@ -26,7 +26,7 @@ export default function ContactPage() {
       
       <main className="flex-1 py-16 px-6 max-w-7xl mx-auto w-full">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">Contactez l'équipe <span className="text-blue-600">Check CV</span></h1>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">Contactez l'équipe <span className="text-blue-600">Netacuv</span></h1>
           <p className="text-slate-600 text-lg">
             Une question, un problème technique ou un partenariat ? Nous sommes là pour vous aider.
           </p>
@@ -38,7 +38,7 @@ export default function ContactPage() {
             <div className="relative h-64 md:h-80 w-full rounded-3xl overflow-hidden shadow-2xl mb-8">
               <img 
                 src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=2069&auto=format&fit=crop" 
-                alt="Équipe Check CV" 
+                alt="Équipe Netacuv" 
                 className="w-full h-full object-cover"
               />
             </div>
@@ -57,7 +57,7 @@ export default function ContactPage() {
                   <Mail size={24} />
                 </div>
                 <h3 className="font-bold text-slate-900 mb-2">E-mail Entreprises</h3>
-                <a href="mailto:recruteurs@checkcv.com" className="text-blue-600 hover:underline text-sm font-medium">recruteurs@checkcv.com</a>
+                <a href="mailto:recruteurs@netacuv.com" className="text-blue-600 hover:underline text-sm font-medium">recruteurs@netacuv.com</a>
               </div>
 
               <div className="p-6 bg-white rounded-2xl shadow-sm border border-slate-100">

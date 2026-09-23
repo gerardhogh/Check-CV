@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       if (actionParam === "signup") {
         return NextResponse.json(
           { 
-            error: `Ce compte Google est déjà associé à un compte Check CV. Veuillez vous connecter.` 
+            error: `Ce compte Google est déjà associé à un compte Netacuv. Veuillez vous connecter.` 
           },
           { status: 403 }
         );

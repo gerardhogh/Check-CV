@@ -19,7 +19,7 @@ export const LOCALES: { code: Locale; label: string; flag: string }[] = [
   { code: "pt", label: "Português", flag: "🇵🇹" },
 ];
 
-const COOKIE_NAME = "checkcv_locale";
+const COOKIE_NAME = "netacuv_locale";
 const DEFAULT_LOCALE: Locale = "fr";
 
 // ─── Dictionary type (mirrors JSON structure) ─────────────────────────────────

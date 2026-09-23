@@ -901,7 +901,7 @@ export default function InterviewPage() {
               <div className="relative h-8 w-32">
                 <Image
                   src="/assets/CC blue white horiz.png"
-                  alt="Check CV Logo"
+                  alt="Netacuv Logo"
                   fill
                   priority
                   className="object-contain object-left"

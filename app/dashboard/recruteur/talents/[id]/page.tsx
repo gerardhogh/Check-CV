@@ -315,7 +315,7 @@ function TabVideoEntretien({ talent }: { talent: TalentProfile }) {
         <div className="mt-6 p-5 rounded-xl bg-indigo-50/60 border border-indigo-100">
           <h4 className="text-sm font-bold text-indigo-900 flex items-center gap-2 mb-3">
             <CheckCircle size={18} className="text-indigo-500" />
-            Évaluation de l'IA Check CV
+            Évaluation de l'IA Netacuv
           </h4>
           <div className="flex items-center gap-4 mb-4">
             <div className="flex-shrink-0 w-16 h-16 rounded-full bg-white border-2 border-indigo-200 flex items-center justify-center shadow-sm">
@@ -433,7 +433,7 @@ export default function TalentDetailPage() {
             <div className="relative h-9 w-36">
               <Image
                 src="/assets/CC blue png horiz 1.png"
-                alt="Check CV Logo"
+                alt="Netacuv Logo"
                 fill
                 sizes="144px"
                 priority

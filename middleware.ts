@@ -6,15 +6,25 @@ export default withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
-    // Rediriger si le rôle ne correspond pas au dashboard demandé
+    // Rediriger si l'accès à l'espace Admin est tenté par un non-ADMIN
     if (path.startsWith("/dashboard/admin") && token?.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/connexion", req.url));
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
-    if (path.startsWith("/dashboard/recruteur") && token?.role !== "RECRUTEUR" && token?.role !== "RECRUITER") {
-      return NextResponse.redirect(new URL("/connexion", req.url));
+
+    // Rediriger si l'accès à l'espace Recruteur est tenté par un rôle non autorisé
+    if (
+      (path.startsWith("/dashboard/recruiter") || path.startsWith("/dashboard/recruteur")) &&
+      !["RECRUITER", "ADMIN"].includes(token?.role as string)
+    ) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
-    if (path.startsWith("/dashboard/talent") && token?.role !== "TALENT") {
-      return NextResponse.redirect(new URL("/connexion", req.url));
+
+    // Rediriger si l'accès à l'espace Talent est tenté par un rôle non autorisé
+    if (
+      path.startsWith("/dashboard/talent") &&
+      !["TALENT", "ADMIN"].includes(token?.role as string)
+    ) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
   },
   {
@@ -23,13 +33,13 @@ export default withAuth(
     },
     pages: {
       signIn: "/connexion",
-    }
+    },
   }
 );
 
 export const config = {
   matcher: [
-    "/dashboard/:path*", 
-    "/interview/:path*"
+    "/dashboard/:path*",
+    "/interview/:path*",
   ],
 };

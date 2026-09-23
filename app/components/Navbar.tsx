@@ -58,7 +58,7 @@ export default function Navbar({
           <div className="relative h-11 w-36 sm:w-44 flex items-center">
             <Image
               src="/assets/CC blue png horiz 1.png"
-              alt="Check CV Logo"
+              alt="Netacuv Logo"
               fill
               priority
               className="object-contain object-left"

@@ -1,39 +1,37 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    const body = await req.json();
-    const { active, roleId } = body;
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions);
 
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: {
-        ...(active !== undefined && { active }),
-        ...(roleId !== undefined && { roleId })
-      },
-      include: { role: true }
-    });
-
-    // Add Audit Log
-    let actionDesc = `Utilisateur "${updatedUser.name}" modifié`;
-    if (active !== undefined) {
-      actionDesc = `Utilisateur "${updatedUser.name}" ${active ? 'activé' : 'suspendu'}`;
-    } else if (roleId !== undefined) {
-      actionDesc = `Rôle modifié pour "${updatedUser.name}"`;
-    }
-
-    await prisma.auditLog.create({
-      data: {
-        action: actionDesc,
-        by: "Jean Dupont\n(Administrateur)", // TODO: get from session
-      }
-    });
-
-    return NextResponse.json(updatedUser);
-  } catch (error) {
-    console.error("Erreur PUT /api/users/[id]:", error);
-    return NextResponse.json({ error: "Erreur lors de la mise à jour de l'utilisateur" }, { status: 500 });
+  // Seul un ADMIN peut modifier le rôle d'un autre utilisateur
+  if (!session || session.user?.role !== "ADMIN") {
+    return NextResponse.json(
+      { error: "Accès refusé. Action réservée aux administrateurs." },
+      { status: 403 }
+    );
   }
+
+  const body = await req.json();
+
+  const updatedUser = await prisma.user.update({
+    where: { id: params.id },
+    data: {
+      roleId: body.roleId,
+      name: body.name,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+    },
+  });
+
+  return NextResponse.json(updatedUser);
 }

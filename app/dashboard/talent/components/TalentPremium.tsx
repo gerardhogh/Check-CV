@@ -154,7 +154,7 @@ export default function TalentPremium() {
       {step === "plan" && (
         <div className="bg-white rounded-3xl p-8 shadow-xl max-w-4xl mx-auto border border-slate-100">
           <h2 className="text-2xl md:text-3xl font-black text-center text-[#005a82] mb-8">
-            Devenez Talent Premium sur Check-CV
+            Devenez Talent Premium sur Netacuv
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

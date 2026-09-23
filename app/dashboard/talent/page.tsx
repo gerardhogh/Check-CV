@@ -206,7 +206,7 @@ export default function TalentDashboard() {
   };
 
   const handleCopyAffiliation = () => {
-    const link = `https://checkcv.com/inscription?ref=${(user?.name || "CANDIDAT").toUpperCase().replace(/\s+/g, "")}-750`;
+    const link = `https://netacuv.com/inscription?ref=${(user?.name || "CANDIDAT").toUpperCase().replace(/\s+/g, "")}-750`;
     navigator.clipboard.writeText(link);
     setCopiedLink(true);
     showToast("Lien de parrainage copié dans le presse-papier !");
@@ -269,7 +269,7 @@ export default function TalentDashboard() {
               <div className="relative h-9 w-36">
                 <Image
                   src="/assets/CC blue png horiz 1.png"
-                  alt="Check CV Logo"
+                  alt="Netacuv Logo"
                   fill
                   priority
                   className="object-contain object-left"
@@ -333,7 +333,7 @@ export default function TalentDashboard() {
                 </span>
               </h1>
               <p className="text-[11px] text-slate-400 font-medium">
-                Espace Candidat Certifié Check CV
+                Espace Candidat Certifié Netacuv
               </p>
             </div>
           </div>

@@ -165,7 +165,7 @@ export default function RecruteurDashboard() {
             <div className="relative h-9 w-36">
               <Image
                 src="/assets/CC blue png horiz 1.png"
-                alt="Check CV Logo"
+                alt="Netacuv Logo"
                 fill
                 priority
                 className="object-contain object-left"
@@ -554,7 +554,7 @@ export default function RecruteurDashboard() {
               {/* Filters */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 {[
-                  { label: "License", options: ["Toutes les licenses", "Licence Pro", "Master / Ingénieur", "Doctorat", "Certifié Check CV"] },
+                  { label: "License", options: ["Toutes les licenses", "Licence Pro", "Master / Ingénieur", "Doctorat", "Certifié Netacuv"] },
                   { label: "Genre", options: ["Tous les genres", "Femme", "Homme"] },
                   { label: "Pays", options: ["Tous les pays", "Bénin", "Côte d'Ivoire", "Sénégal", "Togo", "Cameroun", "France"] },
                   { label: "Ville", options: ["Toutes les villes", "Cotonou", "Porto-Novo", "Abidjan", "Dakar", "Lomé", "Douala", "Paris"] },

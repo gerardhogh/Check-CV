@@ -88,7 +88,7 @@ export default function RecruteursPage() {
         {/* Pricing Section */}
         <div className="max-w-4xl mx-auto mb-16">
           <h2 className="text-2xl md:text-3xl font-black text-center text-slate-800 mb-10">
-            Devenez Recruteur Premium sur Check-CV
+            Devenez Recruteur Premium sur Netacuv
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-2 rounded-3xl shadow-xl shadow-slate-200/50">
