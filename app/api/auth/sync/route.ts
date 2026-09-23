@@ -6,7 +6,7 @@ import crypto from "crypto";
 
 export async function POST(request: NextRequest) {
   try {
-    const { access_token, roleParam } = await request.json();
+    const { access_token, roleParam, actionParam } = await request.json();
 
     if (!access_token) {
       return NextResponse.json(
