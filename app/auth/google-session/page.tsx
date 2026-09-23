@@ -41,11 +41,16 @@ function GoogleSessionHandler() {
           }),
         });
 
-        if (!res.ok) {
-          throw new Error("Erreur lors de la synchronisation backend");
+        let data: any = {};
+        try {
+          data = await res.json();
+        } catch (e) {
+          // Si la réponse n'est pas du JSON valide, on ignore
         }
 
-        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Erreur lors de la synchronisation backend");
+        }
 
         if (mounted) setStatus("Connexion au tableau de bord...");
 
@@ -69,11 +74,11 @@ function GoogleSessionHandler() {
             router.push(data.redirect || "/dashboard/talent");
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Session setup error:", error);
         if (mounted) {
-          setStatus("Une erreur inattendue est survenue.");
-          setTimeout(() => router.push("/connexion?error=ServerError"), 2000);
+          setStatus("Erreur: " + (error?.message || "Une erreur est survenue"));
+          setTimeout(() => router.push(`/connexion?error=${encodeURIComponent(error?.message || "ServerError")}`), 2000);
         }
       }
     };
