@@ -113,7 +113,7 @@ export default function UpdatePasswordPage() {
     >
       {/* Top Logo */}
       <div className="w-full flex justify-center pt-8 md:pt-12">
-        <Link href="/" className="relative h-12 w-48 transition-opacity hover:opacity-90">
+        <Link href="/" className="relative h-10 w-40 transition-opacity hover:opacity-90">
           <Image
             src="/Logo/PNG/Logo.png"
             alt="Netacuv Logo"

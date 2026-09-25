@@ -55,7 +55,7 @@ export default function Navbar({
       <nav className={`mx-auto px-6 flex items-center justify-between ${variant === "transparent" ? "h-16" : "max-w-7xl h-20"}`}>
         {/* Logo with official Figma asset */}
         <Link href="/" className="flex items-center gap-2 group transition-opacity hover:opacity-90">
-          <div className="relative h-11 w-36 sm:w-44 flex items-center">
+          <div className="relative h-8 w-28 sm:w-36 flex items-center">
             <Image
               src="/Logo/PNG/Logo.png"
               alt="Netacuv Logo"

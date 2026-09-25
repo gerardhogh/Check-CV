@@ -18,7 +18,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-1">
             <Link href="/" className="inline-block mb-4">
-              <div className="relative h-10 w-44">
+              <div className="relative h-8 w-36">
                 <Image
                   src="/Logo/PNG/Logo%20white.png"
                   alt="Netacuv Logo"

@@ -430,7 +430,7 @@ export default function TalentDetailPage() {
         {/* Logo */}
         <div className="p-5 border-b border-slate-100 flex items-center justify-between shrink-0">
           <Link href="/" className="block">
-            <div className="relative h-9 w-36">
+            <div className="relative h-7 w-28">
               <Image
                 src="/Logo/PNG/Logo.png"
                 alt="Netacuv Logo"

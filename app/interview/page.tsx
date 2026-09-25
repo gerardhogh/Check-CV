@@ -898,7 +898,7 @@ export default function InterviewPage() {
           <div className="relative w-72 max-w-[85vw] bg-[#091522] border-r border-white/10 text-white flex flex-col h-full shadow-2xl z-10 animate-in slide-in-from-left duration-300">
             {/* Header */}
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
-              <div className="relative h-8 w-32">
+              <div className="relative h-6 w-24">
                 <Image
                   src="/Logo/PNG/Logo%20white.png"
                   alt="Netacuv Logo"
