@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { supabase } from "@/lib/supabase";
@@ -10,6 +10,8 @@ function GoogleSessionHandler() {
   const searchParams = useSearchParams();
   const role = searchParams.get("role") || "talent";
   const action = searchParams.get("action") || "login";
+
+  const [debugError, setDebugError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -21,9 +23,7 @@ function GoogleSessionHandler() {
 
         if (sessionError || !session) {
           console.error("Supabase session error:", sessionError);
-          if (mounted) {
-            router.push("/connexion?error=SessionError");
-          }
+          if (mounted) setDebugError(`Erreur Supabase: ${sessionError?.message || "Pas de session"}`);
           return;
         }
 
@@ -46,7 +46,8 @@ function GoogleSessionHandler() {
         }
 
         if (!res.ok) {
-          throw new Error(data.error || "Erreur lors de la synchronisation backend");
+          if (mounted) setDebugError(`Erreur API Sync: ${data.error || "Erreur serveur backend"}`);
+          return;
         }
 
         // 3. Connecter NextAuth avec le token HMAC sécurisé
@@ -58,9 +59,7 @@ function GoogleSessionHandler() {
 
         if (result?.error) {
           console.error("NextAuth error:", result.error);
-          if (mounted) {
-            router.push("/connexion?error=NextAuthError");
-          }
+          if (mounted) setDebugError(`Erreur NextAuth: ${result.error}`);
         } else {
           // Succès ! On redirige vers le dashboard
           if (mounted) {
@@ -69,14 +68,11 @@ function GoogleSessionHandler() {
         }
       } catch (error: any) {
         console.error("Session setup error:", error);
-        if (mounted) {
-          router.push(`/connexion?error=${encodeURIComponent(error?.message || "ServerError")}`);
-        }
+        if (mounted) setDebugError(`Exception inattendue: ${error?.message || "ServerError"}`);
       }
     };
 
-    // On utilise un petit délai pour s'assurer que le hash fragment de l'URL
-    // a été intercepté par Supabase
+    // On utilise un petit délai pour s'assurer que le hash fragment de l'URL a été intercepté
     const timer = setTimeout(() => {
       setupSession();
     }, 1000);
@@ -85,12 +81,27 @@ function GoogleSessionHandler() {
       mounted = false;
       clearTimeout(timer);
     };
-  }, [router, role]);
+  }, [router, role, action]);
+
+  if (debugError) {
+    return (
+      <div className="text-center p-8 bg-red-50 text-red-600 rounded-lg max-w-lg mx-auto mt-12">
+        <h2 className="font-bold text-xl mb-4">Erreur de connexion Google</h2>
+        <p className="mb-4">{debugError}</p>
+        <button 
+          onClick={() => router.push("/connexion")} 
+          className="px-4 py-2 bg-slate-800 text-white rounded-lg"
+        >
+          Retour à la connexion
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="text-center">
+    <div className="text-center mt-20">
       <div className="w-10 h-10 border-3 border-[#32A8D7] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-slate-600 font-medium">Veuillez patienter...</p>
+      <p className="text-slate-600 font-medium">Synchronisation de votre compte...</p>
     </div>
   );
 }
