@@ -83,56 +83,7 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
-    // Authentification Google OAuth par Supabase
-    CredentialsProvider({
-      id: "google-oauth",
-      name: "Google OAuth",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        token: { label: "Token", type: "text" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.token) {
-          throw new Error("Paramètres manquants");
-        }
 
-        const [timestampStr, signature] = credentials.token.split(":");
-        if (!timestampStr || !signature) {
-          throw new Error("Token malformé");
-        }
-
-        const timestamp = Number(timestampStr);
-        if (isNaN(timestamp) || Date.now() - timestamp > 5 * 60 * 1000) {
-          throw new Error("Session expirée, veuillez vous reconnecter");
-        }
-
-        const secret = process.env.NEXTAUTH_SECRET || "fallback-secret";
-        const expectedSignature = crypto
-          .createHmac("sha256", secret)
-          .update(`${credentials.email}:${timestampStr}`)
-          .digest("hex");
-
-        if (signature !== expectedSignature) {
-          throw new Error("Signature invalide");
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          include: { role: true },
-        });
-
-        if (!user) {
-          throw new Error("Utilisateur introuvable");
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role?.name || "TALENT",
-        };
-      },
-    }),
   ],
   callbacks: {
     async jwt({ token, user }) {
@@ -147,6 +98,17 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role = token.role || "TALENT";
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Permet les URLs relatives
+      if (url.startsWith("/")) return new URL(url, baseUrl).toString();
+      // Permet les URLs sur le même domaine
+      if (new URL(url).origin === baseUrl) return url;
+      // Permet expressément le localhost (pour le dev) et le domaine de prod
+      if (url.startsWith("http://localhost:") || url.startsWith("https://netacuv.com") || url.startsWith("https://www.netacuv.com")) {
+        return url;
+      }
+      return baseUrl;
     },
   },
   pages: {

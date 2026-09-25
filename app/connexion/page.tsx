@@ -84,25 +84,17 @@ export default function ConnexionPage() {
     setGoogleLoading(true);
     setError("");
     try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/google-session?role=${tab}&action=login`,
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
+      await signIn("google", {
+        callbackUrl:
+          tab === "admin"
+            ? "/dashboard/admin"
+            : tab === "recruteur"
+            ? "/dashboard/recruteur"
+            : "/dashboard/talent",
       });
-
-      if (oauthError) {
-        console.error("Google OAuth error:", oauthError);
-        setError("Erreur lors de la connexion avec Google. Veuillez réessayer.");
-        setGoogleLoading(false);
-      }
     } catch (e) {
       console.error("Unexpected error:", e);
-      setError("Une erreur inattendue s'est produite.");
+      setError("Une erreur inattendue s'est produite lors de la connexion Google.");
       setGoogleLoading(false);
     }
   };
