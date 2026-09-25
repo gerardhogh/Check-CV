@@ -83,7 +83,7 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
-      // Authentification Google OAuth par Supabase
+    // Authentification Google OAuth par Supabase
     CredentialsProvider({
       id: "google-oauth",
       name: "Google OAuth",
@@ -137,15 +137,14 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        token.role = (user as any).role || "TALENT";
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
+        (session.user as any).id = token.sub;
+        (session.user as any).role = token.role || "TALENT";
       }
       return session;
     },

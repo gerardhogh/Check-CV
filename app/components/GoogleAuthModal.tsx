@@ -32,36 +32,18 @@ export default function GoogleAuthModal({
 
   const handleSelectAccount = async (name: string, email: string) => {
     setIsLoading(true);
-    
-    // Simuler un token signé pour notre custom provider
-    const timestamp = Date.now();
-    // En dev/demo, on laisse le backend accepter ce token "simulé" si nécessaire
-    // Normalement ce token viendrait de l'API Google OAuth.
-    
-    const res = await signIn("google-oauth", {
-      email,
-      name,
-      role,
-      token: `${timestamp}:simulate`,
-      redirect: false,
-    });
-
-    if (res?.ok) {
-      setSuccess(true);
-      setTimeout(() => {
-        setIsLoading(false);
-        onClose();
-        if (role === "admin") {
-          router.push("/dashboard/admin");
-        } else if (role === "recruteur") {
-          router.push("/dashboard/recruteur");
-        } else {
-          router.push("/dashboard/talent");
-        }
-      }, 700);
-    } else {
+    try {
+      await signIn("google", {
+        callbackUrl:
+          role === "admin"
+            ? "/dashboard/admin"
+            : role === "recruteur"
+              ? "/dashboard/recruteur"
+              : "/dashboard/talent",
+      });
+    } catch (err) {
       setIsLoading(false);
-      alert("Erreur de connexion : " + res?.error);
+      alert("Erreur de connexion avec Google");
     }
   };
 
@@ -137,22 +119,20 @@ export default function GoogleAuthModal({
                   <button
                     type="button"
                     onClick={() => setRole("talent")}
-                    className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-                      role === "talent"
+                    className={`py-2 text-xs font-semibold rounded-lg transition-all ${role === "talent"
                         ? "bg-white text-blue-600 shadow-sm"
                         : "text-slate-600 hover:text-slate-900"
-                    }`}
+                      }`}
                   >
                     Talent
                   </button>
                   <button
                     type="button"
                     onClick={() => setRole("recruteur")}
-                    className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-                      role === "recruteur"
+                    className={`py-2 text-xs font-semibold rounded-lg transition-all ${role === "recruteur"
                         ? "bg-white text-blue-600 shadow-sm"
                         : "text-slate-600 hover:text-slate-900"
-                    }`}
+                      }`}
                   >
                     Recruteur
                   </button>
