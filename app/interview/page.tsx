@@ -900,7 +900,7 @@ export default function InterviewPage() {
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <div className="relative h-8 w-32">
                 <Image
-                  src="/assets/CC blue white horiz.png"
+                  src="/Logo/PNG/Logo%20white.png"
                   alt="Netacuv Logo"
                   fill
                   priority

@@ -164,7 +164,7 @@ export default function RecruteurDashboard() {
           <Link href="/" className="block">
             <div className="relative h-9 w-36">
               <Image
-                src="/assets/CC blue png horiz 1.png"
+                src="/Logo/PNG/Logo.png"
                 alt="Netacuv Logo"
                 fill
                 priority

@@ -20,7 +20,7 @@ export default function Footer() {
             <Link href="/" className="inline-block mb-4">
               <div className="relative h-10 w-44">
                 <Image
-                  src="/assets/CC white png horiz.png"
+                  src="/Logo/PNG/Logo%20white.png"
                   alt="Netacuv Logo"
                   fill
                   className="object-contain object-left"

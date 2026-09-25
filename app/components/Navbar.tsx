@@ -57,7 +57,7 @@ export default function Navbar({
         <Link href="/" className="flex items-center gap-2 group transition-opacity hover:opacity-90">
           <div className="relative h-11 w-36 sm:w-44 flex items-center">
             <Image
-              src="/assets/CC blue png horiz 1.png"
+              src="/Logo/PNG/Logo.png"
               alt="Netacuv Logo"
               fill
               priority
