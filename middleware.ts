@@ -14,7 +14,7 @@ export default withAuth(
     // Rediriger si l'accès à l'espace Recruteur est tenté par un rôle non autorisé
     if (
       (path.startsWith("/dashboard/recruiter") || path.startsWith("/dashboard/recruteur")) &&
-      !["RECRUITER", "ADMIN"].includes(token?.role as string)
+      !["RECRUTEUR", "ADMIN"].includes(token?.role as string)
     ) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
