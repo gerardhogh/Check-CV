@@ -163,7 +163,7 @@ function InscriptionForm() {
       }}
     >
       {/* Navbar with pill transparent variant */}
-      <Navbar variant="transparent" />
+      <Navbar />
       {/* Main card */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8 md:p-10 border border-slate-100 animate-fade-in-up">

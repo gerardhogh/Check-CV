@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
         backgroundPosition: "center",
       }}
     >
-      <Navbar variant="transparent" />
+      <Navbar />
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 md:p-10 border border-slate-100 animate-fade-in-up">

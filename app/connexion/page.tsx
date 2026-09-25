@@ -136,7 +136,7 @@ export default function ConnexionPage() {
       }}
     >
       {/* Navbar with pill transparent variant */}
-      <Navbar variant="transparent" />
+      <Navbar />
 
       {/* Center card */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">

@@ -36,7 +36,7 @@ export default function Navbar({
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         variant === "transparent"
-          ? "max-w-5xl mx-auto mt-6 rounded-full border border-white/40 shadow-sm"
+          ? "max-w-[1200px] w-[95%] mx-auto mt-6 rounded-full border border-white/40 shadow-sm"
           : ""
       }`}
       style={
