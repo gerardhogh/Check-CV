@@ -12,7 +12,7 @@ export async function GET(req: Request) {
 
     if (mine) {
       const session = await getServerSession(authOptions);
-      if (session && session.user?.id && ["RECRUITER", "ADMIN"].includes(session.user?.role || "")) {
+      if (session && session.user?.id && ["RECRUTEUR", "RECRUITER", "ADMIN"].includes(session.user?.role || "")) {
         const recruiterProfile = await prisma.recruiterProfile.findFirst({
           where: { userId: session.user.id as string },
         });
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
   // Vérification stricte des droits
-  if (!session || !session.user?.id || !["RECRUITER", "ADMIN"].includes(session.user?.role || "")) {
+  if (!session || !session.user?.id || !["RECRUTEUR", "RECRUITER", "ADMIN"].includes(session.user?.role || "")) {
     return NextResponse.json(
       { error: "Accès refusé. Seuls les recruteurs et administrateurs peuvent publier une offre." },
       { status: 403 }
