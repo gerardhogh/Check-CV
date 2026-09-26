@@ -12,9 +12,9 @@ export async function GET(req: Request) {
 
     if (mine) {
       const session = await getServerSession(authOptions);
-      if (session && ["RECRUITER", "ADMIN"].includes(session.user?.role || "")) {
+      if (session && session.user?.id && ["RECRUITER", "ADMIN"].includes(session.user?.role || "")) {
         const recruiterProfile = await prisma.recruiterProfile.findFirst({
-          where: { userId: session.user.id },
+          where: { userId: session.user.id as string },
         });
         if (recruiterProfile) {
           whereClause = { recruiterId: recruiterProfile.id };
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
   // Vérification stricte des droits
-  if (!session || !["RECRUITER", "ADMIN"].includes(session.user?.role || "")) {
+  if (!session || !session.user?.id || !["RECRUITER", "ADMIN"].includes(session.user?.role || "")) {
     return NextResponse.json(
       { error: "Accès refusé. Seuls les recruteurs et administrateurs peuvent publier une offre." },
       { status: 403 }
@@ -62,15 +62,16 @@ export async function POST(req: Request) {
     }
 
     // Récupérer le profil recruteur lié à l'utilisateur connecté
+    const userId = session.user.id as string;
     let recruiterProfile = await prisma.recruiterProfile.findFirst({
-      where: { userId: session.user.id },
+      where: { userId },
     });
 
     if (!recruiterProfile) {
       // Si le recruteur n'a pas encore de profil, on le crée automatiquement avec le nom saisi
       recruiterProfile = await prisma.recruiterProfile.create({
         data: {
-          userId: session.user.id,
+          userId,
           companyName: body.entreprise || "Entreprise",
         }
       });
