@@ -12,6 +12,8 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const roleParam = searchParams.get("role"); // "talent" ou "recruteur"
+  const type = searchParams.get("type"); // "recovery" pour réinitialisation de mot de passe
+  const next = searchParams.get("next"); // URL de redirection optionnelle
 
   if (!code) {
     return NextResponse.redirect(`${origin}/connexion?error=NoCodeReceived`);
@@ -34,6 +36,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(
         `${origin}/connexion?error=AuthenticationFailed`
       );
+    }
+
+    // Si c'est un lien de réinitialisation de mot de passe, rediriger vers la page dédiée
+    const sessionType = (session as any)?.type || type;
+    if (sessionType === "recovery" || next === "/mise-a-jour-mot-de-passe") {
+      return NextResponse.redirect(`${origin}/mise-a-jour-mot-de-passe`);
     }
 
     const supabaseUser = session.user;
