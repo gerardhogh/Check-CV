@@ -39,9 +39,9 @@ function ProfilTalentContent({ initialTab = "informations" }: { initialTab?: Sub
   const cvInputRef = useRef<HTMLInputElement>(null);
   const [selectedCvFile, setSelectedCvFile] = useState<File | null>(null);
   const [selectedCvName, setSelectedCvName] = useState<string>("");
-  const [cvName, setCvName] = useState<string>("Netacuv.pdf");
-  const [cvDate, setCvDate] = useState<string>("21 avril 2025");
-  const [cvBlobUrl, setCvBlobUrl] = useState<string>("/Docs/Netacuv.pdf");
+  const [cvName, setCvName] = useState<string>("Aucun CV ajouté");
+  const [cvDate, setCvDate] = useState<string>("");
+  const [cvBlobUrl, setCvBlobUrl] = useState<string>("");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [completionPercent, setCompletionPercent] = useState(0);
@@ -398,10 +398,16 @@ function ProfilTalentContent({ initialTab = "informations" }: { initialTab?: Sub
                   title="Aperçu du CV"
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                  <FileText size={40} className="text-slate-300 mb-2" />
-                  <p className="text-xs font-semibold text-slate-600">{cvName}</p>
-                  <p className="text-[10px] text-slate-400 mt-1">Cliquez pour prévisualiser</p>
+                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 border border-dashed border-slate-300 rounded p-4">
+                  <div className="w-16 h-20 bg-white shadow-sm border border-slate-200 rounded-sm mb-3 flex flex-col p-2 gap-1.5 opacity-60">
+                    <div className="w-1/2 h-1.5 bg-slate-200 rounded-full"></div>
+                    <div className="w-full h-1 bg-slate-100 rounded-full mt-1"></div>
+                    <div className="w-5/6 h-1 bg-slate-100 rounded-full"></div>
+                    <div className="w-full h-1 bg-slate-100 rounded-full"></div>
+                    <div className="w-2/3 h-1 bg-slate-100 rounded-full"></div>
+                  </div>
+                  <p className="text-xs font-semibold text-slate-500">Aucun CV disponible</p>
+                  <p className="text-[10px] text-slate-400 mt-1 text-center px-4">Uploadez votre CV pour qu'il s'affiche ici</p>
                 </div>
               )}
 
@@ -479,13 +485,36 @@ function ProfilTalentContent({ initialTab = "informations" }: { initialTab?: Sub
               </div>
             </div>
 
-            {/* Document Viewer Body */}
             <div className="flex-1 bg-slate-100 p-4 overflow-hidden flex items-center justify-center">
-              <iframe
-                src={`${cvBlobUrl}#toolbar=0`}
-                className="w-full h-full bg-white rounded-lg shadow-inner border border-slate-300"
-                title="Prévisualisation PDF"
-              />
+              {cvBlobUrl ? (
+                <iframe
+                  src={`${cvBlobUrl}#toolbar=0`}
+                  className="w-full h-full bg-white rounded-lg shadow-inner border border-slate-300"
+                  title="Prévisualisation PDF"
+                />
+              ) : (
+                <div className="w-full max-w-2xl h-full bg-white rounded-lg shadow-inner border border-slate-300 flex flex-col items-center justify-center text-slate-400 relative overflow-hidden">
+                  <div className="absolute inset-0 flex flex-col p-12 gap-6 opacity-10">
+                    <div className="flex items-center gap-6 mb-8">
+                      <div className="w-24 h-24 bg-slate-400 rounded-full"></div>
+                      <div className="space-y-4 flex-1">
+                        <div className="h-6 bg-slate-400 rounded w-1/3"></div>
+                        <div className="h-4 bg-slate-400 rounded w-1/4"></div>
+                      </div>
+                    </div>
+                    <div className="h-4 bg-slate-400 rounded w-full"></div>
+                    <div className="h-4 bg-slate-400 rounded w-5/6"></div>
+                    <div className="h-4 bg-slate-400 rounded w-full"></div>
+                    <div className="h-4 bg-slate-400 rounded w-4/5"></div>
+                    <div className="h-4 bg-slate-400 rounded w-full mt-8"></div>
+                    <div className="h-4 bg-slate-400 rounded w-2/3"></div>
+                    <div className="h-4 bg-slate-400 rounded w-3/4"></div>
+                  </div>
+                  <FileText size={64} className="text-slate-300 mb-4 z-10" />
+                  <h3 className="text-xl font-bold text-slate-600 z-10">Aucun CV disponible</h3>
+                  <p className="text-sm text-slate-500 z-10">Veuillez d'abord uploader un document PDF.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
