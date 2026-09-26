@@ -20,11 +20,29 @@ export default function UpdatePasswordPage() {
   const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
-    // Check if the user is authenticated (which happens automatically when they click the magic link)
     const checkSession = async () => {
+      // Cas 1 : code PKCE reçu en query param (nouveau flow Supabase)
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get("code");
+
+      if (code) {
+        // Échanger le code côté client pour obtenir une session stockée dans le navigateur
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+        if (exchangeError) {
+          setError("Le lien de réinitialisation est invalide ou a expiré. Veuillez refaire la demande.");
+          setCheckingSession(false);
+          return;
+        }
+        // Nettoyer l'URL
+        window.history.replaceState({}, "", "/mise-a-jour-mot-de-passe");
+        setCheckingSession(false);
+        return;
+      }
+
+      // Cas 2 : session déjà présente (ancien flow hash-based ou session active)
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
-        // Wait a bit to see if the hash is being processed by Supabase auth listener
+        // Attendre un peu au cas où le hash est en cours de traitement
         setTimeout(async () => {
           const { data: retryData } = await supabase.auth.getSession();
           if (!retryData.session) {

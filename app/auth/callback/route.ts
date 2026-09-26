@@ -19,6 +19,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/connexion?error=NoCodeReceived`);
   }
 
+  // Si c'est un lien de réinitialisation de mot de passe,
+  // on redirige directement vers la page client sans échanger le code côté serveur
+  // (le client Supabase JS échangera le code et stockera la session dans le navigateur)
+  if (type === "recovery" || next === "/mise-a-jour-mot-de-passe") {
+    const resetUrl = new URL(`${origin}/mise-a-jour-mot-de-passe`);
+    resetUrl.searchParams.set("code", code);
+    return NextResponse.redirect(resetUrl.toString());
+  }
+
   try {
     // 1. Échanger le code OAuth contre une session Supabase
     const supabaseServer = createClient(
