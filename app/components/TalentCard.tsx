@@ -17,6 +17,7 @@ export interface TalentCardProps {
   onViewProfile?: (id?: string | number) => void;
   /** Override the destination URL for "Voir profil". Defaults to /dashboard/recruteur/talents/[id] */
   profileHref?: string;
+  blurSensitive?: boolean;
 }
 
 export default function TalentCard({
@@ -31,6 +32,7 @@ export default function TalentCard({
   onSendEmail,
   onViewProfile,
   profileHref,
+  blurSensitive = false,
 }: TalentCardProps) {
   const destination = profileHref ?? (id ? `/dashboard/recruteur/talents/${id}` : undefined);
 
@@ -61,11 +63,11 @@ export default function TalentCard({
         {/* Name & Bookmark */}
         <div className="flex justify-between items-start mb-1.5">
           <div className="min-w-0 pr-2">
-            <h3 className="font-bold text-slate-900 text-base leading-snug truncate">
-              {name}
+            <h3 className={`font-bold text-slate-900 text-base leading-snug truncate ${blurSensitive ? 'blur-sm select-none' : ''}`}>
+              {blurSensitive ? "Profil Confidentiel" : name}
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5 font-normal truncate">
-              {location}
+            <p className={`text-xs text-slate-400 mt-0.5 font-normal truncate ${blurSensitive ? 'blur-sm select-none' : ''}`}>
+              {blurSensitive ? "Localisation Masquée" : location}
             </p>
           </div>
           <button

@@ -28,6 +28,7 @@ import {
   User,
   Globe,
   CreditCard,
+  Crown,
 } from "lucide-react";
 import { useLang, LOCALES } from "../../context/LangContext";
 import TalentCard from "@/app/components/TalentCard";
@@ -38,7 +39,9 @@ import AffiliationTab from "./components/AffiliationTab";
 import ParametresTab from "./components/ParametresTab";
 import ProfilTab from "./components/ProfilTab";
 import TransactionsTab from "./components/TransactionsTab";
+import RecruteurPremium from "./components/RecruteurPremium";
 import LogoutButton from "../../components/LogoutButton";
+import PremiumBanner from "../../components/PremiumBanner";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -52,7 +55,8 @@ type RecruiterTab =
   | "favoris"
   | "affiliation"
   | "parametres"
-  | "profil";
+  | "profil"
+  | "premium";
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 export default function RecruteurDashboard() {
@@ -128,6 +132,7 @@ export default function RecruteurDashboard() {
     { key: "favoris" as RecruiterTab, icon: Bookmark, label: t("nav", "favorites") },
     { key: "affiliation" as RecruiterTab, icon: Share2, label: t("nav", "affiliation") },
     { key: "parametres" as RecruiterTab, icon: Settings, label: t("nav", "settings") },
+    { key: "premium" as RecruiterTab, icon: Crown, label: "Premium" },
   ];
 
   return (
@@ -215,6 +220,8 @@ export default function RecruteurDashboard() {
 
       {/* ── MAIN CONTENT AREA ─────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-h-screen min-w-0">
+        
+        <PremiumBanner />
 
         {/* ── TOP HEADER ──────────────────────────────────────────────────────── */}
         <header className="sticky top-0 z-20 bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6">
@@ -266,6 +273,11 @@ export default function RecruteurDashboard() {
             {activeTab === "parametres" && (
               <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
                 Paramètres du <span className="text-[#32A8D7]">compte</span>
+              </h1>
+            )}
+            {activeTab === "premium" && (
+              <h1 className="text-xl sm:text-2xl font-bold text-[#232323] tracking-tight">
+                Abonnement <span className="text-[#32A8D7]">Premium</span>
               </h1>
             )}
           </div>
@@ -587,6 +599,7 @@ export default function RecruteurDashboard() {
                         isVerified={true}
                         isFavorite={favorites.includes(tItem.id)}
                         onFavorite={toggleFavorite}
+                        blurSensitive={!user?.isPremium}
                       />
                     );
                   })
@@ -652,6 +665,9 @@ export default function RecruteurDashboard() {
 
           {/* TAB: PROFIL */}
           {activeTab === "profil" && <ProfilTab />}
+
+          {/* TAB: PREMIUM */}
+          {activeTab === "premium" && <RecruteurPremium />}
 
         </main>
       </div>

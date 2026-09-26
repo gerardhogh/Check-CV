@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Eye, EyeOff, Shield, Bell, Globe2, AlertTriangle } from "lucide-react";
+import { useLang } from "../../../context/LangContext";
 
 export default function ParametresTab() {
   const [emailNotif, setEmailNotif] = useState(true);
@@ -12,7 +13,7 @@ export default function ParametresTab() {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [lang, setLang] = useState("fr");
+  const { locale: lang, setLocale: setLang } = useLang();
   const [pwdSuccess, setPwdSuccess] = useState(false);
   const [deactivateModal, setDeactivateModal] = useState(false);
 
@@ -114,7 +115,7 @@ export default function ParametresTab() {
         <div className="max-w-lg">
           <select
             value={lang}
-            onChange={(e) => setLang(e.target.value)}
+            onChange={(e) => setLang(e.target.value as any)}
             className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-100 appearance-none cursor-pointer"
           >
             <option value="fr">🇫🇷 Français</option>

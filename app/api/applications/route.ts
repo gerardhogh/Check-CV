@@ -112,6 +112,29 @@ export async function POST(req: Request) {
       );
     }
 
+    // Vérification du quota Freemium
+    if (!session.user.isPremium) {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const applicationsThisMonth = await prisma.application.count({
+        where: {
+          talentId: talentProfile.id,
+          createdAt: {
+            gte: startOfMonth,
+          },
+        },
+      });
+
+      if (applicationsThisMonth >= 1) {
+        return NextResponse.json(
+          { error: "Vous avez atteint votre limite de 1 candidature gratuite ce mois-ci. Passez au Premium pour candidater en illimité !" },
+          { status: 403 }
+        );
+      }
+    }
+
     // Vérifier l'existence de l'offre d'emploi
     const jobOffer = await prisma.jobOffer.findUnique({
       where: { id: jobOfferId },

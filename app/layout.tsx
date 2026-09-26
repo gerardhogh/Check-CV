@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 import Providers from "./components/Providers";
 import { LangProvider } from "./context/LangContext";
+import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -30,11 +31,25 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
+        <style>{`
+          .skiptranslate iframe { display: none !important; }
+          body { top: 0 !important; }
+          #google_translate_element { display: none; }
+        `}</style>
       </head>
       <body>
         <LangProvider>
           <Providers>{children}</Providers>
         </LangProvider>
+        <div id="google_translate_element" style={{ display: "none" }}></div>
+        <Script id="google-translate-init" strategy="beforeInteractive">
+          {`
+            window.googleTranslateElementInit = function() {
+              new google.translate.TranslateElement({pageLanguage: 'fr', autoDisplay: false}, 'google_translate_element');
+            };
+          `}
+        </Script>
+        <Script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" strategy="afterInteractive" />
       </body>
     </html>
   );

@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import TalentCard from "@/app/components/TalentCard";
+import { useAuth } from "../../../context/AuthContext";
 
 interface CandidatFavori {
   id: string;
@@ -28,6 +29,7 @@ interface FavorisTabProps {
 }
 
 export default function FavorisTab({ onViewProfile, onSendEmail }: FavorisTabProps) {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [favoris, setFavoris] = useState<CandidatFavori[]>(MOCK_FAVORIS);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -115,6 +117,7 @@ export default function FavorisTab({ onViewProfile, onSendEmail }: FavorisTabPro
                 isFavorite={true}
                 onFavorite={() => removeFavori(candidat.id)}
                 onViewProfile={() => onViewProfile?.(candidat.id)}
+                blurSensitive={!user?.isPremium}
               />
             </div>
           ))}

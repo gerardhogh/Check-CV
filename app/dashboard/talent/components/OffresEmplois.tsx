@@ -49,7 +49,17 @@ const JOB_BOARDS = [
 
 type ViewState = "list" | "detail" | "company";
 
-export default function OffresEmplois() {
+export default function OffresEmplois({ 
+  isPremium, 
+  applicationsCount, 
+  onLimitReached,
+  onApplySuccess
+}: { 
+  isPremium?: boolean; 
+  applicationsCount?: number; 
+  onLimitReached?: () => void;
+  onApplySuccess?: () => void;
+}) {
   const [view, setView] = useState<ViewState>("list");
   const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const [companyTab, setCompanyTab] = useState<"info" | "reseaux">("info");
@@ -318,6 +328,11 @@ export default function OffresEmplois() {
               <button 
                 disabled={selectedJob.status === "CLOSED" || applying}
                 onClick={async () => {
+                  if (!isPremium && (applicationsCount ?? 0) >= 1) {
+                    if (onLimitReached) onLimitReached();
+                    return;
+                  }
+
                   setApplying(true);
                   try {
                     const res = await fetch('/api/applications', {
@@ -327,10 +342,15 @@ export default function OffresEmplois() {
                     });
                     if (res.ok) {
                       setApplySuccess(true);
+                      if (onApplySuccess) onApplySuccess();
                       setTimeout(() => setApplySuccess(false), 3000);
                     } else {
                       const err = await res.json();
-                      alert(err.error || "Erreur lors de la candidature");
+                      if (err.error === 'Upgrade Required' || res.status === 403) {
+                        if (onLimitReached) onLimitReached();
+                      } else {
+                        alert(err.error || "Erreur lors de la candidature");
+                      }
                     }
                   } catch (e) {
                     alert("Erreur lors de la candidature");

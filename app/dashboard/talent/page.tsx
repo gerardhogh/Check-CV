@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
+import { useLang } from "../../context/LangContext";
 import LogoutButton from "../../components/LogoutButton";
 import {
   Menu,
@@ -41,6 +42,7 @@ import TalentPremium from "./components/TalentPremium";
 import ProfilTalent from "./components/ProfilTalent";
 import TransactionsTab from "./components/TransactionsTab";
 import ParametresTab from "./components/ParametresTab";
+import PremiumBanner from "../../components/PremiumBanner";
 
 type TalentTab =
   | "dashboard"
@@ -59,13 +61,14 @@ export default function TalentDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
-  const [lang, setLang] = useState<"fr" | "en">("fr");
+  const { locale: lang, setLocale: setLang } = useLang();
   const [langMenuOpen, setLangMenuOpen] = useState(false);
 
   // Dynamic Dashboard States
   const [profilePct, setProfilePct] = useState(0);
   const [stars, setStars] = useState(0);
   const [hasValidVideo, setHasValidVideo] = useState(false);
+  const [hasPersonalInfo, setHasPersonalInfo] = useState(false);
   const [hasSocialLinks, setHasSocialLinks] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [cvFileName, setCvFileName] = useState("CV_Candidat_2025.pdf");
@@ -87,18 +90,43 @@ export default function TalentDashboard() {
   const [copiedLink, setCopiedLink] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [profileGuideOpen, setProfileGuideOpen] = useState(false);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   // Profile editable state
   const [userName, setUserName] = useState(user?.name || "Candidat");
   const [userAvatar, setUserAvatar] = useState(user?.avatar || "/assets/avatar_africain.jpg");
+  
+  // Premium & Quota
+  const [isPremium, setIsPremium] = useState(false);
+  const [applicationsCount, setApplicationsCount] = useState(0);
+
+  const isFirstRender = useRef(true);
+
+  // Sync activeTab with URL Hash for persistence on reload
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (hash && ["dashboard", "profil", "transactions", "video", "emplois", "premium", "affiliation", "parametres"].includes(hash)) {
+      setActiveTab(hash as TalentTab);
+    }
+  }, []);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    window.history.replaceState(null, "", `#${activeTab}`);
+  }, [activeTab]);
+
+  const fetchDashboardData = () => {
     fetch("/api/talents/me")
       .then(res => res.json())
       .then(data => {
         if (data && !data.error) {
           if (data.name) setUserName(data.name);
           if (data.avatar) setUserAvatar(data.avatar);
+          if (data.isPremium !== undefined) setIsPremium(data.isPremium);
+          if (data.applicationsCountThisMonth !== undefined) setApplicationsCount(data.applicationsCountThisMonth);
           if (data.talentProfile?.cvUrl) {
             const url = data.talentProfile.cvUrl;
             // Decode URI component to remove %20 etc, then extract filename
@@ -132,10 +160,22 @@ export default function TalentDashboard() {
           const hasSocial = !!(data.talentProfile?.facebook && data.talentProfile?.linkedin && data.talentProfile?.twitter && data.talentProfile?.pinterest && data.talentProfile?.behance);
           setHasSocialLinks(hasSocial);
 
+          // Personal info requires all main fields
+          const isInfoComplete = !!(
+            data.name &&
+            data.talentProfile?.degree &&
+            data.talentProfile?.gender &&
+            data.talentProfile?.country &&
+            data.talentProfile?.city &&
+            data.talentProfile?.phone &&
+            data.talentProfile?.bio
+          );
+          setHasPersonalInfo(isInfoComplete);
+
           // Calculate profile percentage — 4 steps (social links are optional, not counted)
           // Weights: info=25, avatar=10, cv=25, video=40
           let pct = 0;
-          if (data.name) pct += 25;
+          if (isInfoComplete) pct += 25;
           if (data.avatar) pct += 10;
           if (data.talentProfile?.cvUrl) pct += 25;
           if (hasVid) pct += 40;
@@ -151,13 +191,24 @@ export default function TalentDashboard() {
           else setStars(0);
 
           if (pct === 100) {
-            setShowConfetti(true);
-            setTimeout(() => setShowConfetti(false), 4000);
+            const hasSeenConfetti = typeof window !== "undefined" && localStorage.getItem("confetti_shown");
+            if (!hasSeenConfetti) {
+              setShowConfetti(true);
+              setTimeout(() => setShowConfetti(false), 4000);
+              if (typeof window !== "undefined") {
+                localStorage.setItem("confetti_shown", "true");
+              }
+            }
           }
         }
       })
       .catch(console.error);
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
   }, []);
+
   const [userTitle, setUserTitle] = useState("Développeur Full-Stack & UI");
   const [userPhone, setUserPhone] = useState((user as any)?.phone || "+229 97 00 00 00");
   const [userBio, setUserBio] = useState(
@@ -315,6 +366,7 @@ export default function TalentDashboard() {
 
       {/* ── MAIN CONTENT AREA ── */}
       <div className="flex-1 flex flex-col min-h-screen min-w-0">
+        <PremiumBanner />
         {/* Top Header */}
         <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-4">
@@ -339,6 +391,24 @@ export default function TalentDashboard() {
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Quota Indicator */}
+            {isPremium ? (
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 rounded-full border border-yellow-500/30 text-yellow-600 shadow-inner">
+                <Star size={14} className="fill-yellow-500 text-yellow-500" />
+                <span className="text-xs font-bold">Premium - Illimité</span>
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full border border-slate-200">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-500 font-medium leading-none mb-0.5">Candidatures ce mois</span>
+                  <span className="text-xs font-bold text-slate-800 leading-none">{applicationsCount} / 1</span>
+                </div>
+                <Link href="/dashboard/talent/premium" className="text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-full transition-colors ml-2">
+                  Passer au Premium
+                </Link>
+              </div>
+            )}
+
             {/* Language Switcher */}
             <div className="relative">
               <button
@@ -347,7 +417,7 @@ export default function TalentDashboard() {
                 aria-label="Langue"
               >
                 <Globe size={18} />
-                <span className="text-xs font-bold uppercase">{lang}</span>
+                <span className="notranslate text-xs font-bold uppercase">{lang === "en" ? "EN" : "FR"}</span>
               </button>
               {langMenuOpen && (
                 <div className="absolute right-0 mt-2 w-36 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-30 animate-fade-in">
@@ -358,7 +428,7 @@ export default function TalentDashboard() {
                       className={`w-full text-left px-4 py-2 text-xs font-semibold transition-colors ${lang === l ? "text-blue-600 bg-blue-50" : "text-slate-600 hover:bg-slate-50"
                         }`}
                     >
-                      {l === "fr" ? "🇫🇷 Français" : "🇬🇧 English"}
+                      {l === "fr" ? "🇫🇷 Français" : l === "en" ? "🇬🇧 English" : l === "es" ? "🇪🇸 Español" : "🇵🇹 Português"}
                     </button>
                   ))}
                 </div>
@@ -567,7 +637,7 @@ export default function TalentDashboard() {
                   {profileGuideOpen && (
                     <div className="mt-4 pt-4 border-t border-slate-100 space-y-2 animate-fade-in">
                       {[
-                        { label: "Informations personnelles", done: !!userName, pct: 25, tab: "profil" },
+                        { label: "Informations personnelles", done: hasPersonalInfo, pct: 25, tab: "profil" },
                         { label: "Photo de profil", done: !!userAvatar, pct: 10, tab: "profil" },
                         { label: "CV uploadé", done: cvFileName !== "Aucun CV ajouté", pct: 25, tab: "profil" },
                         { label: "Entretien vidéo validé", done: hasValidVideo, pct: 40, tab: "video" },
@@ -819,13 +889,20 @@ export default function TalentDashboard() {
           {activeTab === "profil" && <ProfilTalent />}
 
           {/* TAB: ENTRETIEN VIDÉO – redirects to ProfilTalent video tab */}
-          {activeTab === "video" && <ProfilTalent />}
+          {activeTab === "video" && <ProfilTalent initialTab="video" />}
 
           {/* TAB: MES TRANSACTIONS */}
           {activeTab === "transactions" && <TransactionsTab />}
 
           {/* TAB: OFFRES D'EMPLOI */}
-          {activeTab === "emplois" && <OffresEmplois />}
+          {activeTab === "emplois" && (
+            <OffresEmplois 
+              isPremium={isPremium} 
+              applicationsCount={applicationsCount} 
+              onLimitReached={() => setUpgradeModalOpen(true)}
+              onApplySuccess={() => setApplicationsCount(prev => prev + 1)}
+            />
+          )}
 
           {/* TAB: PREMIUM */}
           {activeTab === "premium" && <TalentPremium />}
@@ -1045,6 +1122,45 @@ export default function TalentDashboard() {
             >
               Copier mon lien de parrainage
             </button>
+          </div>
+        </div>
+      )}
+      {/* ── MODAL: UPGRADE TO PREMIUM ── */}
+      {upgradeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 relative overflow-hidden animate-scale-up">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600" />
+            <button
+              onClick={() => setUpgradeModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+            >
+              <X size={24} />
+            </button>
+            <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center mb-6 text-amber-500">
+              <Star size={32} />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Passez en Premium</h2>
+            <p className="text-slate-600 mb-6 leading-relaxed">
+              Vous avez atteint votre limite de 1 candidature gratuite par mois.
+              Passez à la version Premium pour postuler de manière illimitée et débloquer toutes les fonctionnalités avancées.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setUpgradeModalOpen(false);
+                  setActiveTab("premium");
+                }}
+                className="w-full py-3.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02]"
+              >
+                Découvrir les offres Premium
+              </button>
+              <button
+                onClick={() => setUpgradeModalOpen(false)}
+                className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors"
+              >
+                Plus tard
+              </button>
+            </div>
           </div>
         </div>
       )}

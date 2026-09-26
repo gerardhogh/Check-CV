@@ -304,6 +304,7 @@ export default function RechercheProfil() {
                 isVerified={talent.isVerified}
                 isFavorite={favorites.includes(talent.id)}
                 onFavorite={toggleFavorite}
+                blurSensitive={!user?.isPremium}
               />
             ))}
           </div>

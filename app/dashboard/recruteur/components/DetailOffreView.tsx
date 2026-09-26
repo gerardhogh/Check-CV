@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowLeft, Share2, Trash2, Edit3, CheckCircle } from "lucide-react";
 import TalentCard from "@/app/components/TalentCard";
+import { useAuth } from "../../../context/AuthContext";
 
 export interface JobDetailData {
   id: string | number;
@@ -34,6 +35,7 @@ export default function DetailOffreView({
   onDelete,
   onViewCandidate,
 }: DetailOffreViewProps) {
+  const { user } = useAuth();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isClosed, setIsClosed] = useState(job?.status === "Clôturée");
 
@@ -201,6 +203,7 @@ export default function DetailOffreView({
               imageUrl={c.imageUrl}
               isVerified={c.isVerified}
               onViewProfile={() => onViewCandidate(c.id)}
+              blurSensitive={!user?.isPremium}
             />
           ))}
         </div>

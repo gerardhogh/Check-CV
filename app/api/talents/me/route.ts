@@ -26,11 +26,30 @@ export async function GET() {
       return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
     }
 
+    let applicationsCountThisMonth = 0;
+    
+    if (user.talentProfile) {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      
+      applicationsCountThisMonth = await prisma.application.count({
+        where: {
+          talentId: user.talentProfile.id,
+          createdAt: {
+            gte: startOfMonth
+          }
+        }
+      });
+    }
+
     return NextResponse.json({
       id: user.id,
       name: user.name,
       email: user.email,
       avatar: user.image,
+      isPremium: user.isPremium || false,
+      applicationsCountThisMonth,
       talentProfile: user.talentProfile || {}
     });
   } catch (error) {
@@ -63,7 +82,9 @@ export async function PUT(req: Request) {
       linkedin,
       twitter,
       pinterest,
-      behance
+      behance,
+      other1,
+      other2
     } = data;
 
     // Mise à jour du User
@@ -88,6 +109,8 @@ export async function PUT(req: Request) {
     if (twitter !== undefined) talentData.twitter = twitter;
     if (pinterest !== undefined) talentData.pinterest = pinterest;
     if (behance !== undefined) talentData.behance = behance;
+    if (other1 !== undefined) talentData.other1 = other1;
+    if (other2 !== undefined) talentData.other2 = other2;
 
     const talentProfile = await prisma.talentProfile.upsert({
       where: { userId },

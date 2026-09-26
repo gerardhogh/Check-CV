@@ -21,7 +21,7 @@ const COUNTRY_PREFIXES: Record<string, string> = {
   card: "",
 };
 
-export default function TalentPremium() {
+export default function RecruteurPremium() {
   const router = useRouter();
   const [step, setStep] = useState<PayStep>("plan");
   const [method, setMethod] = useState<PayMethod>(null);
@@ -49,7 +49,7 @@ export default function TalentPremium() {
           setStep("success");
           setTimeout(() => {
             if (!isCancelled) {
-              window.location.href = "/dashboard/talent";
+              window.location.href = "/dashboard/recruteur";
               window.location.reload();
             }
           }, 5000);
@@ -82,31 +82,20 @@ export default function TalentPremium() {
     return (
       <div className={bgClass}>
         <div className="flex flex-col items-center justify-center py-16 space-y-6 text-center animate-fade-in relative z-10">
-          <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center animate-bounce-once">
-              <CheckCheck size={44} className="text-green-500" />
-            </div>
-            <div className="absolute -top-1 -right-1 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center animate-ping-once shadow-lg">
-              <CheckCircle size={20} className="text-white" />
-            </div>
+          <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(34,197,94,0.3)]">
+            <CheckCheck size={48} />
           </div>
           <div>
-            <h3 className="text-2xl font-black text-slate-900 mb-2">Félicitations !</h3>
-            <p className="text-slate-500 max-w-sm">
-              Votre abonnement <strong>Talent Premium</strong> est activé. Profitez de tous vos avantages dès maintenant.
+            <h2 className="text-3xl font-black text-slate-800 mb-2">Paiement Réussi !</h2>
+            <p className="text-slate-500 max-w-md mx-auto text-sm">
+              Félicitations, vous êtes maintenant un <strong className="text-[#32A8D7]">Recruteur Premium</strong> sur Netacuv. Profitez d'un accès complet aux talents !
             </p>
           </div>
-          <div className="bg-green-50 border border-green-200 rounded-2xl px-6 py-4 w-full max-w-sm space-y-2 text-left text-sm text-slate-700">
-            <div className="flex justify-between"><span className="text-slate-500">Service</span><span className="font-bold">Abonnement Talent Premium</span></div>
-            <div className="flex justify-between"><span className="text-slate-500">Montant</span><span className="font-bold">700 FCFA</span></div>
-            <div className="flex justify-between"><span className="text-slate-500">Méthode</span><span className="font-bold">{selectedMethod?.label}</span></div>
-            <div className="flex justify-between"><span className="text-slate-500">Statut</span><span className="font-bold text-green-600">✅ Réussi</span></div>
-          </div>
           <button
-            onClick={() => { window.location.href = "/dashboard/talent"; }}
-            className="w-full max-w-sm py-3 rounded-xl bg-[#008de4] hover:bg-blue-600 text-white font-bold text-sm transition-colors shadow-lg"
+            onClick={() => window.location.reload()}
+            className="mt-8 px-8 py-3.5 bg-[#32A8D7] hover:bg-[#0071a2] text-white font-bold rounded-xl transition-colors shadow-lg shadow-blue-500/20"
           >
-            Retourner au tableau de bord
+            Retour à mon tableau de bord
           </button>
         </div>
       </div>
@@ -114,22 +103,27 @@ export default function TalentPremium() {
   }
 
   if (step === "processing") {
-    const pct = Math.round(((90 - countdown) / 90) * 100);
+    const pct = (countdown / 90) * 100;
     return (
       <div className={bgClass}>
         <div className="flex flex-col items-center justify-center py-16 space-y-8 text-center">
-          <div className="relative w-28 h-28">
-            <svg className="w-28 h-28 -rotate-90 animate-spin" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="44" fill="none" stroke="#e2e8f0" strokeWidth="8" />
+          <div className="relative w-32 h-32 flex items-center justify-center animate-spin">
+            <svg className="absolute inset-0 w-full h-full -rotate-90">
+              <circle cx="64" cy="64" r="60" className="stroke-slate-100" strokeWidth="8" fill="none" />
               <circle
-                cx="50" cy="50" r="44" fill="none" stroke="#008de4" strokeWidth="8"
-                strokeDasharray={`${2 * Math.PI * 44}`}
-                strokeDashoffset={`${2 * Math.PI * 44 * 0.75}`}
+                cx="64"
+                cy="64"
+                r="60"
+                className="stroke-[#32A8D7]"
+                strokeWidth="8"
+                fill="none"
+                strokeDasharray={`${2 * Math.PI * 60}`}
+                strokeDashoffset={`${2 * Math.PI * 60 * 0.75}`}
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center animate-pulse">
-              <Clock size={24} className="text-[#008de4]" />
+              <Clock size={24} className="text-[#32A8D7]" />
             </div>
           </div>
           <div>
@@ -141,7 +135,7 @@ export default function TalentPremium() {
           <div className="flex flex-col items-center gap-2">
             <div className="flex gap-1.5">
               {[0, 1, 2].map((i) => (
-                <span key={i} className={`w-2.5 h-2.5 rounded-full bg-[#008de4] ${i < pollingDots.length ? "opacity-100" : "opacity-30"} transition-opacity duration-300`} />
+                <span key={i} className={`w-2.5 h-2.5 rounded-full bg-[#32A8D7] ${i < pollingDots.length ? "opacity-100" : "opacity-30"} transition-opacity duration-300`} />
               ))}
             </div>
             <p className="text-xs text-slate-400">Vérification toutes les 3 secondes</p>
@@ -180,7 +174,7 @@ export default function TalentPremium() {
       {step === "plan" && (
         <div className="bg-white/95 backdrop-blur-xl rounded-[32px] p-8 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.1)] max-w-4xl mx-auto border border-white/50 relative overflow-hidden">
           <h2 className="text-3xl font-black text-center text-[#32A8D7] mb-10 relative z-10 drop-shadow-sm">
-            Devenez Talent Premium sur Netacuv
+            Devenez Recruteur Premium sur Netacuv
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
@@ -191,42 +185,30 @@ export default function TalentPremium() {
                 <div className="text-5xl font-black text-slate-800 mb-2 flex items-baseline justify-center gap-1">
                   0 FCFA<span className="text-base font-medium text-slate-500">/mois</span>
                 </div>
-                <p className="text-sm text-slate-500 font-medium">L'essentiel pour démarrer</p>
+                <p className="text-sm text-slate-500 font-medium">Pour commencer à recruter</p>
               </div>
               <div className="p-8 flex-1 bg-white flex flex-col">
                 <ul className="space-y-5 mb-8 flex-1">
                   <li className="flex items-start gap-3 text-sm text-slate-700">
                     <CheckCircle size={20} className="text-slate-400 mt-0.5 flex-shrink-0" strokeWidth={2} />
-                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Candidatures mensuelles :</span> 1 seule candidature par mois</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-slate-700">
-                    <CheckCircle size={20} className="text-slate-400 mt-0.5 flex-shrink-0" strokeWidth={2} />
-                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Visibilité du profil :</span> Standard</span>
+                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Accès aux profils :</span> Floutés</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-slate-400">
                     <XCircle size={20} className="text-slate-200 mt-0.5 flex-shrink-0" strokeWidth={2} />
-                    <span className="leading-relaxed">Badge "Profil Recommandé" : Non</span>
+                    <span className="leading-relaxed">Coordonnées des talents : Masquées</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-slate-400">
                     <XCircle size={20} className="text-slate-200 mt-0.5 flex-shrink-0" strokeWidth={2} />
-                    <span className="leading-relaxed">Statistiques de vue du CV : Non</span>
+                    <span className="leading-relaxed">Accès vidéos de présentation : Non</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-slate-400">
                     <XCircle size={20} className="text-slate-200 mt-0.5 flex-shrink-0" strokeWidth={2} />
-                    <span className="leading-relaxed">Ajout de CV : Non</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-slate-400">
-                    <XCircle size={20} className="text-slate-200 mt-0.5 flex-shrink-0" strokeWidth={2} />
-                    <span className="leading-relaxed">Entretien vidéo IA : Non</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-slate-400">
-                    <XCircle size={20} className="text-slate-200 mt-0.5 flex-shrink-0" strokeWidth={2} />
-                    <span className="leading-relaxed">Assistance 24h/24 : Non</span>
+                    <span className="leading-relaxed">Badges de distinction : Non</span>
                   </li>
                 </ul>
 
                 <button
-                  onClick={() => router.push("/dashboard/talent")}
+                  onClick={() => router.push("/dashboard/recruteur")}
                   className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 mt-auto"
                 >
                   <ArrowLeft size={18} /> Rester sur le mode Gratuit
@@ -244,48 +226,36 @@ export default function TalentPremium() {
               </div>
               <div className="p-8 text-center border-b border-slate-100 bg-white">
                 <div className="text-5xl font-black text-[#32A8D7] mb-2 flex items-baseline justify-center gap-1">
-                  700 FCFA<span className="text-base font-medium text-slate-500">/mois</span>
+                  1 000 FCFA<span className="text-base font-medium text-slate-500">/mois</span>
                 </div>
-                <p className="text-sm text-slate-500 font-medium">Pour maximiser vos chances</p>
+                <p className="text-sm text-slate-500 font-medium">Pour des recrutements de qualité</p>
               </div>
               
               <div className="p-8 flex-1 bg-white flex flex-col">
                 <ul className="space-y-5 mb-8 flex-1">
                   <li className="flex items-start gap-3 text-sm text-slate-700">
                     <CheckCircle size={20} className="text-[#32A8D7] mt-0.5 flex-shrink-0" strokeWidth={2.5} />
-                    <span className="leading-relaxed"><span className="font-bold text-[#32A8D7]">Candidatures mensuelles :</span> ILLIMITÉES</span>
+                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Accès aux profils :</span> Visibles</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-slate-700">
                     <CheckCircle size={20} className="text-[#32A8D7] mt-0.5 flex-shrink-0" strokeWidth={2.5} />
-                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Visibilité du profil :</span> Prioritaire en tête de liste</span>
+                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Coordonnées des talents :</span> Accessibles</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-slate-700">
                     <CheckCircle size={20} className="text-[#32A8D7] mt-0.5 flex-shrink-0" strokeWidth={2.5} />
-                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Badge "Profil Recommandé" :</span> Inclus</span>
+                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Accès vidéos de présentation :</span> Inclus</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-slate-700">
                     <CheckCircle size={20} className="text-[#32A8D7] mt-0.5 flex-shrink-0" strokeWidth={2.5} />
-                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Statistiques de vue du CV :</span> Inclus</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-slate-700">
-                    <CheckCircle size={20} className="text-[#32A8D7] mt-0.5 flex-shrink-0" strokeWidth={2.5} />
-                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Ajout de CV :</span> Inclus</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-slate-700">
-                    <CheckCircle size={20} className="text-[#32A8D7] mt-0.5 flex-shrink-0" strokeWidth={2.5} />
-                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Entretien vidéo IA :</span> Inclus</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-slate-700">
-                    <CheckCircle size={20} className="text-[#32A8D7] mt-0.5 flex-shrink-0" strokeWidth={2.5} />
-                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Assistance 24h/24 :</span> Inclus</span>
+                    <span className="leading-relaxed"><span className="font-bold text-slate-800">Badges de distinction :</span> "Recruteur Premium"</span>
                   </li>
                 </ul>
                 
                 <button
                   onClick={() => setStep("method")}
-                  className="w-full bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white font-bold py-4 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white font-bold py-4 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-auto"
                 >
-                  <CreditCard size={18} /> Activer mon Premium à 700 FCFA
+                  <CreditCard size={18} /> Activer mon Premium à 1 000 FCFA
                 </button>
               </div>
             </div>
@@ -304,14 +274,14 @@ export default function TalentPremium() {
         <div className="max-w-lg mx-auto space-y-6 relative z-10">
           <div className="text-center">
             <h3 className="text-2xl font-black text-slate-900">Choisissez votre méthode</h3>
-            <p className="text-sm text-slate-500 mt-1">Sélectionnez un moyen de paiement pour votre abonnement à <strong>700 FCFA/mois</strong></p>
+            <p className="text-sm text-slate-500 mt-1">Sélectionnez un moyen de paiement pour votre abonnement à <strong>1 000 FCFA/mois</strong></p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {PAYMENT_METHODS.map((pm) => (
               <button
                 key={pm.id}
                 onClick={() => { setMethod(pm.id); setStep("input"); }}
-                className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-slate-100 hover:border-[#008de4] hover:shadow-lg hover:shadow-blue-500/10 transition-all bg-white"
+                className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-slate-100 hover:border-[#32A8D7] hover:shadow-lg hover:shadow-blue-500/10 transition-all bg-white"
               >
                 <span className="text-3xl">{pm.logo}</span>
                 <div>
@@ -369,17 +339,17 @@ export default function TalentPremium() {
             </div>
 
             <div className="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-slate-500">Service</span><span className="font-bold">Abonnement Talent Premium</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">Montant</span><span className="font-black text-[#008de4]">700 FCFA</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">Service</span><span className="font-bold">Abonnement Recruteur Premium</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">Montant</span><span className="font-black text-[#32A8D7]">1 000 FCFA</span></div>
               <div className="flex justify-between"><span className="text-slate-500">Méthode</span><span className="font-bold">{selectedMethod.label}</span></div>
             </div>
 
             <button
               disabled={phone.length < 8}
               onClick={() => setStep("processing")}
-              className="w-full py-3.5 rounded-xl bg-[#008de4] hover:bg-blue-600 text-white font-bold text-sm transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-white font-bold text-sm transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Confirmer et payer 700 FCFA
+              Confirmer et payer 1 000 FCFA
             </button>
           </div>
 

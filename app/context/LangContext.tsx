@@ -105,14 +105,19 @@ export function LangProvider({ children }: { children: ReactNode }) {
     loaders[locale]().then((d) => {
       if (!cancelled) setDict(d);
     });
-    // Update <html lang="..."> attribute
-    document.documentElement.lang = locale;
+    // Do NOT update <html lang="..."> attribute because Google Translate relies on it being "fr" to trigger translation!
+    // document.documentElement.lang = locale;
     return () => { cancelled = true; };
   }, [locale]);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setCookie(COOKIE_NAME, newLocale);
     setLocaleState(newLocale);
+    
+    // Set googtrans cookie for global translation
+    document.cookie = `googtrans=/fr/${newLocale}; path=/`;
+    document.cookie = `googtrans=/fr/${newLocale}; domain=${window.location.hostname}; path=/`;
+    window.location.reload();
   }, []);
 
   // Convenience translator for flat sections

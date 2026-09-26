@@ -13,6 +13,7 @@ export interface User {
   avatar?: string;
   phone?: string;
   company?: string;
+  isPremium?: boolean;
 }
 
 // Fonction utilitaire pour migrer en douceur toutes les utilisations de useAuth
@@ -26,6 +27,7 @@ export function useAuth() {
         email: session.user.email || "",
         role: ((session.user as any).role as UserRole) || "talent",
         avatar: session.user.image || "/assets/avatar_africain.jpg",
+        isPremium: (session.user as any).isPremium || false,
       }
     : null;
 

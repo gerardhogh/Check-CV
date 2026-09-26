@@ -107,25 +107,28 @@ function mapToTalentProfile(dbData: any): TalentProfile {
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
-function InfoField({ label, value }: { label: string; value: string }) {
+function InfoField({ label, value, blurSensitive }: { label: string; value: string; blurSensitive?: boolean }) {
+  const isSensitive = blurSensitive && (label === "Numéro de téléphone" || label === "Email" || label === "Nom" || label === "Prénom");
   return (
     <div>
       <p className="text-xs text-slate-500 mb-1.5 font-medium">{label}</p>
-      <div className="px-4 py-3 bg-slate-50 rounded-xl border border-slate-100 text-sm text-slate-800 font-medium">
-        {value}
+      <div className={`px-4 py-3 bg-slate-50 rounded-xl border border-slate-100 text-sm text-slate-800 font-medium ${isSensitive ? 'blur-sm select-none' : ''}`}>
+        {isSensitive ? "Masqué (Premium)" : value}
       </div>
     </div>
   );
 }
 
-function SocialRow({
+function SocialLink({
   icon,
   label,
   url,
+  blurSensitive,
 }: {
   icon: React.ReactNode;
   label: string;
   url: string;
+  blurSensitive?: boolean;
 }) {
   return (
     <div className="flex items-center gap-4 py-2">
@@ -133,34 +136,42 @@ function SocialRow({
         <span className="shrink-0">{icon}</span>
         <span className="text-sm font-semibold text-slate-700">{label} :</span>
       </div>
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-[#32A8D7] hover:text-[#2896c2] hover:bg-sky-50 transition-colors font-medium truncate flex items-center justify-between group"
-      >
-        <span className="truncate">{url}</span>
-        <ExternalLink size={13} className="shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-      </a>
+      {blurSensitive ? (
+        <div
+          className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-[#32A8D7] font-medium truncate flex items-center justify-between group blur-sm select-none"
+        >
+          <span className="truncate">Lien masqué (Premium)</span>
+        </div>
+      ) : (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-[#32A8D7] hover:text-[#2896c2] hover:bg-sky-50 transition-colors font-medium truncate flex items-center justify-between group"
+        >
+          <span className="truncate">{url}</span>
+          <ExternalLink size={13} className="shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </a>
+      )}
     </div>
   );
 }
 
 // ─── Tab: Informations ─────────────────────────────────────────────────────────
-function TabInformations({ talent }: { talent: TalentProfile }) {
+function TabInformations({ talent, blurSensitive }: { talent: TalentProfile, blurSensitive?: boolean }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InfoField label="Prénom" value={talent.firstName} />
-        <InfoField label="Nom" value={talent.lastName} />
-        <InfoField label="Titre professionnel" value={talent.profession} />
-        <InfoField label="Nom d'utilisateur" value={talent.username} />
-        <InfoField label="Sexe H/F" value={talent.sex} />
-        <InfoField label="Types d'opportunités recherchées" value={talent.opportunites} />
-        <InfoField label="Pays/Nationalité" value={talent.pays} />
-        <InfoField label="Ville" value={talent.ville} />
-        <InfoField label="Numéro de téléphone" value={talent.phone} />
-        <InfoField label="Email" value={talent.email} />
+        <InfoField label="Prénom" value={talent.firstName} blurSensitive={blurSensitive} />
+        <InfoField label="Nom" value={talent.lastName} blurSensitive={blurSensitive} />
+        <InfoField label="Titre professionnel" value={talent.profession} blurSensitive={blurSensitive} />
+        <InfoField label="Nom d'utilisateur" value={talent.username} blurSensitive={blurSensitive} />
+        <InfoField label="Sexe H/F" value={talent.sex} blurSensitive={blurSensitive} />
+        <InfoField label="Types d'opportunités recherchées" value={talent.opportunites} blurSensitive={blurSensitive} />
+        <InfoField label="Pays/Nationalité" value={talent.pays} blurSensitive={blurSensitive} />
+        <InfoField label="Ville" value={talent.ville} blurSensitive={blurSensitive} />
+        <InfoField label="Numéro de téléphone" value={talent.phone} blurSensitive={blurSensitive} />
+        <InfoField label="Email" value={talent.email} blurSensitive={blurSensitive} />
       </div>
 
       <div>
@@ -190,7 +201,7 @@ function TabInformations({ talent }: { talent: TalentProfile }) {
 }
 
 // ─── Tab: Réseaux ──────────────────────────────────────────────────────────────
-function TabReseaux({ talent }: { talent: TalentProfile }) {
+function TabReseaux({ talent, blurSensitive }: { talent: TalentProfile, blurSensitive?: boolean }) {
   const socialItems = [
     {
       key: "facebook",
@@ -252,11 +263,12 @@ function TabReseaux({ talent }: { talent: TalentProfile }) {
       {socialItems.map((item) => {
         const url = talent.socials[item.key as keyof typeof talent.socials];
         return (
-          <SocialRow
+          <SocialLink
             key={item.key}
             icon={item.icon}
             label={item.label}
             url={url || "—"}
+            blurSensitive={blurSensitive}
           />
         );
       })}
@@ -265,7 +277,7 @@ function TabReseaux({ talent }: { talent: TalentProfile }) {
 }
 
 // ─── Tab: Vidéo Entretien ─────────────────────────────────────────────────────
-function TabVideoEntretien({ talent }: { talent: TalentProfile }) {
+function TabVideoEntretien({ talent, blurSensitive }: { talent: TalentProfile, blurSensitive?: boolean }) {
   const finalVideoUrl = talent.interviewSession?.videoRecordings || talent.videoUrl;
 
   return (
@@ -296,12 +308,17 @@ function TabVideoEntretien({ talent }: { talent: TalentProfile }) {
 
       {/* Video player */}
       {finalVideoUrl ? (
-        <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-slate-200 flex flex-col">
+        <div className={`relative w-full aspect-video rounded-2xl overflow-hidden shadow-xl border border-slate-200 flex flex-col ${blurSensitive ? 'bg-slate-300 pointer-events-none' : 'bg-slate-900'}`}>
           <video
             src={finalVideoUrl}
-            controls
-            className="w-full h-full object-contain"
+            controls={!blurSensitive}
+            className={`w-full h-full object-contain ${blurSensitive ? 'blur-xl select-none' : ''}`}
           />
+          {blurSensitive && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 text-slate-800 font-bold">
+              <span className="text-lg">Vidéo masquée (Premium)</span>
+            </div>
+          )}
         </div>
       ) : (
         <div className="relative w-full aspect-video rounded-2xl bg-slate-100 border border-slate-200 flex flex-col items-center justify-center text-slate-400">
@@ -731,9 +748,9 @@ export default function TalentDetailPage() {
 
               {/* Tab content */}
               <div className="p-6">
-                {activeTab === "informations" && <TabInformations talent={talent} />}
-                {activeTab === "reseaux" && <TabReseaux talent={talent} />}
-                {activeTab === "video" && <TabVideoEntretien talent={talent} />}
+                {activeTab === "informations" && <TabInformations talent={talent} blurSensitive={!user?.isPremium} />}
+                {activeTab === "reseaux" && <TabReseaux talent={talent} blurSensitive={!user?.isPremium} />}
+                {activeTab === "video" && <TabVideoEntretien talent={talent} blurSensitive={!user?.isPremium} />}
               </div>
             </div>
             </div>

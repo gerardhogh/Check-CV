@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
+import { Country, City } from "country-state-city";
 import { useAuth } from "../../../context/AuthContext";
 import {
   Star,
@@ -15,18 +16,21 @@ import {
   Upload,
   X,
   ExternalLink,
+  Copy,
+  Download
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getVideoFromDB, deleteVideoFromDB, saveCvToDB, getCvFromDB } from "../../../../lib/indexedDB";
+import { QRCodeSVG } from "qrcode.react";
 
 type SubTab = "informations" | "reseaux" | "video";
 
-function ProfilTalentContent() {
+function ProfilTalentContent({ initialTab = "informations" }: { initialTab?: SubTab }) {
   const { user, updateUser } = useAuth();
   const searchParams = useSearchParams();
   
-  const [activeTab, setActiveTab] = useState<SubTab>("informations");
+  const [activeTab, setActiveTab] = useState<SubTab>(initialTab);
   
   // Avatar upload
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -43,6 +47,8 @@ function ProfilTalentContent() {
   const [completionPercent, setCompletionPercent] = useState(0);
   const [stars, setStars] = useState(0);
   const [userAvatar, setUserAvatar] = useState<string>(user?.avatar || "/assets/avatar_africain.jpg");
+  const [userName, setUserName] = useState<string>(user?.name || "Candidat");
+  const [userTitle, setUserTitle] = useState<string>("Développeur");
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -55,11 +61,26 @@ function ProfilTalentContent() {
       .then(data => {
         if (!data.error) {
           if (data.avatar) setUserAvatar(data.avatar);
+          if (data.name) setUserName(data.name);
+          if (data.talentProfile?.degree) setUserTitle(data.talentProfile.degree);
+
+          const isInfoComplete = !!(
+            data.name?.trim() &&
+            data.talentProfile?.degree?.trim() &&
+            data.talentProfile?.gender?.trim() &&
+            data.talentProfile?.country?.trim() &&
+            data.talentProfile?.city?.trim() &&
+            data.talentProfile?.phone?.trim() &&
+            data.talentProfile?.bio?.trim() &&
+            data.talentProfile?.skills?.trim()
+          );
 
           let pct = 0;
-          if (data.name) pct += 25;
+          if (isInfoComplete) pct += 25;
           if (data.avatar) pct += 10;
-          if (data.talentProfile?.cvUrl) pct += 25;
+          
+          const hasCv = !!(data.talentProfile?.cvUrl) || localStorage.getItem("check_cv_has_pdf") === "true";
+          if (hasCv) pct += 25;
 
           const hasVid = !!(data.talentProfile?.videoUrl) || localStorage.getItem("interview_recorded") === "true";
           if (hasVid) pct += 40;
@@ -317,10 +338,10 @@ function ProfilTalentContent() {
             </div>
 
             <h2 className="text-xl font-bold text-slate-800">
-              {user?.name || "Candidat"}
+              {userName}
             </h2>
             <p className="text-sm text-slate-600 font-medium mb-4">
-              Développeur Frontend
+              {userTitle || "Talent"}
             </p>
 
             <div className="flex items-center gap-3 mb-8">
@@ -520,10 +541,10 @@ function ProfilTalentContent() {
   );
 }
 
-export default function ProfilTalent() {
+export default function ProfilTalent({ initialTab = "informations" }: { initialTab?: SubTab }) {
   return (
     <Suspense fallback={<div className="p-8 text-center text-slate-500">Chargement...</div>}>
-      <ProfilTalentContent />
+      <ProfilTalentContent initialTab={initialTab} />
     </Suspense>
   );
 }
@@ -576,10 +597,19 @@ function InformationsTab({ onUpdate }: { onUpdate: () => void }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => {
+      const next = { ...prev, [name]: value };
+      if (name === "country") {
+        next.city = ""; // Reset city when country changes
+      }
+      return next;
+    });
   };
+
+  const countriesList = Country.getAllCountries();
+  const citiesList = formData.country ? City.getCitiesOfCountry(formData.country) : [];
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -612,6 +642,29 @@ function InformationsTab({ onUpdate }: { onUpdate: () => void }) {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const profileLink = typeof window !== "undefined" && formData.username ? `${window.location.origin}/talents/${formData.username}` : "";
+
+  const handleCopyLink = () => {
+    if (!profileLink) return;
+    navigator.clipboard.writeText(profileLink);
+    showTabToast("Lien de profil copié !");
+  };
+
+  const handleDownloadQR = () => {
+    const svg = document.getElementById("profile-qrcode");
+    if (!svg) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = `qrcode-${formData.username || "profil"}.svg`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    URL.revokeObjectURL(url);
   };
 
   if (isLoading) return <div className="p-4 text-center text-slate-500">Chargement...</div>;
@@ -668,14 +721,17 @@ function InformationsTab({ onUpdate }: { onUpdate: () => void }) {
           <label className="text-[13px] text-[#475569] font-semibold">
             Sexe H/F
           </label>
-          <input
-            type="text"
+          <select
             name="gender"
             value={formData.gender}
             onChange={handleChange}
-            placeholder="ex: Homme"
             className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
-          />
+          >
+            <option value="">Sélectionnez</option>
+            <option value="Homme">Homme</option>
+            <option value="Femme">Femme</option>
+            <option value="Autre">Autre</option>
+          </select>
         </div>
         <div className="space-y-1.5">
           <label className="text-[13px] text-[#475569] font-semibold">
@@ -693,25 +749,36 @@ function InformationsTab({ onUpdate }: { onUpdate: () => void }) {
           <label className="text-[13px] text-[#475569] font-semibold">
             Pays/Nationalité
           </label>
-          <input
-            type="text"
+          <select
             name="country"
             value={formData.country}
             onChange={handleChange}
-            placeholder="ex: Bénin"
             className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
-          />
+          >
+            <option value="">Sélectionnez un pays</option>
+            {countriesList.map((c) => (
+              <option key={c.isoCode} value={c.isoCode}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="space-y-1.5">
           <label className="text-[13px] text-[#475569] font-semibold">Ville</label>
-          <input
-            type="text"
+          <select
             name="city"
             value={formData.city}
             onChange={handleChange}
-            placeholder="ex: Cotonou"
-            className="w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
-          />
+            disabled={!formData.country}
+            className={`w-full bg-[#f8fafc] border-none rounded-md px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-blue-100 ${!formData.country ? 'opacity-50 cursor-not-allowed text-slate-400' : 'text-slate-800'}`}
+          >
+            <option value="">Sélectionnez une ville</option>
+            {citiesList?.map((city, index) => (
+              <option key={`${city.name}-${index}`} value={city.name}>
+                {city.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="space-y-1.5">
           <label className="text-[13px] text-[#475569] font-semibold">
@@ -773,6 +840,50 @@ function InformationsTab({ onUpdate }: { onUpdate: () => void }) {
       >
         {isSaving ? "Enregistrement..." : "Modifier les informations"}
       </button>
+
+      {/* Section Lien de Profil & QR Code */}
+      <div className="mt-8 p-5 bg-blue-50 border border-blue-100 rounded-lg flex flex-col md:flex-row items-center gap-6">
+        <div className="flex-1 space-y-3">
+          <h4 className="text-[15px] font-bold text-[#08304c]">
+            Partagez votre profil public
+          </h4>
+          <p className="text-[13px] text-slate-600">
+            Augmentez votre visibilité en partageant ce lien et ce code QR sur vos réseaux sociaux ou directement avec des recruteurs.
+          </p>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="bg-white border border-slate-200 rounded-md px-3 py-2 text-[13px] text-slate-500 font-medium flex-1 truncate select-all" title={profileLink}>
+              {profileLink || "Génération du lien..."}
+            </div>
+            <button
+              onClick={handleCopyLink}
+              className="bg-white border border-slate-200 p-2 rounded-md hover:bg-slate-50 transition-colors flex items-center justify-center text-slate-600 shadow-sm"
+              title="Copier le lien"
+            >
+              <Copy size={16} />
+            </button>
+          </div>
+        </div>
+        <div className="flex flex-col items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+          {profileLink ? (
+            <QRCodeSVG 
+              id="profile-qrcode"
+              value={profileLink} 
+              size={110} 
+              level="M" 
+              includeMargin={false} 
+            />
+          ) : (
+            <div className="w-[110px] h-[110px] bg-slate-100 rounded animate-pulse" />
+          )}
+          <button
+            onClick={handleDownloadQR}
+            className="flex items-center gap-1.5 text-[11px] font-bold text-[#008de4] hover:text-blue-600 transition-colors"
+          >
+            <Download size={14} />
+            Télécharger QR
+          </button>
+        </div>
+      </div>
       </div>
     </div>
   );
@@ -785,7 +896,9 @@ function ReseauxTab() {
     linkedin: "",
     twitter: "",
     pinterest: "",
-    behance: ""
+    behance: "",
+    other1: "",
+    other2: ""
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -806,7 +919,9 @@ function ReseauxTab() {
             linkedin: data.talentProfile?.linkedin || "",
             twitter: data.talentProfile?.twitter || "",
             pinterest: data.talentProfile?.pinterest || "",
-            behance: data.talentProfile?.behance || ""
+            behance: data.talentProfile?.behance || "",
+            other1: data.talentProfile?.other1 || "",
+            other2: data.talentProfile?.other2 || ""
           });
         }
       })
@@ -876,20 +991,32 @@ function ReseauxTab() {
             name: "behance", label: "Behance",
             icon: (<svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px]"><path d="M22 7h-7v-2h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14h-8.027c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988H0V3.98h7.366c3.121 0 5.028 1.074 5.028 3.411 0 1.76-1.073 2.537-2.074 2.924 1.343.344 2.457 1.332 2.457 3.344 0 2.92-2.348 3.329-5.11 3.329zm-1.898-10.999H2.82v4h1.748c1.375 0 2.234-.355 2.234-1.921 0-1.493-.848-2.079-2.234-2.079zm.344 6h-2.091v4.394h2.091c1.554 0 2.65-.453 2.65-2.221 0-1.767-1.157-2.173-2.65-2.173z" /></svg>)
           },
+          {
+            name: "other1", label: "Autres",
+            customPlaceholder: "Lien portfolio ou autre",
+            icon: (<svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px] text-slate-500"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>)
+          },
+          {
+            name: "other2", label: "Autres",
+            customPlaceholder: "Lien portfolio ou autre",
+            icon: (<svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px] text-slate-500"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>)
+          },
         ].map((net) => (
           <div key={net.name} className="flex items-center gap-4">
-            <div className="flex items-center gap-2 w-32 shrink-0">
-              {net.icon}
-              <span className="text-[13px] text-slate-700 font-semibold">
-                {net.label} <span className="text-slate-400 font-normal">:</span>
-              </span>
+            <div className="flex flex-col gap-0.5 w-32 shrink-0">
+              <div className="flex items-center gap-2">
+                {net.icon}
+                <span className="text-[13px] text-slate-700 font-semibold">
+                  {net.label} <span className="text-slate-400 font-normal">:</span>
+                </span>
+              </div>
             </div>
             <input
               type="url"
               name={net.name}
               value={(formData as any)[net.name]}
               onChange={handleChange}
-              placeholder={`Lien vers votre profil ${net.label}`}
+              placeholder={(net as any).customPlaceholder || `Lien vers votre profil ${net.label}`}
               className="flex-1 bg-white border border-slate-300 rounded-md px-4 py-2 text-[14px] text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
             />
           </div>
@@ -910,7 +1037,6 @@ function ReseauxTab() {
 
 /* ─── Onglet: Video Entretien ─── */
 import { DeleteVideoModal, ReplaceVideoModal } from "../../../components/modals/InterviewModals";
-import { Download } from "lucide-react";
 
 function VideoTab() {
   const router = useRouter();

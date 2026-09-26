@@ -15,11 +15,13 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
+      isPremium?: boolean;
     };
   }
   interface User {
     id?: string;
     role?: string;
+    isPremium?: boolean;
   }
 }
 
@@ -27,6 +29,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
     role?: string;
+    isPremium?: boolean;
   }
 }
 
@@ -46,6 +49,14 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      allowDangerousEmailAccountLinking: true,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
 
     // Authentification classique (Email + Mot de passe)
@@ -87,8 +98,18 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
+      if (token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          include: { role: true },
+        });
+        if (dbUser) {
+          token.role = dbUser.role?.name || "TALENT";
+          token.isPremium = dbUser.isPremium || false;
+        }
+      } else if (user) {
         token.role = (user as any).role || "TALENT";
+        token.isPremium = (user as any).isPremium || false;
       }
       return token;
     },
@@ -96,6 +117,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = token.sub;
         (session.user as any).role = token.role || "TALENT";
+        (session.user as any).isPremium = token.isPremium || false;
       }
       return session;
     },
@@ -114,4 +136,5 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/connexion",
   },
+  debug: true,
 };
