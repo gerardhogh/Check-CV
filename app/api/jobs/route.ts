@@ -3,11 +3,31 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// GET : Récupérer toutes les offres d'emploi
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const mine = searchParams.get("mine") === "true";
+
+    let whereClause = {};
+
+    if (mine) {
+      const session = await getServerSession(authOptions);
+      if (session && ["RECRUITER", "ADMIN"].includes(session.user?.role || "")) {
+        const recruiterProfile = await prisma.recruiterProfile.findFirst({
+          where: { userId: session.user.id },
+        });
+        if (recruiterProfile) {
+          whereClause = { recruiterId: recruiterProfile.id };
+        }
+      }
+    }
+
     const jobs = await prisma.jobOffer.findMany({
+      where: whereClause,
       orderBy: { createdAt: "desc" },
+      include: {
+        recruiter: true,
+      }
     });
     return NextResponse.json(jobs);
   } catch (error) {
@@ -42,15 +62,18 @@ export async function POST(req: Request) {
     }
 
     // Récupérer le profil recruteur lié à l'utilisateur connecté
-    const recruiterProfile = await prisma.recruiterProfile.findFirst({
+    let recruiterProfile = await prisma.recruiterProfile.findFirst({
       where: { userId: session.user.id },
     });
 
     if (!recruiterProfile) {
-      return NextResponse.json(
-        { error: "Profil recruteur introuvable." },
-        { status: 404 }
-      );
+      // Si le recruteur n'a pas encore de profil, on le crée automatiquement avec le nom saisi
+      recruiterProfile = await prisma.recruiterProfile.create({
+        data: {
+          userId: session.user.id,
+          companyName: body.entreprise || "Entreprise",
+        }
+      });
     }
 
     const newJob = await prisma.jobOffer.create({
@@ -63,6 +86,9 @@ export async function POST(req: Request) {
         status: "PUBLISHED",
         recruiterId: recruiterProfile.id,
       },
+      include: {
+        recruiter: true,
+      }
     });
 
     return NextResponse.json(newJob, { status: 201 });

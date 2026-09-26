@@ -124,17 +124,29 @@ function PublierModal({ onClose, onPublish }: PublierModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload = {
+        title: titre,
+        description: `Mode de travail : ${modeTravail}\n\n${description}`,
+        location: `${ville}, ${pays}`,
+        contractType: typeEmploi,
+        entreprise: entreprise, // Utilisé pour auto-créer le profil si inexistant
+      };
+
       const res = await fetch("/api/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ titre, entreprise, pays, ville, typeEmploi, modeTravail, description, lieu: `${ville}, ${pays}` })
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         const newJob = await res.json();
         onPublish(newJob);
+      } else {
+        const errorData = await res.json();
+        alert(`Erreur : ${errorData.error || "Impossible de publier l'offre"}`);
       }
     } catch (error) {
       console.error(error);
+      alert("Une erreur inattendue est survenue.");
     }
     onClose();
   };
